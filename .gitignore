@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+build/
+dist/
+venv/
+.env
+.venv/
+.env.*
+*.sqlite3
+
+# Django
+db.sqlite3
+staticfiles/
+media/
+*.log
+
+# IDE/Editor
+.vscode/
+.idea/
+*.code-workspace
+
+# OS / OneDrive / Windows
+Thumbs.db
+Desktop.ini
+~$*
+*.tmp

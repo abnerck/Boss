@@ -1,0 +1,301 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% load static %}
+
+<style>
+    /* Estilos Cyberpunk para el carrusel */
+    .cyber-carousel-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 0 20px var(--shadow-color),
+                    inset 0 0 15px rgba(0, 188, 212, 0.3);
+        position: relative;
+    }
+
+    .cyber-carousel-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, 
+                    rgba(0, 188, 212, 0.1) 0%, 
+                    rgba(255, 32, 121, 0.1) 100%);
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .cyber-carousel-inner {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16/9;
+    }
+
+    .cyber-carousel-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        filter: brightness(0.8) contrast(1.2);
+        transition: all 0.5s ease;
+    }
+
+    .cyber-carousel-item:hover img {
+        filter: brightness(1) contrast(1);
+        transform: scale(1.02);
+    }
+
+    .cyber-carousel-caption {
+        background: rgba(18, 30, 48, 0.85);
+        backdrop-filter: blur(5px);
+        border-radius: 8px;
+        padding: 1.5rem;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 800px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 0 15px rgba(0, 188, 212, 0.3);
+    }
+
+    .cyber-carousel-caption h5 {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--primary-neon);
+        text-shadow: 0 0 10px var(--primary-neon);
+        font-size: 1.8rem;
+        letter-spacing: 2px;
+    }
+
+    .cyber-carousel-caption p {
+        font-family: 'Rajdhani', sans-serif;
+        color: var(--text-light);
+        font-weight: 500;
+        font-size: 1.2rem;
+    }
+
+    .carousel-control-prev,
+    .carousel-control-next {
+        width: 5%;
+        filter: drop-shadow(0 0 5px var(--primary-neon));
+    }
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        background-color: var(--primary-neon);
+        border-radius: 50%;
+        padding: 15px;
+        background-size: 60%;
+        box-shadow: 0 0 10px var(--primary-neon);
+    }
+
+    /* Estilos Cyberpunk para el encabezado */
+    .cyber-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        position: relative;
+        padding: 2rem 0;
+    }
+
+    .cyber-header::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 0;
+        width: 200px;
+        height: 3px;
+        background: linear-gradient(90deg, 
+                    transparent 0%, 
+                    var(--primary-neon) 20%, 
+                    var(--secondary-neon) 80%, 
+                    transparent 100%);
+        box-shadow: 0 0 15px var(--shadow-color);
+    }
+
+    .cyber-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 4rem;
+        font-weight: 700;
+        color: transparent;
+        text-transform: uppercase;
+        letter-spacing: 5px;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 0 10px var(--primary-neon);
+        background: linear-gradient(90deg, 
+                    var(--primary-neon), 
+                    var(--secondary-neon), 
+                    var(--accent-neon));
+        -webkit-background-clip: text;
+        background-clip: text;
+        animation: textGlow 3s infinite alternate;
+    }
+
+    .cyber-subtitle {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 500;
+        color: var(--text-light);
+        letter-spacing: 3px;
+        position: relative;
+        display: inline-block;
+    }
+
+    .cyber-subtitle::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -10px;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, 
+                    var(--primary-neon), 
+                    var(--secondary-neon));
+        transform: scaleX(0);
+        transform-origin: right;
+        transition: transform 0.5s ease;
+    }
+
+    .cyber-subtitle:hover::after {
+        transform: scaleX(1);
+        transform-origin: left;
+    }
+
+    @keyframes textGlow {
+        0% {
+            text-shadow: 0 0 10px var(--primary-neon),
+                         0 0 20px rgba(0, 188, 212, 0.5);
+        }
+        100% {
+            text-shadow: 0 0 15px var(--secondary-neon),
+                         0 0 30px rgba(255, 32, 121, 0.7);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .cyber-carousel-inner {
+            aspect-ratio: 3/2;
+        }
+        
+        .cyber-title {
+            font-size: 3rem;
+        }
+        
+        .cyber-subtitle {
+            font-size: 1.3rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .cyber-carousel-inner {
+            aspect-ratio: 4/3;
+        }
+        
+        .cyber-title {
+            font-size: 2.5rem;
+            letter-spacing: 3px;
+        }
+        
+        .cyber-subtitle {
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+        }
+        
+        .cyber-carousel-caption {
+            padding: 1rem;
+            bottom: 1rem;
+        }
+        
+        .cyber-carousel-caption h5 {
+            font-size: 1.3rem;
+        }
+        
+        .cyber-carousel-caption p {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<div class="cyber-main-content">
+    <!-- Encabezado Cyberpunk -->
+    <div class="cyber-header">
+        <h1 class="cyber-title" data-aos="fade-down">BOSS ADMIN</h1>
+        <p class="cyber-subtitle" data-aos="fade-up" data-aos-delay="300">GESTIÓN DE MANTENIMIENTOS 2.0</p>
+    </div>
+
+    <!-- Carrusel Cyberpunk -->
+    <div class="cyber-carousel-container" data-aos="zoom-in">
+        <div id="cyberCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner cyber-carousel-inner">
+                <!-- Item 1 -->
+                <div class="carousel-item cyber-carousel-item active">
+                    <img src="{% static 'img/sunset.jpg' %}" class="d-block w-100" alt="Departamento 101">
+                    <div class="carousel-caption cyber-carousel-caption d-none d-md-block">
+                        <h5>DEPARTAMENTO 101</h5>
+                        <p>ESTILO CYBERPUNK CON VISTA NEON</p>
+                    </div>
+                </div>
+                
+                <!-- Item 2 -->
+                <div class="carousel-item cyber-carousel-item">
+                    <img src="{% static 'img/reja.jpg' %}" class="d-block w-100" alt="Departamento 202">
+                    <div class="carousel-caption cyber-carousel-caption d-none d-md-block">
+                        <h5>DEPARTAMENTO 202</h5>
+                        <p>INTERIORES FUTURISTAS</p>
+                    </div>
+                </div>
+                
+                <!-- Item 3 -->
+                <div class="carousel-item cyber-carousel-item">
+                    <img src="{% static 'img/valcon.jpg' %}" class="d-block w-100" alt="Departamento 303">
+                    <div class="carousel-caption cyber-carousel-caption d-none d-md-block">
+                        <h5>DEPARTAMENTO 303</h5>
+                        <p>TECNOLOGÍA DE VANGUARDIA</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Controles -->
+            <button class="carousel-control-prev" type="button" data-bs-target="#cyberCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#cyberCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Siguiente</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Inicialización del carrusel con efectos especiales
+    document.addEventListener('DOMContentLoaded', function() {
+        var cyberCarousel = new bootstrap.Carousel(document.getElementById('cyberCarousel'), {
+            interval: 6000, // 6 segundos por slide
+            wrap: true,
+            pause: 'hover',
+            ride: 'carousel'
+        });
+        
+        // Efecto de glitch aleatorio en el título
+        const cyberTitle = document.querySelector('.cyber-title');
+        setInterval(() => {
+            if (Math.random() > 0.7) {
+                cyberTitle.style.textShadow = '0 0 15px var(--secondary-neon)';
+                setTimeout(() => {
+                    cyberTitle.style.textShadow = '0 0 10px var(--primary-neon)';
+                }, 200);
+            }
+        }, 3000);
+    });
+</script>
+
+{% endblock %}

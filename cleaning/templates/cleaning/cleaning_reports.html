@@ -1,0 +1,616 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-neon: #00bcd4;
+        --secondary-neon: #ff2079;
+        --accent-neon: #a0ff00;
+        --dark-background: #0f1c2d;
+        --card-background: rgba(18, 30, 48, 0.9);
+        --text-light: #e0e6ed;
+        --border-color: rgba(0, 188, 212, 0.3);
+        --shadow-color: rgba(0, 188, 212, 0.5);
+    }
+
+    .cyber-panel {
+        background: var(--card-background);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        box-shadow: 0 0 30px var(--shadow-color);
+        padding: 2.5rem;
+        margin-top: 2rem;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .cyber-panel::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg,
+                rgba(0, 188, 212, 0.05),
+                rgba(255, 32, 121, 0.05));
+        z-index: -1;
+    }
+
+    .cyber-title {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--primary-neon);
+        text-shadow: 0 0 15px var(--primary-neon);
+        margin-bottom: 1.5rem;
+        position: relative;
+        display: inline-block;
+        padding-bottom: 10px;
+        font-size: 2.5rem;
+    }
+
+    .cyber-title::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(to right, var(--primary-neon), var(--secondary-neon), transparent);
+    }
+
+    .stats-card {
+        background: rgba(18, 30, 48, 0.8);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        box-shadow: 0 0 20px rgba(0, 188, 212, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0, 188, 212, 0.1), transparent);
+        transition: left 0.5s;
+    }
+
+    .stats-card:hover::before {
+        left: 100%;
+    }
+
+    .progress-bar {
+        height: 25px;
+        background: rgba(15, 28, 45, 0.8);
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        overflow: hidden;
+        margin: 15px 0;
+        position: relative;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-neon), var(--secondary-neon));
+        transition: width 0.5s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--dark-background);
+        font-weight: bold;
+        font-family: 'Orbitron', sans-serif;
+        text-shadow: 0 0 5px rgba(160, 255, 0, 0.8);
+        position: relative;
+    }
+
+    .progress-fill::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        animation: shine 2s infinite;
+    }
+
+    @keyframes shine {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+        background: rgba(15, 28, 45, 0.6);
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .table th {
+        background: rgba(0, 188, 212, 0.2);
+        color: var(--primary-neon);
+        padding: 1rem;
+        text-align: left;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 600;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .table td {
+        padding: 1rem;
+        border-bottom: 1px solid rgba(0, 188, 212, 0.1);
+        color: var(--text-light);
+    }
+
+    .table tr:hover {
+        background: rgba(0, 188, 212, 0.05);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .date-navigation {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: rgba(18, 30, 48, 0.8);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(0, 188, 212, 0.2);
+    }
+
+    .date-btn {
+        background: linear-gradient(45deg, var(--primary-neon), var(--secondary-neon));
+        color: var(--dark-background);
+        padding: 0.8rem 1.5rem;
+        text-decoration: none;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 600;
+        text-shadow: 0 0 5px rgba(160, 255, 0, 0.8);
+        transition: all 0.3s ease;
+        box-shadow: 0 0 15px rgba(0, 188, 212, 0.3);
+    }
+
+    .date-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 25px rgba(0, 188, 212, 0.5);
+        color: var(--dark-background);
+    }
+
+    .date-btn:disabled {
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.3);
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    .current-date {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: var(--accent-neon);
+        text-shadow: 0 0 10px var(--accent-neon);
+        font-family: 'Orbitron', sans-serif;
+    }
+
+    .date-picker {
+        padding: 0.8rem;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        background: rgba(15, 28, 45, 0.8);
+        color: var(--text-light);
+        font-family: 'Rajdhani', sans-serif;
+        margin-left: 1rem;
+    }
+
+    .day-card {
+        padding: 1rem;
+        border: 2px solid transparent;
+        border-radius: 5px;
+        text-align: center;
+        cursor: pointer;
+        background: rgba(15, 28, 45, 0.6);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .day-card:hover {
+        border-color: var(--primary-neon);
+        box-shadow: 0 0 15px rgba(0, 188, 212, 0.3);
+        transform: translateY(-3px);
+    }
+
+    .day-card.selected {
+        border-color: var(--accent-neon);
+        box-shadow: 0 0 20px rgba(160, 255, 0, 0.4);
+        background: rgba(160, 255, 0, 0.1);
+    }
+
+    .completed {
+        color: var(--accent-neon);
+        text-shadow: 0 0 5px var(--accent-neon);
+        font-weight: bold;
+    }
+
+    .pending {
+        color: var(--secondary-neon);
+        text-shadow: 0 0 5px var(--secondary-neon);
+        font-weight: bold;
+    }
+
+    .status-badge {
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .status-completed {
+        background: rgba(160, 255, 0, 0.2);
+        color: var(--accent-neon);
+        border: 1px solid var(--accent-neon);
+    }
+
+    .status-pending {
+        background: rgba(255, 32, 121, 0.2);
+        color: var(--secondary-neon);
+        border: 1px solid var(--secondary-neon);
+    }
+
+    .scanline-effect {
+        position: relative;
+    }
+
+    .scanline-effect::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom,
+                transparent 50%,
+                rgba(160, 255, 0, 0.03) 51%,
+                transparent 52%);
+        background-size: 100% 4px;
+        pointer-events: none;
+        animation: scanline 10s infinite linear;
+    }
+
+    @keyframes scanline {
+        0% { transform: translateY(-100%); }
+        100% { transform: translateY(100%); }
+    }
+
+    .cyber-glitch {
+        position: relative;
+        display: inline-block;
+    }
+
+    .cyber-glitch::before,
+    .cyber-glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .cyber-glitch::before {
+        left: 2px;
+        text-shadow: -2px 0 #ff2079;
+        clip: rect(44px, 450px, 56px, 0);
+        animation: glitch-anim 5s infinite linear alternate-reverse;
+    }
+
+    .cyber-glitch::after {
+        left: -2px;
+        text-shadow: -2px 0 #00bcd4;
+        clip: rect(44px, 450px, 56px, 0);
+        animation: glitch-anim2 5s infinite linear alternate-reverse;
+    }
+
+    @keyframes glitch-anim {
+        0% { clip: rect(42px, 9999px, 44px, 0); }
+        5% { clip: rect(12px, 9999px, 59px, 0); }
+        10% { clip: rect(48px, 9999px, 29px, 0); }
+        15% { clip: rect(42px, 9999px, 73px, 0); }
+        20% { clip: rect(63px, 9999px, 27px, 0); }
+        25% { clip: rect(34px, 9999px, 55px, 0); }
+        30% { clip: rect(86px, 9999px, 73px, 0); }
+        35% { clip: rect(20px, 9999px, 20px, 0); }
+        40% { clip: rect(26px, 9999px, 60px, 0); }
+        45% { clip: rect(25px, 9999px, 66px, 0); }
+        50% { clip: rect(57px, 9999px, 98px, 0); }
+        55% { clip: rect(5px, 9999px, 46px, 0); }
+        60% { clip: rect(82px, 9999px, 31px, 0); }
+        65% { clip: rect(54px, 9999px, 27px, 0); }
+        70% { clip: rect(28px, 9999px, 99px, 0); }
+        75% { clip: rect(45px, 9999px, 69px, 0); }
+        80% { clip: rect(23px, 9999px, 85px, 0); }
+        85% { clip: rect(54px, 9999px, 84px, 0); }
+        90% { clip: rect(45px, 9999px, 47px, 0); }
+        95% { clip: rect(37px, 9999px, 20px, 0); }
+        100% { clip: rect(73px, 9999px, 99px, 0); }
+    }
+
+    @keyframes glitch-anim2 {
+        0% { clip: rect(65px, 9999px, 100px, 0); }
+        5% { clip: rect(52px, 9999px, 74px, 0); }
+        10% { clip: rect(79px, 9999px, 85px, 0); }
+        15% { clip: rect(75px, 9999px, 5px, 0); }
+        20% { clip: rect(67px, 9999px, 61px, 0); }
+        25% { clip: rect(14px, 9999px, 79px, 0); }
+        30% { clip: rect(1px, 9999px, 66px, 0); }
+        35% { clip: rect(86px, 9999px, 30px, 0); }
+        40% { clip: rect(23px, 9999px, 98px, 0); }
+        45% { clip: rect(85px, 9999px, 72px, 0); }
+        50% { clip: rect(71px, 9999px, 75px, 0); }
+        55% { clip: rect(2px, 9999px, 48px, 0); }
+        60% { clip: rect(30px, 9999px, 16px, 0); }
+        65% { clip: rect(59px, 9999px, 50px, 0); }
+        70% { clip: rect(41px, 9999px, 62px, 0); }
+        75% { clip: rect(2px, 9999px, 82px, 0); }
+        80% { clip: rect(47px, 9999px, 73px, 0); }
+        85% { clip: rect(3px, 9999px, 27px, 0); }
+        90% { clip: rect(26px, 9999px, 55px, 0); }
+        95% { clip: rect(42px, 9999px, 97px, 0); }
+        100% { clip: rect(38px, 9999px, 49px, 0); }
+    }
+</style>
+
+<div class="cyber-panel scanline-effect" data-aos="fade-up">
+    <!-- Navegación de fechas -->
+    <div class="date-navigation">
+        <a href="?date={{ yesterday|date:'Y-m-d' }}" class="date-btn">
+            <i class="fas fa-arrow-left"></i> Ayer ({{ yesterday|date:'d/m' }})
+        </a>
+        
+        <div>
+            <strong class="current-date cyber-glitch" data-text="{{ selected_date|date:'l, d F Y' }}">
+                {{ selected_date|date:"l, d F Y" }}
+            </strong>
+            {% if selected_date == today %}
+                <span style="color: var(--accent-neon); margin-left: 10px; text-shadow: 0 0 10px var(--accent-neon);">
+                    <i class="fas fa-location-dot"></i> HOY
+                </span>
+            {% endif %}
+            
+            <form method="get" style="display: inline; margin-left: 15px;">
+                <label for="date_picker" style="color: var(--primary-neon);">Ir a fecha:</label>
+                <input type="date" id="date_picker" name="date" value="{{ selected_date|date:'Y-m-d' }}" 
+                       class="date-picker" onchange="this.form.submit()">
+            </form>
+        </div>
+        
+        {% if tomorrow <= today %}
+        <a href="?date={{ tomorrow|date:'Y-m-d' }}" class="date-btn">
+            Mañana ({{ tomorrow|date:'d/m' }}) <i class="fas fa-arrow-right"></i>
+        </a>
+        {% else %}
+        <button class="date-btn" disabled>Mañana <i class="fas fa-arrow-right"></i></button>
+        {% endif %}
+    </div>
+
+    <h1 class="cyber-title">📊 REPORTE DE LIMPIEZA</h1>
+</div>
+
+<!-- Resumen de últimos 7 días -->
+<div class="cyber-panel" data-aos="fade-up">
+    <h3 style="color: var(--primary-neon); font-family: 'Orbitron', sans-serif;">
+        <i class="fas fa-calendar-week"></i> ÚLTIMOS 7 DÍAS
+    </h3>
+    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin: 15px 0;">
+        {% for day in last_7_days %}
+        <a href="?date={{ day.date|date:'Y-m-d' }}" style="text-decoration: none;">
+            <div class="day-card {% if day.is_selected %}selected{% endif %}">
+                <div><strong style="color: var(--primary-neon);">{{ day.date|date:'d/m' }}</strong></div>
+                <div style="font-size: 0.9em; color: var(--text-light);">{{ day.date|date:'D' }}</div>
+                <div style="font-size: 1.2em; color: {% if day.percentage == 100 %}var(--accent-neon){% elif day.percentage > 50 %}var(--primary-neon){% else %}var(--secondary-neon){% endif %}; font-weight: bold;">
+                    {{ day.percentage }}%
+                </div>
+                <div style="font-size: 0.8em; color: var(--text-light);">{{ day.completed }}/{{ day.total }}</div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="cyber-panel" data-aos="fade-up">
+    <h3 style="color: var(--primary-neon); font-family: 'Orbitron', sans-serif;">
+        <i class="fas fa-chart-bar"></i> RESUMEN DEL {{ selected_date|date:"d/m/Y" }}
+    </h3>
+    
+    <div class="stats-grid">
+        <div class="stats-card">
+            <h4 style="color: var(--accent-neon); margin-bottom: 1rem;">
+                <i class="fas fa-tachometer-alt"></i> PROGRESO DEL DÍA
+            </h4>
+            <h2 style="color: var(--primary-neon); font-family: 'Orbitron', sans-serif; font-size: 2.5rem; text-align: center;">
+                {{ date_stats.completed }}/{{ date_stats.total }}
+            </h2>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ date_stats.percentage }}%">
+                    {{ date_stats.percentage }}%
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+                <span class="completed">✅ {{ date_stats.completed }} COMPLETADAS</span>
+                <span class="pending">⏳ {{ date_stats.pending }} PENDIENTES</span>
+            </div>
+        </div>
+        
+        <div class="stats-card">
+            <h4 style="color: var(--accent-neon); margin-bottom: 1rem;">
+                <i class="fas fa-users"></i> DESEMPEÑO POR USUARIO
+            </h4>
+            {% if user_stats %}
+                {% for stat in user_stats %}
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 0.8rem 0; padding: 0.5rem; background: rgba(0, 0, 0, 0.3); border-radius: 5px;">
+                    <span style="color: var(--text-light); font-weight: bold;">{{ stat.user__username|default:"USUARIO ANÓNIMO" }}</span>
+                    <span style="color: var(--primary-neon); font-family: 'Orbitron', sans-serif;">
+                        {{ stat.completed }}/{{ stat.total }} ({% widthratio stat.completed stat.total 100 %}%)
+                    </span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: var(--text-light); text-align: center; padding: 2rem;">NO HAY REGISTROS PARA ESTE DÍA</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="cyber-panel" data-aos="fade-right">
+        <h4 style="color: var(--accent-neon); margin-bottom: 1rem;">
+            <i class="fas fa-check-circle"></i> ACTIVIDADES COMPLETADAS
+        </h4>
+        {% if completed_activities %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ACTIVIDAD</th>
+                    <th>ÁREA</th>
+                    <th>USUARIO</th>
+                    <th>HORA</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in completed_activities %}
+                <tr>
+                    <td>{{ log.activity.task }}</td>
+                    <td><span class="status-badge status-completed">{{ log.activity.area }}</span></td>
+                    <td>{{ log.user.username|default:"N/A" }}</td>
+                    <td style="color: var(--accent-neon); font-family: 'Orbitron', sans-serif;">{{ log.timestamp|time }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: var(--text-light); text-align: center; padding: 2rem;">NO HAY ACTIVIDADES COMPLETADAS ESTE DÍA</p>
+        {% endif %}
+    </div>
+
+    <div class="cyber-panel" data-aos="fade-left">
+        <h4 style="color: var(--secondary-neon); margin-bottom: 1rem;">
+            <i class="fas fa-clock"></i> ACTIVIDADES PENDIENTES
+        </h4>
+        {% if pending_activities %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ACTIVIDAD</th>
+                    <th>ÁREA</th>
+                    <th>PERIODICIDAD</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for activity in pending_activities %}
+                <tr>
+                    <td>{{ activity.task }}</td>
+                    <td><span class="status-badge status-pending">{{ activity.area }}</span></td>
+                    <td style="color: var(--text-light);">{{ activity.frequency }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: var(--accent-neon); text-align: center; padding: 2rem; font-weight: bold;">
+            <i class="fas fa-trophy"></i> ¡TODAS LAS ACTIVIDADES COMPLETADAS!
+        </p>
+        {% endif %}
+    </div>
+</div>
+
+{% if week_stats %}
+<div class="cyber-panel" data-aos="fade-up">
+    <h4 style="color: var(--primary-neon); font-family: 'Orbitron', sans-serif;">
+        <i class="fas fa-chart-line"></i> SEMANA DEL {{ start_of_week|date:"d/m/Y" }} AL {{ selected_date|date:"d/m/Y" }}
+    </h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>FECHA</th>
+                <th>COMPLETADAS</th>
+                <th>TOTAL</th>
+                <th>PORCENTAJE</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stat in week_stats %}
+            <tr>
+                <td>
+                    {% if stat.date == selected_date %}
+                    <strong style="color: var(--accent-neon);">{{ stat.date }} ★</strong>
+                    {% else %}
+                    <a href="?date={{ stat.date|date:'Y-m-d' }}" style="color: var(--primary-neon); text-decoration: none;">{{ stat.date }}</a>
+                    {% endif %}
+                </td>
+                <td style="color: var(--accent-neon); font-weight: bold;">{{ stat.completed }}</td>
+                <td style="color: var(--text-light);">{{ stat.total }}</td>
+                <td style="color: var(--primary-neon); font-family: 'Orbitron', sans-serif; font-weight: bold;">
+                    {% widthratio stat.completed stat.total 100 %}%
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- Botones de navegación -->
+<div style="text-align: center; margin: 2rem 0;">
+    <a href="{% url 'cleaning_schedule' %}" class="date-btn" style="background: linear-gradient(45deg, var(--primary-neon), #2196F3); margin-right: 1rem;">
+        <i class="fas fa-arrow-left"></i> VOLVER AL PROGRAMA
+    </a>
+    <a href="?date={{ today|date:'Y-m-d' }}" class="date-btn" style="background: linear-gradient(45deg, var(--accent-neon), #4CAF50);">
+        <i class="fas fa-location-dot"></i> VER HOY
+    </a>
+</div>
+
+<script>
+    // Establecer la fecha máxima como hoy en el selector
+    document.addEventListener('DOMContentLoaded', function() {
+        const datePicker = document.getElementById('date_picker');
+        const today = new Date().toISOString().split('T')[0];
+        datePicker.max = today;
+        
+        // Efecto de escritura para títulos
+        const glitchElements = document.querySelectorAll('.cyber-glitch');
+        glitchElements.forEach(element => {
+            const text = element.getAttribute('data-text');
+            element.textContent = '';
+            
+            let i = 0;
+            const typeWriter = () => {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 50);
+                }
+            };
+            typeWriter();
+        });
+    });
+</script>
+{% endblock %}

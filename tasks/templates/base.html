@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOSS ADMIN | CyberPanel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-neon: #00bcd4;
+            --secondary-neon: #ff2079;
+            --accent-neon: #a0ff00;
+            --dark-background: #0f1c2d;
+            --card-background: rgba(18, 30, 48, 0.9);
+            --text-light: #e0e6ed;
+            --border-color: rgba(0, 188, 212, 0.3);
+            --shadow-color: rgba(0, 188, 212, 0.5);
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--dark-background);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            background-image:
+                radial-gradient(circle at 10% 80%, rgba(255, 32, 121, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 20%, rgba(0, 188, 212, 0.08) 0%, transparent 40%);
+            padding-left: 280px;
+        }
+
+        /* Scanlines */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom,
+                    rgba(160, 255, 0, 0.02) 0%,
+                    rgba(160, 255, 0, 0) 15%);
+            background-size: 100% 2px;
+            pointer-events: none;
+            z-index: -1;
+            animation: scanlineAnimation 10s infinite linear;
+        }
+
+        @keyframes scanlineAnimation {
+            0% {
+                background-position: 0 0;
+            }
+
+            100% {
+                background-position: 0 100%;
+            }
+        }
+
+        /* Menú Lateral Cyberpunk */
+        .cyber-menu {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 280px;
+            background: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            box-shadow: 5px 0 25px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+
+        .cyber-menu-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cyber-menu-brand {
+            color: var(--primary-neon);
+            font-family: 'Orbitron', sans-serif;
+            text-decoration: none;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            text-shadow: 0 0 10px var(--primary-neon);
+        }
+
+        .cyber-menu-brand-text {
+            margin-left: 0.5rem;
+        }
+
+        .cyber-menu-toggle {
+            background: transparent;
+            border: none;
+            color: var(--primary-neon);
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: none;
+        }
+
+        .cyber-menu-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 0;
+        }
+
+        .cyber-menu-user {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .cyber-menu-avatar {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 188, 212, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary-neon);
+            border: 1px solid var(--border-color);
+            margin-right: 1rem;
+        }
+
+        .cyber-menu-user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cyber-menu-username {
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .cyber-menu-status {
+            font-size: 0.8rem;
+            color: var(--accent-neon);
+            display: flex;
+            align-items: center;
+        }
+
+        .cyber-menu-status i {
+            font-size: 0.5rem;
+            margin-right: 0.5rem;
+            color: var(--accent-neon);
+        }
+
+        .cyber-menu-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .cyber-menu-item {
+            margin: 0.5rem 0;
+        }
+
+        .cyber-menu-link {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: var(--text-light);
+            text-decoration: none;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .cyber-menu-link:hover,
+        .cyber-menu-link.active {
+            background: rgba(0, 188, 212, 0.1);
+            color: var(--primary-neon);
+        }
+
+        .cyber-menu-link:hover::before,
+        .cyber-menu-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: var(--primary-neon);
+            box-shadow: 0 0 10px var(--primary-neon);
+        }
+
+        .cyber-menu-icon {
+            width: 30px;
+            font-size: 1.1rem;
+            color: var(--primary-neon);
+        }
+
+        .cyber-menu-text {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .cyber-menu-badge {
+            background: var(--secondary-neon);
+            color: var(--dark-background);
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+        }
+
+        .cyber-menu-ping {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-neon);
+            border-radius: 50%;
+            box-shadow: 0 0 5px var(--accent-neon);
+            margin-left: 0.5rem;
+            animation: ping 1.5s infinite;
+        }
+
+        @keyframes ping {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.8;
+            }
+
+            70% {
+                transform: scale(1.3);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        .cyber-menu-divider {
+            padding: 1rem 1.5rem;
+            color: var(--text-light);
+            opacity: 0.6;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        .cyber-menu-divider::before {
+            content: '';
+            position: absolute;
+            left: 1.5rem;
+            right: 1.5rem;
+            bottom: 0;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .cyber-menu-footer {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .cyber-menu-system-status {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.8rem;
+            border-radius: 5px;
+        }
+
+        .cyber-menu-system-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .cyber-menu-system-version {
+            color: var(--accent-neon);
+        }
+
+        .cyber-menu-system-bar {
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .cyber-menu-system-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-neon), var(--secondary-neon));
+            animation: progressAnimation 2s infinite alternate;
+        }
+
+        @keyframes progressAnimation {
+            0% {
+                width: 70%;
+            }
+
+            100% {
+                width: 85%;
+            }
+        }
+
+        /* Contenido Principal */
+        .cyber-main-content {
+            flex: 1;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .cyber-panel {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 0 30px var(--shadow-color);
+            padding: 2.5rem;
+            margin-top: 2rem;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .cyber-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg,
+                    rgba(0, 188, 212, 0.05),
+                    rgba(255, 32, 121, 0.05));
+            z-index: -1;
+        }
+
+        .cyber-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary-neon);
+            text-shadow: 0 0 15px var(--primary-neon);
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        .cyber-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-neon), var(--secondary-neon), transparent);
+        }
+
+        /* Menú móvil */
+        .menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 999;
+            backdrop-filter: blur(5px);
+        }
+
+        .cyber-mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: var(--secondary-neon);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            z-index: 1000;
+            box-shadow: 0 0 15px var(--secondary-neon);
+            cursor: pointer;
+            animation: pulse 2s infinite;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 32, 121, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(255, 32, 121, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 32, 121, 0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            body {
+                padding-left: 0;
+            }
+
+            .cyber-mobile-menu-toggle {
+                display: flex;
+            }
+
+            .cyber-menu {
+                transform: translateX(-100%);
+                z-index: 1001;
+            }
+
+            .cyber-menu.active {
+                transform: translateX(0);
+            }
+
+            .menu-overlay.active {
+                display: block;
+            }
+
+            .cyber-main-content {
+                padding: 1rem;
+            }
+
+            .cyber-title {
+                font-size: 1.8rem;
+            }
+
+            .cyber-panel {
+                padding: 1.5rem;
+                margin-top: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .cyber-title {
+                font-size: 1.5rem;
+            }
+
+            .cyber-menu-user {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .cyber-menu-avatar {
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cyber-menu {
+                width: 85%;
+            }
+
+            .cyber-menu-link {
+                padding: 0.8rem 1rem;
+            }
+
+            .cyber-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Overlay para móviles -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    <!-- Botón flotante para móviles -->
+    <button class="cyber-mobile-menu-toggle" id="mobileMenuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="scanlines"></div>
+
+    <!-- Menú Lateral -->
+    <div class="cyber-menu" id="cyberMenu">
+        <div class="cyber-menu-header">
+            <a class="cyber-menu-brand" href="/">
+                <i class="fas fa-satellite-dish"></i>
+                <span class="cyber-menu-brand-text">BOSS_ADMIN</span>
+            </a>
+            <button class="cyber-menu-toggle" id="menuToggle">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="cyber-menu-content">
+            <div class="cyber-menu-user">
+                <div class="cyber-menu-avatar">
+                    <i class="fas fa-user-astronaut"></i>
+                </div>
+                <div class="cyber-menu-user-info">
+                    <span class="cyber-menu-username">{{ user.username|default:"INVITADO"|upper }}</span>
+                    <span class="cyber-menu-status">
+                        <i class="fas fa-circle"></i>
+                        {% if user.is_authenticated %}ACTIVO{% else %}OFFLINE{% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <ul class="cyber-menu-nav">
+                <li class="cyber-menu-item">
+                    <a href="/" class="cyber-menu-link active">
+                        <span class="cyber-menu-icon">
+                            <i class="fas fa-home"></i>
+                        </span>
+                        <span class="cyber-menu-text">INICIO</span>
+                        <span class="cyber-menu-ping"></span>
+                    </a>
+                </li>
+
+                {% if user.is_authenticated %}
+                {% if user.is_superuser %}
+                <li class="cyber-menu-item">
+                    <a href="/admin/auth/user/" class="cyber-menu-link">
+                        <span class="cyber-menu-icon">
+                            <i class="fas fa-users-cog"></i>
+                        </span>
+                        <span class="cyber-menu-text">Usuarios</span>
+                        {% if usuarios_total > 0 %}
+                        <span class="cyber-menu-badge">{{ usuarios_total }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <li class="cyber-menu-item">
+                    <a href="/respaldo/" class="cyber-menu-link">
+                        <span class="cyber-menu-icon">
+                            <i class="fas fa-database"></i>
+                        </span>
+                        <span class="cyber-menu-text">Respaldo base de Datos</span>
+                    </a>
+                </li>
+                <li class="cyber-menu-item">
+                    <a href="/restore/" class="cyber-menu-link">
+                        <span class="cyber-menu-icon">
+                            <i class="fas fa-history"></i> <!-- Representa volver atrás/restaurar -->
+                        </span>
+                        <span class="cyber-menu-text">Restaurar base de datos</span>
+                    </a>
+                </li>
+
+                {% endif %}
+
+                <li class="cyber-menu-item">
+                    <a href="/areas/" class="cyber-menu-link">
+                        <span class="cyber-menu-icon">
+                            <i class="fas fa-th-large"></i>
+                        </span>
+                        <span class="cyber-menu-text">Areas</span>
+                    </a>
+                </li>
+
+                <li class="cyber-menu-item">
+                    <a href="/mantenimientos/" class="cyber-menu-link">
+                        <span class="cyber-menu-icon">
+                            <i class="fas fa-microchip"></i>
+                        </span>
+                        <span class="cyber-menu-text">MANTENIMIENTOS</span>
+                        {% if user.is_superuser %}
+                        <span class="cyber-menu-badge">{{ user.mantenimientos_set.count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+
+                <li class="cyber-menu-item">
+                    <a href="/limpiezas/" class="cyber-menu-link">
+                        <span class="cyber-menu-icon">
+                            <i class="fas fa-broom"></i>
+                        </span>
+                        <span class="cyber-menu-text">LIMPIEZAS</span>
+                        {% if user.is_superuser %}
+                        <span class="cyber-menu-badge">{{ user.limpieza_set.count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+
+                <li class="cyber-menu-item">
+                    <a href="/finanzas/" class="cyber-menu-link">
+                        <span class="cyber-menu-icon">
+                            <i class="fas fa-money-check-alt"></i>
+                        </span>
+                        <span class="cyber-menu-text">FINANZAS</span>
+                        {% if user.is_superuser %}
+                        <span class="cyber-menu-badge pulse">{{ user.finanza_set.count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+
+                <li class="cyber-menu-item">
+                    <a href="/calendario/" class="cyber-menu-link">
+                        <span class="cyber-menu-icon">
+                            <i class="fas fa-money-check-alt"></i>
+                        </span>
+                        <span class="cyber-menu-text">Calenario de limpieza</span>
+                        
+                    </a>
+                </li>
+
+                <li class="cyber-menu-item">
+                    <a href="/calendario/Reprtes/" class="cyber-menu-link">
+                        <span class="cyber-menu-icon">
+                            <i class="fas fa-money-check-alt"></i>
+                        </span>
+                        <span class="cyber-menu-text">REPORTES DE LIMPIEZA</span>
+                        
+                    </a>
+                </li>
+                <li class="cyber-menu-item">
+                    <a href="/admin/" class="cyber-menu-link">
+                        <span class="cyber-menu-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </span>
+                        <span class="cyber-menu-text">ADMINISTRACIÓN</span>
+                    </a>
+                </li>
+
+                <li class="cyber-menu-divider">
+                    <span>CONFIGURACIÓN</span>
+                </li>
+
+                <li class="cyber-menu-item">
+                    <a href="{% url 'logout' %}" class="cyber-menu-link text-danger">
+                        <span class="cyber-menu-icon">
+                            <i class="fas fa-power-off"></i>
+                        </span>
+                        <span class="cyber-menu-text">LOGOUT</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="cyber-menu-item">
+                    <a href="{% url 'signin' %}" class="cyber-menu-link">
+                        <span class="cyber-menu-icon">
+                            <i class="fas fa-key"></i>
+                        </span>
+                        <span class="cyber-menu-text">LOGIN</span>
+                    </a>
+                </li>
+
+                <li class="cyber-menu-item">
+                    <a href="{% url 'signup' %}" class="cyber-menu-link">
+                        <span class="cyber-menu-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </span>
+                        <span class="cyber-menu-text">REGISTRO</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <div class="cyber-menu-footer">
+            <div class="cyber-menu-system-status">
+                <div class="cyber-menu-system-info">
+                    <span>SISTEMA</span>
+                    <span class="cyber-menu-system-version">v3.5.2</span>
+                </div>
+                <div class="cyber-menu-system-bar">
+                    <div class="cyber-menu-system-progress"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="cyber-main-content">
+        {% block content %}
+        <div class="cyber-panel" data-aos="fade-up">
+            <!-- Tu contenido aquí -->
+        </div>
+        {% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Inicializar AOS
+        AOS.init({
+            duration: 1000,
+            once: true
+        });
+
+        // Control del menú móvil
+        const menu = document.getElementById('cyberMenu');
+        const mobileToggle = document.getElementById('mobileMenuToggle');
+        const menuToggle = document.getElementById('menuToggle');
+        const overlay = document.getElementById('menuOverlay');
+
+        // Abrir/cerrar menú con botón flotante
+        mobileToggle.addEventListener('click', () => {
+            menu.classList.add('active');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        // Cerrar menú con botón de cierre (X)
+        menuToggle.addEventListener('click', () => {
+            menu.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+
+        // Cerrar menú al hacer clic en overlay
+        overlay.addEventListener('click', () => {
+            menu.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+
+        // Cerrar menú al seleccionar opción (en móviles)
+        document.querySelectorAll('.cyber-menu-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 992) {
+                    menu.classList.remove('active');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+
+        // Efecto de escritura para títulos
+        document.addEventListener('DOMContentLoaded', function () {
+            const titleElements = document.querySelectorAll('.glitch');
+
+            titleElements.forEach(title => {
+                const originalText = title.getAttribute('data-text');
+                title.textContent = '';
+
+                let charIndex = 0;
+                const typingSpeed = 70;
+
+                function typeText() {
+                    if (charIndex < originalText.length) {
+                        title.textContent += originalText.charAt(charIndex);
+                        charIndex++;
+                        setTimeout(typeText, typingSpeed);
+                    }
+                }
+
+                typeText();
+            });
+        });
+    </script>
+</body>
+
+</html>

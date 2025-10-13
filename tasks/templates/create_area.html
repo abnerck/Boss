@@ -1,0 +1,329 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="area-form-container">
+    <div class="area-form-card">
+        <div class="area-form-header">
+            <i class="fas fa-building icon-title"></i>
+            <h1>Crear Nueva Área</h1>
+            <p>Complete los datos del área a registrar</p>
+        </div>
+
+        <form method="POST" class="area-form">
+            {% csrf_token %}
+            
+            <div class="form-grid">
+                <!-- Nombre -->
+                <div class="input-group floating">
+                    <input type="text" name="nombre" id="id_nombre" required class="floating-input">
+                    <label for="id_nombre" class="floating-label">Nombre del Área*</label>
+                    <i class="fas fa-signature input-icon"></i>
+                </div>
+
+                <!-- Número de Piso -->
+                <div class="input-group floating">
+                    <input type="number" name="numero_piso" id="id_numero_piso" min="0" class="floating-input">
+                    <label for="id_numero_piso" class="floating-label">Número de Piso</label>
+                    <i class="fas fa-layer-group input-icon"></i>
+                </div>
+
+                <!-- Tipo de Área -->
+                <div class="input-group floating">
+                    <select name="tipo_area" id="id_tipo_area" class="floating-select">
+                        <option value=""></option>
+                        <option value="Oficina">Oficina</option>
+                        <option value="Departamento">Departamento</option>
+                        <option value="Sala de Reuniones">Sala de Reuniones</option>
+                        <option value="Área Común">Área Común</option>
+                    </select>
+                    <label for="id_tipo_area" class="floating-label">Tipo de Área</label>
+                    <i class="fas fa-tag input-icon"></i>
+                </div>
+
+                <!-- Estado -->
+                <div class="input-group floating">
+                    <select name="estado" id="id_estado" class="floating-select">
+                        <option value=""></option>
+                        <option value="Libre">Libre</option>
+                        <option value="Ocupado">Ocupado</option>
+                        <option value="Mantenimiento">Mantenimiento</option>
+                    </select>
+                    <label for="id_estado" class="floating-label">Estado</label>
+                    <i class="fas fa-info-circle input-icon"></i>
+                </div>
+
+                <!-- Ubicación -->
+                <div class="input-group floating full-width">
+                    <input type="text" name="ubicacion" id="id_ubicacion" class="floating-input">
+                    <label for="id_ubicacion" class="floating-label">Ubicación</label>
+                    <i class="fas fa-map-marker-alt input-icon"></i>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="cancel-btn" onclick="window.history.back()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-save"></i> Guardar Área
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary: #4361ee;
+        --primary-light: #4895ef;
+        --secondary: #3f37c9;
+        --dark: #212529;
+        --light: #f8f9fa;
+        --gray: #6c757d;
+        --success: #4cc9f0;
+        --danger: #f72585;
+        --warning: #f8961e;
+    }
+
+    .area-form-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 2rem;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    .area-form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+        overflow: hidden;
+        width: 100%;
+        max-width: 800px;
+        transition: all 0.3s ease;
+    }
+
+    .area-form-header {
+        padding: 2rem;
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+        color: white;
+        text-align: center;
+        position: relative;
+    }
+
+    .area-form-header h1 {
+        margin: 0.5rem 0 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+    }
+
+    .area-form-header p {
+        margin: 0.5rem 0 0;
+        opacity: 0.9;
+        font-size: 0.9rem;
+    }
+
+    .icon-title {
+        font-size: 2.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        width: 70px;
+        height: 70px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin-bottom: 1rem;
+    }
+
+    .area-form {
+        padding: 2rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .input-group {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    .floating-input, .floating-select {
+        width: 100%;
+        padding: 1.5rem 1rem 0.5rem 2.5rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+
+    .floating-input:focus, .floating-select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        background-color: white;
+    }
+
+    .floating-label {
+        position: absolute;
+        top: 50%;
+        left: 2.5rem;
+        transform: translateY(-50%);
+        color: var(--gray);
+        pointer-events: none;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+    .floating-input:focus + .floating-label,
+    .floating-input:not(:placeholder-shown) + .floating-label,
+    .floating-select:focus + .floating-label,
+    .floating-select:not([value=""]):valid + .floating-label {
+        top: 0.8rem;
+        left: 2.5rem;
+        transform: translateY(0);
+        font-size: 0.7rem;
+        color: var(--primary);
+        background: white;
+        padding: 0 0.3rem;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray);
+        transition: all 0.3s ease;
+    }
+
+    .floating-input:focus ~ .input-icon,
+    .floating-select:focus ~ .input-icon {
+        color: var(--primary);
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+    }
+
+    .submit-btn, .cancel-btn {
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .submit-btn {
+        background-color: var(--primary);
+        color: white;
+        border: none;
+    }
+
+    .submit-btn:hover {
+        background-color: var(--secondary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+    }
+
+    .cancel-btn {
+        background-color: white;
+        color: var(--danger);
+        border: 1px solid var(--danger);
+    }
+
+    .cancel-btn:hover {
+        background-color: #fff5f7;
+        transform: translateY(-2px);
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .area-form-container {
+            padding: 1rem;
+            align-items: flex-start;
+        }
+        
+        .area-form-header {
+            padding: 1.5rem;
+        }
+        
+        .area-form {
+            padding: 1.5rem;
+        }
+        
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column-reverse;
+        }
+        
+        .submit-btn, .cancel-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .area-form-header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .icon-title {
+            width: 60px;
+            height: 60px;
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<script>
+    // Efecto de labels flotantes para selects
+    document.querySelectorAll('.floating-select').forEach(select => {
+        select.addEventListener('change', function() {
+            if(this.value !== "") {
+                this.classList.add('filled');
+            } else {
+                this.classList.remove('filled');
+            }
+        });
+        
+        // Trigger change event on load for prefilled selects
+        if(select.value !== "") {
+            select.classList.add('filled');
+        }
+    });
+
+    // Validación básica del formulario
+    document.querySelector('.area-form').addEventListener('submit', function(e) {
+        const nombreInput = document.getElementById('id_nombre');
+        if(nombreInput.value.trim() === '') {
+            e.preventDefault();
+            nombreInput.focus();
+            nombreInput.style.borderColor = 'var(--danger)';
+            setTimeout(() => {
+                nombreInput.style.borderColor = '#ddd';
+            }, 2000);
+        }
+    });
+</script>
+{% endblock %}

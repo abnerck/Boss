@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    /* Estilos Cyberpunk para el Login */
+    .cyber-login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cyber-login-container::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: 
+            radial-gradient(circle at 30% 30%, rgba(0, 188, 212, 0.1) 0%, transparent 25%),
+            radial-gradient(circle at 70% 70%, rgba(255, 32, 121, 0.1) 0%, transparent 25%);
+        animation: rotateBG 20s linear infinite;
+        z-index: -1;
+    }
+
+    @keyframes rotateBG {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .cyber-login-card {
+        background: var(--card-background);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 3rem;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 0 30px var(--shadow-color);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(5px);
+    }
+
+    .cyber-login-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-neon), var(--secondary-neon));
+    }
+
+    .cyber-login-title {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--primary-neon);
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 2.5rem;
+        text-shadow: 0 0 10px var(--primary-neon);
+        letter-spacing: 3px;
+        position: relative;
+        padding-bottom: 1rem;
+    }
+
+    .cyber-login-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-neon), var(--secondary-neon));
+    }
+
+    .cyber-form-group {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+    .cyber-form-label {
+        display: block;
+        margin-bottom: 0.8rem;
+        color: var(--text-light);
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 500;
+        font-size: 1.1rem;
+        letter-spacing: 1px;
+    }
+
+    .cyber-form-input {
+        width: 100%;
+        padding: 1rem 1rem 1rem 3.5rem;
+        background: rgba(18, 30, 48, 0.7);
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        color: var(--text-light);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+
+    .cyber-form-input:focus {
+        outline: none;
+        border-color: var(--primary-neon);
+        box-shadow: 0 0 10px var(--shadow-color);
+    }
+
+    .cyber-input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 3.2rem;
+        color: var(--primary-neon);
+        font-size: 1.2rem;
+    }
+
+    .cyber-login-button {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(90deg, var(--primary-neon), var(--secondary-neon));
+        color: var(--dark-background);
+        border: none;
+        border-radius: 5px;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.1rem;
+        font-weight: bold;
+        letter-spacing: 2px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+        margin-top: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cyber-login-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px var(--shadow-color);
+    }
+
+    .cyber-login-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: all 0.5s;
+    }
+
+    .cyber-login-button:hover::before {
+        left: 100%;
+    }
+
+    .cyber-button-icon {
+        margin-left: 0.8rem;
+        font-size: 1.2rem;
+    }
+
+    .cyber-alert-error {
+        background: rgba(255, 32, 121, 0.1);
+        color: var(--text-light);
+        padding: 1rem;
+        border-radius: 5px;
+        margin-bottom: 2rem;
+        border-left: 3px solid var(--secondary-neon);
+        font-family: 'Rajdhani', sans-serif;
+    }
+
+    .cyber-login-footer {
+        margin-top: 2rem;
+        text-align: center;
+        font-family: 'Rajdhani', sans-serif;
+        color: var(--text-light);
+        font-size: 0.9rem;
+    }
+
+    .cyber-footer-link {
+        color: var(--primary-neon);
+        text-decoration: none;
+        margin: 0 0.5rem;
+        position: relative;
+        font-weight: 500;
+    }
+
+    .cyber-footer-link::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 1px;
+        background: var(--primary-neon);
+        transition: width 0.3s;
+    }
+
+    .cyber-footer-link:hover::after {
+        width: 100%;
+    }
+
+    /* Efectos especiales */
+    .cyber-glitch {
+        animation: glitch 1s linear infinite;
+    }
+
+    @keyframes glitch {
+        0% { text-shadow: 0.05em 0 0 var(--primary-neon), -0.05em -0.025em 0 var(--secondary-neon); }
+        14% { text-shadow: 0.05em 0 0 var(--primary-neon), -0.05em -0.025em 0 var(--secondary-neon); }
+        15% { text-shadow: -0.05em -0.025em 0 var(--primary-neon), 0.025em 0.025em 0 var(--secondary-neon); }
+        49% { text-shadow: -0.05em -0.025em 0 var(--primary-neon), 0.025em 0.025em 0 var(--secondary-neon); }
+        50% { text-shadow: 0.025em 0.05em 0 var(--primary-neon), 0.05em 0 0 var(--secondary-neon); }
+        99% { text-shadow: 0.025em 0.05em 0 var(--primary-neon), 0.05em 0 0 var(--secondary-neon); }
+        100% { text-shadow: -0.025em 0 0 var(--primary-neon), -0.025em -0.025em 0 var(--secondary-neon); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .cyber-login-card {
+            padding: 2rem;
+        }
+        
+        .cyber-login-title {
+            font-size: 2rem;
+        }
+        
+        .cyber-form-input {
+            padding: 0.8rem 0.8rem 0.8rem 3rem;
+        }
+        
+        .cyber-input-icon {
+            top: 2.7rem;
+            left: 0.8rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .cyber-login-card {
+            padding: 1.5rem;
+        }
+        
+        .cyber-login-title {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+
+<div class="cyber-login-container">
+    <div class="cyber-login-card" data-aos="zoom-in">
+        <h1 class="cyber-login-title cyber-glitch">ACCESO SEGURO</h1>
+
+        {% if error %}
+        <div class="cyber-alert-error">
+            <i class="fas fa-exclamation-triangle"></i> {{ error }}
+        </div>
+        {% endif %}
+
+        <form action="/signin/" method="POST" class="cyber-login-form">
+            {% csrf_token %}
+
+            <div class="cyber-form-group">
+                <label for="id_username" class="cyber-form-label">USUARIO</label>
+                <input type="text" name="username" id="id_username" class="cyber-form-input" placeholder="INGRESA TU USUARIO" required>
+                <i class="fas fa-user-astronaut cyber-input-icon"></i>
+            </div>
+
+            <div class="cyber-form-group">
+                <label for="id_password" class="cyber-form-label">CONTRASEÑA</label>
+                <input type="password" name="password" id="id_password" class="cyber-form-input" placeholder="INGRESA TU CONTRASEÑA" required>
+                <i class="fas fa-key cyber-input-icon"></i>
+            </div>
+
+            <button type="submit" class="cyber-login-button">
+                <span class="button-text">AUTENTICAR</span>
+                <i class="fas fa-fingerprint cyber-button-icon"></i>
+            </button>
+
+            <div class="cyber-login-footer">
+                <p>
+                    ¿NUEVO USUARIO? <a href="{% url 'signup' %}" class="cyber-footer-link">REGISTRARSE</a>
+                    | <a href="{% url 'password_reset' %}" class="cyber-footer-link">RECUPERAR ACCESO</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Efecto de glitch aleatorio en el título
+    const cyberTitle = document.querySelector('.cyber-login-title');
+    setInterval(() => {
+        if (Math.random() > 0.7) {
+            cyberTitle.classList.add('cyber-glitch');
+            setTimeout(() => {
+                cyberTitle.classList.remove('cyber-glitch');
+            }, 1000);
+        }
+    }, 5000);
+</script>
+
+{% endblock %}

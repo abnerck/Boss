@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-center mb-4">Bitácora de Limpieza</h1>
+    <p class="text-center text-muted mb-4">Semana del {{ week.start_date|date:"d/m/Y" }} al {{ week.end_date|date:"d/m/Y" }}</p>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Estadísticas Generales</h5>
+            <p>Porcentaje de tareas completadas: {{ porcentaje_completado }}%</p>
+        </div>
+    </div>
+
+    {% for day, records in grouped_records.items %}
+        <h3>{{ day }}</h3>
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Área</th>
+                    <th>Tarea</th>
+                    <th>Fecha de Completación</th>
+                    <th>Responsable</th>
+                    <th>Observaciones</th>
+                    <th>Completado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                    <tr>
+                        <td>{{ record.task.location.nombre }}</td>
+                        <td>{{ record.task.description }}</td>
+                        <td>{{ record.completed_at|date:"d/m/Y H:i"|default:"No completado" }}</td>
+                        <td>{{ record.completed_by.username|default:"N/A" }}</td>
+                        <td>{{ record.observations|default:"N/A" }}</td>
+                        <td>
+                            {% if record.completed %}
+                                <span class="badge bg-success">Sí</span>
+                            {% else %}
+                                <span class="badge bg-danger">No</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% empty %}
+        <p class="text-center text-muted">No hay registros para esta semana.</p>
+    {% endfor %}
+</div>
+{% endblock %}

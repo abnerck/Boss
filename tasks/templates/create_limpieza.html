@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg">
+    <div class="card-header bg-primary text-white">
+        <h2 class="h4 mb-0">
+            <i class="fas fa-broom me-2"></i> Programar Limpieza
+        </h2>
+    </div>
+    <div class="card-body p-4">
+        <form method="POST" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <!-- Título -->
+            <div class="mb-3">
+                <label for="id_titulo" class="form-label fw-bold">Título</label>
+                <input type="text" class="form-control form-control-lg" name="titulo" id="id_titulo" required>
+                <div class="invalid-feedback">
+                    Por favor ingresa un título
+                </div>
+            </div>
+
+            <!-- Descripción -->
+            <div class="mb-3">
+                <label for="id_descripcion" class="form-label fw-bold">Descripción</label>
+                <textarea class="form-control" name="descripcion" id="id_descripcion" rows="4" required></textarea>
+                <div class="invalid-feedback">
+                    Por favor ingresa una descripción
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Responsable -->
+                <div class="col-md-6 mb-3">
+                    <label for="id_responsable" class="form-label fw-bold">Responsable</label>
+                    <input type="text" class="form-control" name="responsable" id="id_responsable" required>
+                    <div class="invalid-feedback">
+                        Por favor ingresa un responsable
+                    </div>
+                </div>
+
+                <!-- Área -->
+                <div class="col-md-6 mb-3">
+                    <label for="id_area" class="form-label fw-bold">Área</label>
+                    <input type="text" class="form-control" name="area" id="id_area" required>
+                    <div class="invalid-feedback">
+                        Por favor ingresa un área
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Fecha Programada -->
+                <div class="col-md-6 mb-3">
+                    <label for="id_fecha_programada" class="form-label fw-bold">Fecha Programada</label>
+                    <input type="datetime-local" class="form-control" name="fecha_programada" id="id_fecha_programada" required>
+                    <div class="invalid-feedback">
+                        Por favor selecciona una fecha
+                    </div>
+                </div>
+
+                <!-- Estado -->
+                <div class="col-md-6 mb-3">
+                    <label for="id_estado" class="form-label fw-bold">Estado</label>
+                    <select class="form-select" name="estado" id="id_estado" required>
+                        <option value="Pendiente" selected>Pendiente</option>
+                        <option value="En progreso">En progreso</option>
+                        <option value="Completado">Completado</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 pt-3 border-top">
+                <a href="/limpiezas/" class="btn btn-outline-secondary me-md-2 px-4">
+                    <i class="fas fa-times me-2"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="fas fa-save me-2"></i> Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Validación del formulario -->
+<script>
+(function () {
+  'use strict'
+
+  // Fetch all the forms we want to apply custom Bootstrap validation styles to
+  var forms = document.querySelectorAll('.needs-validation')
+
+  // Loop over them and prevent submission
+  Array.prototype.slice.call(forms)
+    .forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+
+        form.classList.add('was-validated')
+      }, false)
+    })
+})()
+</script>
+        </div>
+    </div>
+</div>
+{% endblock %}

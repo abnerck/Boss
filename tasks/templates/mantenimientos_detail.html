@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+{% load static widget_tweaks %}
+
+
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmDelete() {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "Esta acción eliminará el mantenimiento definitivamente.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form').submit();
+            }
+        });
+    }
+</script>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-lg animate__animated animate__fadeInDown rounded-4">
+                <!-- Encabezado -->
+                <div class="card-header bg-primary text-white py-4 rounded-top-4 d-flex justify-content-between align-items-center">
+                    <h2 class="h4 mb-0 fw-bold">
+                        <i class="fas fa-tools me-2"></i> Detalles del Mantenimiento
+                    </h2>
+                    <span class="badge bg-light text-primary-emphasis px-3 py-2 rounded-pill fs-6">
+                        {{ mantenimiento.estado }}
+                    </span>
+                </div>
+
+                <div class="card-body px-5 py-4">
+                    {% if show_form %}
+                    <!-- Formulario de edición -->
+                    <form method="post" class="needs-validation" novalidate enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="id_titulo" class="form-label fw-bold">
+                                    <i class="fas fa-heading me-2 text-primary"></i>Título
+                                </label>
+                                {% render_field form.titulo class="form-control border-2" %}
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label for="id_responsable" class="form-label fw-bold">
+                                    <i class="fas fa-user-tie me-2 text-primary"></i>Responsable
+                                </label>
+                                {% render_field form.responsable class="form-control border-2" %}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="id_descripcion" class="form-label fw-bold">
+                                <i class="fas fa-align-left me-2 text-primary"></i>Descripción
+                            </label>
+                            {% render_field form.descripcion class="form-control border-2" rows="4" %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-4">
+                                <label for="id_ubicacion" class="form-label fw-bold">
+                                    <i class="fas fa-map-marker-alt me-2 text-primary"></i>Ubicación
+                                </label>
+                                {% render_field form.ubicacion class="form-control border-2" %}
+                            </div>
+
+                            <div class="col-md-4 mb-4">
+                                <label for="id_estado" class="form-label fw-bold">
+                                    <i class="fas fa-info-circle me-2 text-primary"></i>Estado
+                                </label>
+                                {% render_field form.estado class="form-select border-2" %}
+                            </div>
+
+                            <div class="col-md-4 mb-4">
+                                <label for="id_prioridad" class="form-label fw-bold">
+                                    <i class="fas fa-exclamation-triangle me-2 text-primary"></i>Prioridad
+                                </label>
+                                {% render_field form.prioridad class="form-select border-2" %}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="id_archivo" class="form-label fw-bold">
+                                <i class="fas fa-paperclip me-2 text-primary"></i>Archivo adjunto
+                            </label>
+                            {% render_field form.archivo class="form-control border-2" %}
+                            {% if mantenimiento.archivo %}
+                                <div class="current-file mt-2 p-2 bg-light rounded">
+                                    <i class="fas fa-file me-2"></i>
+                                    <span>{{ mantenimiento.archivo.name }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                            <a href="{% url 'mantenimientos_detail' mantenimiento.id %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+
+                    {% else %}
+                    <!-- Vista de detalles mejorada -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h5 class="fw-bold text-muted">
+                                    <i class="fas fa-heading me-2 text-primary"></i>Título
+                                </h5>
+                                <p class="ps-4 fs-5">{{ mantenimiento.titulo }}</p>
+                            </div>
+
+                            <div class="mb-4">
+                                <h5 class="fw-bold text-muted">
+                                    <i class="fas fa-user-tie me-2 text-primary"></i>Responsable
+                                </h5>
+                                <p class="ps-4">{{ mantenimiento.responsable|default:"Sin asignar" }}</p>
+                            </div>
+
+                            <div class="mb-4">
+                                <h5 class="fw-bold text-muted">
+                                    <i class="fas fa-map-marker-alt me-2 text-primary"></i>Ubicación
+                                </h5>
+                                <p class="ps-4">{{ mantenimiento.ubicacion|default:"No especificada" }}</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h5 class="fw-bold text-muted">
+                                    <i class="fas fa-calendar-plus me-2 text-primary"></i>Fecha creación
+                                </h5>
+                                <p class="ps-4">{{ mantenimiento.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                            </div>
+
+                            {% if mantenimiento.datecompleted %}
+                            <div class="mb-4">
+                                <h5 class="fw-bold text-muted">
+                                    <i class="fas fa-calendar-check me-2 text-primary"></i>Fecha finalización
+                                </h5>
+                                <p class="ps-4">{{ mantenimiento.datecompleted|date:"d/m/Y H:i" }}</p>
+                            </div>
+                            {% endif %}
+
+                            <div class="mb-4">
+                                <h5 class="fw-bold text-muted">
+                                    <i class="fas fa-bolt me-2 text-primary"></i>Prioridad
+                                </h5>
+                                <p class="ps-4">
+                                    <span class="badge bg-{% if mantenimiento.prioridad == 'Crítica' %}danger
+                                        {% elif mantenimiento.prioridad == 'Alta' %}warning
+                                        {% elif mantenimiento.prioridad == 'Media' %}info
+                                        {% else %}secondary{% endif %}">
+                                        {{ mantenimiento.prioridad }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-muted">
+                            <i class="fas fa-align-left me-2 text-primary"></i>Descripción
+                        </h5>
+                        <div class="ps-4 text-muted bg-light p-3 rounded">
+                            {{ mantenimiento.descripcion|default:"Sin descripción"|linebreaks }}
+                        </div>
+                    </div>
+
+                    {% if mantenimiento.archivo %}
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-muted">
+                            <i class="fas fa-paperclip me-2 text-primary"></i>Archivo adjunto
+                        </h5>
+                        <div class="ps-4">
+                            <div class="attachment-preview mt-3 border rounded p-3">
+                                {% with extension=mantenimiento.archivo.url|lower|slice:"-4:" %}
+                                    {% if extension == '.jpg' or extension == '.png' or extension == '.gif' or extension == 'jpeg' %}
+                                        <div class="image-preview mb-3 text-center">
+                                            <img src="{{ mantenimiento.archivo.url }}" class="img-fluid rounded border shadow-sm" style="max-height: 250px;" alt="Vista previa">
+                                        </div>
+                                        <div class="d-flex gap-2 justify-content-center">
+                                            <a href="{{ mantenimiento.archivo.url }}" download class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-download me-1"></i> Descargar
+                                            </a>
+                                            <a href="{{ mantenimiento.archivo.url }}" target="_blank" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-expand me-1"></i> Ampliar
+                                            </a>
+                                        </div>
+                                    {% elif extension == '.pdf' %}
+                                        <div class="document-preview d-flex flex-column flex-md-row align-items-center gap-3 p-3 bg-light rounded mb-3">
+                                            <i class="fas fa-file-pdf text-danger fa-3x"></i>
+                                            <div class="text-center text-md-start">
+                                                <p class="mb-1 fw-bold">Documento PDF</p>
+                                                <div class="d-flex gap-2 justify-content-center justify-content-md-start">
+                                                    <a href="{{ mantenimiento.archivo.url }}" download class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-download me-1"></i> Descargar
+                                                    </a>
+                                                    <a href="{{ mantenimiento.archivo.url }}" target="_blank" class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-eye me-1"></i> Ver
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% elif extension == '.doc' or extension == 'docx' %}
+                                        <div class="document-preview d-flex flex-column flex-md-row align-items-center gap-3 p-3 bg-light rounded mb-3">
+                                            <i class="fas fa-file-word text-primary fa-3x"></i>
+                                            <div class="text-center text-md-start">
+                                                <p class="mb-1 fw-bold">Documento Word</p>
+                                                <a href="{{ mantenimiento.archivo.url }}" download class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-download me-1"></i> Descargar
+                                                </a>
+                                            </div>
+                                        </div>
+                                    {% elif extension == '.mp4' or extension == '.mov' or extension == '.avi' %}
+                                        <div class="video-preview mb-3">
+                                            <video controls class="w-100 rounded border" style="max-height: 250px; background-color: #000;">
+                                                <source src="{{ mantenimiento.archivo.url }}" type="video/{{ extension|slice:'1:' }}">
+                                                Tu navegador no soporta videos.
+                                            </video>
+                                        </div>
+                                        <div class="text-center">
+                                            <a href="{{ mantenimiento.archivo.url }}" download class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-download me-1"></i> Descargar Video
+                                            </a>
+                                        </div>
+                                    {% else %}
+                                        <div class="generic-file d-flex flex-column flex-md-row align-items-center gap-3 p-3 bg-light rounded mb-3">
+                                            <i class="fas fa-file text-secondary fa-3x"></i>
+                                            <div class="text-center text-md-start">
+                                                <p class="mb-1 fw-bold">{{ mantenimiento.archivo.name|truncatechars:30 }}</p>
+                                                <a href="{{ mantenimiento.archivo.url }}" download class="btn btn-sm btn-secondary">
+                                                    <i class="fas fa-download me-1"></i> Descargar
+                                                </a>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+
+                <!-- Pie de tarjeta -->
+                <div class="card-footer bg-light px-4 py-3 d-flex justify-content-between align-items-center">
+                    <a href="{% url 'mantenimientos' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i> Volver a la lista
+                    </a>
+
+                    <div class="d-flex gap-2">
+                        {% if not show_form %}
+                        <a href="{% url 'mantenimientos_detail' mantenimiento.id %}?edit=true" class="btn btn-warning">
+                            <i class="fas fa-edit me-2"></i> Editar
+                        </a>
+                        {% endif %}
+                        <form method="post" action="{% url 'delete_mantenimiento' mantenimiento.id %}" id="delete-form">
+    {% csrf_token %}
+    <button type="button" class="btn btn-outline-danger" onclick="confirmDelete()">
+        <i class="fas fa-trash-alt me-2"></i> Eliminar
+    </button>
+</form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function filtrarTabla() {
+        const input = document.getElementById("filtroTabla");
+        const filtro = input.value.toLowerCase();
+        const filasDesktop = document.querySelectorAll("tr.table-row-clickable.d-none.d-md-table-row");
+        
+        filasDesktop.forEach(filaDesktop => {
+            // Encontrar la fila móvil correspondiente (la siguiente hermana)
+            const filaMovil = filaDesktop.nextElementSibling;
+            
+            // Texto combinado para búsqueda
+            const textoCompleto = (filaDesktop.textContent + " " + 
+                                 (filaMovil ? filaMovil.textContent : "")).toLowerCase();
+            
+            // Mostrar/ocultar ambas filas
+            const mostrar = textoCompleto.includes(filtro);
+            filaDesktop.style.display = mostrar ? "" : "none";
+            if(filaMovil && filaMovil.classList.contains('d-md-none')) {
+                filaMovil.style.display = mostrar ? "" : "none";
+            }
+        });
+    }
+
+    // Inicialización segura
+    document.addEventListener('DOMContentLoaded', function() {
+        // Evento para clics en filas
+        document.querySelectorAll('.table-row-clickable').forEach(row => {
+            row.addEventListener('click', function() {
+                if(this.dataset.href) {
+                    window.location.href = this.dataset.href;
+                }
+            });
+        });
+        
+        // Evento para el buscador
+        const buscador = document.getElementById('filtroTabla');
+        if(buscador) {
+            buscador.addEventListener('input', filtrarTabla);
+        }
+    });
+</script>
+
+<style>
+.card {
+    border-radius: 1rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.ps-4 {
+    padding-left: 1.5rem !important;
+}
+
+.badge {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    padding: 0.5em 0.8em;
+}
+
+.form-control, .form-select {
+    border-radius: 0.5rem;
+    border-width: 2px;
+}
+
+.bg-light {
+    background-color: #f8fafc !important;
+}
+
+.attachment-preview {
+    background-color: #f9f9f9;
+    border-radius: 0.5rem;
+}
+
+.image-preview img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.document-preview, .generic-file {
+    transition: all 0.3s ease;
+}
+
+.document-preview:hover, .generic-file:hover {
+    background-color: #f0f0f0 !important;
+}
+
+.video-preview video {
+    background-color: #000;
+}
+
+.current-file {
+    border: 1px dashed #ccc;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.5rem !important;
+    }
+    
+    .ps-4 {
+        padding-left: 0 !important;
+    }
+    
+    .attachment-preview {
+        padding: 1rem !important;
+    }
+}
+</style>
+{% endblock %}

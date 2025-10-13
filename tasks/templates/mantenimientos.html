@@ -1,0 +1,639 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="text-dark fw-bold mb-0">
+            <i class="fas fa-tools me-2"></i>Gestión de Mantenimientos
+        </h1>
+        <a href="{% url 'create_mantenimientos' %}" class="btn btn-danger">
+            <i class="fas fa-plus-circle me-2"></i> Nuevo Mantenimiento
+        </a>
+    </div>
+
+    {% if mantenimiento %}
+    <!-- Filtros avanzados -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3 d-flex align-items-center">
+                <div class="col-md-3 text-start">
+                    <label for="filtroTitulo" class="form-label">Buscar por título:</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" id="filtroTitulo" placeholder="Título del mantenimiento">
+                    </div>
+                </div>
+                <div class="col-md-3 mx-auto">
+                    <label for="filtroResponsable" class="form-label">Buscar por responsable:</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        <input type="text" class="form-control" id="filtroResponsable" placeholder="Nombre del responsable">
+                    </div>
+                </div>
+                <div class="col-md-3 text-end">
+                    <label for="filtroEstado" class="form-label">Filtrar por estado:</label>
+                    <select class="form-select" id="filtroEstado">
+                        <option value="">Todos los estados</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="En progreso">En progreso</option>
+                        <option value="Completado">Completado</option>
+                        <option value="Cancelado">Cancelado</option>
+                    </select>
+                </div>
+                <div class="col-md-3 text-end">
+                    <label for="filtroPrioridad" class="form-label">Filtrar por prioridad:</label>
+                    <select class="form-select" id="filtroPrioridad">
+                        <option value="">Todas las prioridades</option>
+                        <option value="Crítica">Crítica</option>
+                        <option value="Alta">Alta</option>
+                        <option value="Media">Media</option>
+                        <option value="Baja">Baja</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de mantenimientos -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-clipboard-list me-2"></i> Listado de Mantenimientos
+            </h5>
+            <div>
+                <button id="btnExportExcel" class="btn btn-success btn-sm me-2">
+                    <i class="fas fa-file-excel me-1"></i> Excel
+                </button>
+                <button id="btnExportPDF" class="btn btn-danger btn-sm">
+                    <i class="fas fa-file-pdf me-1"></i> PDF
+                </button>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table id="tablaMantenimientos" class="table table-hover table-striped mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Título</th>
+                        <th>Responsable</th>
+                        <th>Ubicación</th>
+                        <th>Estado</th>
+                        <th>Prioridad</th>
+                        <th>Fecha Inicio</th>
+                        <th>Creador</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in mantenimiento %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <a href="{% url 'mantenimientos_detail' m.id %}" class="text-decoration-none fw-bold text-dark">
+                                {{ m.titulo|truncatechars:30 }}
+                            </a>
+                            <small class="text-muted d-block">{{ m.descripcion|truncatechars:40|default:"Sin descripción" }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary bg-opacity-10 text-primary">
+                                {{ m.responsable|default:"Sin asignar" }}
+                            </span>
+                        </td>
+                        <td>{{ m.ubicacion|default:"N/A" }}</td>
+                        <td>
+                            {% if m.estado == 'Completado' %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-check-circle me-1"></i> {{ m.estado }}
+                            </span>
+                            {% elif m.estado == 'Cancelado' %}
+                            <span class="badge bg-danger">
+                                <i class="fas fa-times-circle me-1"></i> {{ m.estado }}
+                            </span>
+                            {% elif m.estado == 'En progreso' %}
+                            <span class="badge bg-primary">
+                                <i class="fas fa-spinner fa-spin me-1"></i> {{ m.estado }}
+                            </span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">
+                                <i class="fas fa-clock me-1"></i> {{ m.estado }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if m.prioridad == 'Crítica' %}
+                            <span class="badge bg-danger">
+                                <i class="fas fa-exclamation-triangle me-1"></i> {{ m.prioridad }}
+                            </span>
+                            {% elif m.prioridad == 'Alta' %}
+                            <span class="badge bg-warning text-dark">
+                                <i class="fas fa-exclamation me-1"></i> {{ m.prioridad }}
+                            </span>
+                            {% elif m.prioridad == 'Media' %}
+                            <span class="badge bg-info">
+                                <i class="fas fa-info-circle me-1"></i> {{ m.prioridad }}
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-arrow-down me-1"></i> {{ m.prioridad }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small class="text-muted">
+                                {{ m.fecha_creacion|date:"d/m/Y" }}<br>
+                                {{ m.fecha_creacion|date:"H:i" }}
+                            </small>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a  class="btn btn-sm btn-outline-primary" title="Ver detalles">
+                                    {{ m.user }}
+                                </a>
+                            </div>
+
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'mantenimientos_detail' m.id %}" class="btn btn-sm btn-outline-primary" title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="card-footer bg-light d-flex justify-content-between align-items-center">
+            <div class="text-muted">
+                Mostrando <span id="registrosMostrados">{{ mantenimiento|length }}</span> de {{ mantenimiento|length }} registros
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Gráficas -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i> Distribución por Estado</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="estadoChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i> Distribución por Prioridad</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="prioridadChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center py-5">
+        <i class="fas fa-clipboard-list fa-4x text-info mb-4"></i>
+        <h4 class="alert-heading fw-bold">¡No hay mantenimientos registrados!</h4>
+        <p>Parece que no has añadido ningún mantenimiento todavía.</p>
+        <hr>
+        <a href="{% url 'create_mantenimientos' %}" class="btn btn-info mt-3">
+            <i class="fas fa-plus-circle me-2"></i> Crear Primer Mantenimiento
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Incluir DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css">
+
+<!-- Incluir Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Incluir jQuery y DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Logotipo en Base64 (marcador de posición, reemplaza con tu propio logotipo)
+    var logoBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAMAAABHPGVmAAAAA1BMVEX///+nxBvIAAAAIElEQVRoge3BAQ0AAADCoPdPbQ8HFAAAAAAAAAAAAPgT1y0AAd9zLeQAAAAASUVORK5CYII=";
+
+    // Inicializar DataTable sin paginación
+    var table = $('#tablaMantenimientos').DataTable({
+        paging: false, // Desactivar paginación
+        info: false, // Desactivar el mensaje de "Showing X to Y of Z entries"
+        dom: 'Bfrtip', // Incluir botones de exportación
+        buttons: [
+            {
+                extend: 'excel',
+                text: '<i class="fas fa-file-excel"></i> Excel',
+                className: 'btn-success btn-sm',
+                title: 'Reporte de Mantenimientos',
+                exportOptions: {
+                    columns: [0, 1, 2, 3, 4, 5, 6],
+                    format: {
+                        body: function (data, row, column, node) {
+                            // Limpiar el contenido de las celdas para exportación
+                            if (column === 4 || column === 5) { // Columnas de estado y prioridad
+                                return $(data).text() || data;
+                            }
+                            return data;
+                        }
+                    }
+                }
+            },
+            {
+                extend: 'pdf',
+                text: '<i class="fas fa-file-pdf"></i> PDF',
+                className: 'btn-danger btn-sm',
+                title: 'Reporte de Mantenimientos',
+                exportOptions: {
+                    columns: [0, 1, 2, 3, 4, 5, 6],
+                    format: {
+                        body: function (data, row, column, node) {
+                            // Limpiar el contenido de las celdas para exportación
+                            if (column === 4 || column === 5) { // Columnas de estado y prioridad
+                                return $(data).text() || data;
+                            }
+                            return data;
+                        }
+                    }
+                },
+                customize: function(doc) {
+                    // Configurar márgenes
+                    doc.pageMargins = [40, 60, 40, 60];
+                    
+                    // Encabezado personalizado
+                    doc['header'] = function(currentPage, pageCount) {
+                        return {
+                            table: {
+                                widths: ['*', 'auto'],
+                                body: [
+                                    [
+                                        {
+                                            image: logoBase64,
+                                            width: 50,
+                                            alignment: 'left'
+                                        },
+                                        {
+                                            text: 'Reporte de Mantenimientos\n' + new Date().toLocaleDateString('es-ES', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            }),
+                                            style: 'header',
+                                            alignment: 'right'
+                                        }
+                                    ]
+                                ]
+                            },
+                            layout: 'noBorders',
+                            margin: [40, 10]
+                        };
+                    };
+                    
+                    // Pie de página personalizado
+                    doc['footer'] = function(currentPage, pageCount) {
+                        return {
+                            columns: [
+                                {
+                                    text: 'Gestión de Mantenimientos - Empresa XYZ',
+                                    alignment: 'left',
+                                    style: 'footer'
+                                },
+                                {
+                                    text: 'Página ' + currentPage.toString() + ' de ' + pageCount,
+                                    alignment: 'right',
+                                    style: 'footer'
+                                }
+                            ],
+                            margin: [40, 0]
+                        };
+                    };
+                    
+                    // Estilos del documento
+                    doc.styles = {
+                        header: {
+                            fontSize: 16,
+                            bold: true,
+                            color: '#1a3c6d', // Azul oscuro
+                            margin: [0, 10, 0, 10]
+                        },
+                        footer: {
+                            fontSize: 10,
+                            color: '#666666',
+                            margin: [0, 10]
+                        },
+                        tableHeader: {
+                            fillColor: '#1a3c6d', // Azul oscuro para el encabezado
+                            color: '#ffffff', // Texto blanco
+                            bold: true,
+                            fontSize: 11
+                        },
+                        tableBody: {
+                            fontSize: 10,
+                            color: '#333333'
+                        }
+                    };
+                    
+                    // Personalizar tabla
+                    doc.content[1].table.widths = ['5%', '20%', '15%', '15%', '15%', '15%', '15%'];
+                    doc.content[1].table.body.forEach(function(row, index) {
+                        row.forEach(function(cell, colIndex) {
+                            cell.alignment = 'left';
+                            if (index === 0) {
+                                cell.fillColor = '#1a3c6d'; // Azul oscuro para el encabezado
+                                cell.color = '#ffffff';
+                                cell.bold = true;
+                            } else {
+                                cell.fillColor = index % 2 === 0 ? '#f8f9fa' : '#ffffff'; // Alternar colores de fondo
+                            }
+                        });
+                    });
+                    
+                    // Añadir título antes de la tabla
+                    doc.content.splice(1, 0, {
+                        text: 'Reporte de Mantenimientos',
+                        style: 'header',
+                        alignment: 'center',
+                        margin: [0, 0, 0, 10]
+                    });
+                }
+            }
+        ],
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json'
+        },
+        responsive: true
+    });
+    
+    // Inicializar gráficos
+    var estadoChart = initEstadoChart();
+    var prioridadChart = initPrioridadChart();
+    
+    // Función para inicializar el gráfico de estados
+    function initEstadoChart() {
+        var ctx = document.getElementById('estadoChart').getContext('2d');
+        return new Chart(ctx, {
+            type: 'pie',
+            data: getChartData('estado'),
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw} (${context.formattedValue}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Función para inicializar el gráfico de prioridades
+    function initPrioridadChart() {
+        var ctx = document.getElementById('prioridadChart').getContext('2d');
+        return new Chart(ctx, {
+            type: 'bar',
+            data: getChartData('prioridad'),
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Función para obtener datos para los gráficos
+    function getChartData(type) {
+        var filteredData = table.rows({search: 'applied'}).data();
+        var labels = [];
+        var values = [];
+        var backgroundColors = [];
+        var borderColors = [];
+        
+        if (type === 'estado') {
+            // Datos para gráfico de estados
+            var estados = ['Pendiente', 'En progreso', 'Completado', 'Cancelado'];
+            var colors = {
+                'Pendiente': {bg: 'rgba(255, 193, 7, 0.8)', border: 'rgba(255, 193, 7, 1)'},
+                'En progreso': {bg: 'rgba(13, 110, 253, 0.8)', border: 'rgba(13, 110, 253, 1)'},
+                'Completado': {bg: 'rgba(25, 135, 84, 0.8)', border: 'rgba(25, 135, 84, 1)'},
+                'Cancelado': {bg: 'rgba(220, 53, 69, 0.8)', border: 'rgba(220, 53, 69, 1)'}
+            };
+            
+            estados.forEach(function(estado) {
+                var count = 0;
+                filteredData.each(function(row) {
+                    if (row[4].includes(estado)) count++;
+                });
+                if (count > 0) {
+                    labels.push(estado);
+                    values.push(count);
+                    backgroundColors.push(colors[estado].bg);
+                    borderColors.push(colors[estado].border);
+                }
+            });
+        } else if (type === 'prioridad') {
+            // Datos para gráfico de prioridades
+            var prioridades = ['Crítica', 'Alta', 'Media', 'Baja'];
+            var colors = {
+                'Crítica': 'rgba(220, 53, 69, 0.8)',
+                'Alta': 'rgba(255, 193, 7, 0.8)',
+                'Media': 'rgba(13, 110, 253, 0.8)',
+                'Baja': 'rgba(108, 117, 125, 0.8)'
+            };
+            
+            prioridades.forEach(function(prioridad) {
+                var count = 0;
+                filteredData.each(function(row) {
+                    if (row[5].includes(prioridad)) count++;
+                });
+                if (count > 0) {
+                    labels.push(prioridad);
+                    values.push(count);
+                    backgroundColors.push(colors[prioridad]);
+                }
+            });
+        }
+        
+        return {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: backgroundColors,
+                borderColor: borderColors || backgroundColors,
+                borderWidth: 1
+            }]
+        };
+    }
+    
+    // Función para actualizar todos los gráficos
+    function updateCharts() {
+        estadoChart.data = getChartData('estado');
+        estadoChart.update();
+        
+        prioridadChart.data = getChartData('prioridad');
+        prioridadChart.update();
+    }
+    
+    // Aplicar filtros y actualizar gráficos
+    $('#filtroTitulo').on('keyup', function() {
+        table.column(1).search(this.value).draw();
+        updateCharts();
+    });
+    
+    $('#filtroResponsable').on('keyup', function() {
+        table.column(2).search(this.value).draw();
+        updateCharts();
+    });
+    
+    $('#filtroEstado').on('change', function() {
+        table.column(4).search(this.value).draw();
+        updateCharts();
+    });
+    
+    $('#filtroPrioridad').on('change', function() {
+        table.column(5).search(this.value).draw();
+        updateCharts();
+    });
+    
+    // Actualizar contador de registros mostrados
+    table.on('draw', function() {
+        $('#registrosMostrados').text(table.rows({search: 'applied'}).count());
+    });
+    
+    // Botones personalizados para exportar
+    $('#btnExportExcel').on('click', function() {
+        table.button('.buttons-excel').trigger();
+    });
+    
+    $('#btnExportPDF').on('click', function() {
+        table.button('.buttons-pdf').trigger();
+    });
+    
+    // Actualizar gráficos al cargar la página
+    updateCharts();
+});
+</script>
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    
+    .table {
+        margin-bottom: 0;
+    }
+    
+    .table thead th {
+        border-bottom: 2px solid #dee2e6;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .table tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+    
+    .badge {
+        font-weight: 500;
+        padding: 0.35em 0.65em;
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+    }
+    
+    /* Estilos para los botones de exportación */
+    .dt-buttons {
+        display: none; /* Ocultamos los botones nativos de DataTables */
+    }
+    
+    #btnExportExcel, #btnExportPDF {
+        border-radius: 4px;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    /* Estilos para las tarjetas de gráficos */
+    .chart-card {
+        height: 100%;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 100%;
+        min-height: 250px;
+    }
+    
+    /* Estilos para pantallas pequeñas */
+    @media (max-width: 768px) {
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .card-header h5 {
+            margin-bottom: 10px;
+        }
+        
+        .card-header > div {
+            margin-top: 10px;
+        }
+        
+        .table-responsive {
+            border: none;
+        }
+        
+        .row {
+            margin-bottom: 10px;
+        }
+        
+        .col-md-3 {
+            margin-bottom: 15px;
+        }
+    }
+</style>
+{% endblock %}

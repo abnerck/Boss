@@ -1,0 +1,949 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="cyber-maintenance-container">
+    <!-- Header Limpio y Profesional -->
+    <div class="cyber-maintenance-header">
+        <div class="header-content">
+            <h2 class="cyber-title">
+                <i class="fas fa-tools me-2"></i>NUEVO MANTENIMIENTO
+            </h2>
+            <p class="cyber-subtitle">Registro rápido y eficiente - Vegas Corporativo</p>
+        </div>
+        <div class="header-actions">
+            <a href="/mantenimientos/" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-list me-1"></i>Ver Lista
+            </a>
+        </div>
+    </div>
+
+    <!-- Mensaje de Error (si existe) -->
+    {% if error %}
+    <div class="cyber-alert-error">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- Formulario Compacto y Limpio -->
+    <form action="/mantenimientos/create/" method="POST" enctype="multipart/form-data" class="cyber-maintenance-form" novalidate>
+        {% csrf_token %}
+
+        <div class="form-grid">
+            <!-- Columna Izquierda -->
+            <div class="form-column">
+                <!-- Título con Toggle "Otro" -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-heading me-1"></i>Título <span class="required">*</span>
+                    </label>
+                    <select name="titulo" class="form-select" required id="titulo-select">
+                        <option value="" disabled selected>Selecciona tipo...</option>
+                        <option value="Aguakan">💧 Aguakan</option>
+                        <option value="alberca">🏊 Alberca</option>
+                        <option value="asador en roof">🔥 Asador en Roof</option>
+                        <option value="camaras">📹 Cámaras</option>
+                        <option value="CFE">⚡ CFE</option>
+                        <option value="cuarto de bombas">💦 Cuarto de Bombas</option>
+                        <option value="elevador">🛗 Elevador</option>
+                        <option value="espacio holistico">🧘 Espacio Holístico</option>
+                        <option value="estacionamiento">🚗 Estacionamiento</option>
+                        <option value="fumigación">🦟 Fumigación</option>
+                        <option value="gas">⛽ Gas</option>
+                        <option value="gym">🏋️ Gym</option>
+                        <option value="hidraúlico">🔧 Hidráulico</option>
+                        <option value="internet">🌐 Internet</option>
+                        <option value="limpieza">🧹 Limpieza</option>
+                        <option value="lobby">🏛️ Lobby</option>
+                        <option value="oficina">🏢 Oficina</option>
+                        <option value="porton automático">🚪 Portón Automático</option>
+                        <option value="sala en roof">🪑 Sala en Roof</option>
+                        <option value="Seguimiento mantenimiento">📋 Seguimiento</option>
+                        <option value="otro">✏️ Otro...</option>
+                    </select>
+                    <div class="invalid-feedback">Selecciona un título</div>
+                </div>
+
+                <!-- Campo "Otro" - Oculto por defecto -->
+                <div class="form-group">
+                    <input type="text" name="titulo_otro" class="form-control d-none" 
+                           placeholder="Especifica el título..." maxlength="100" id="titulo-otro">
+                    <div class="invalid-feedback">Especifica el título</div>
+                </div>
+
+                <!-- Responsable -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-user-tie me-1"></i>Responsable <span class="required">*</span>
+                    </label>
+                    <select name="responsable" class="form-select" required>
+                        <option value="" disabled selected>Selecciona...</option>
+                        <option value="Osel">👨‍💼 Osel</option>
+                        <option value="benja">👨‍💼 Benja</option>
+                        <option value="Samuel">👨‍💼 Samuel</option>
+                        <option value="Oscar">👨‍💼 Oscar</option>
+                        <option value="Hugo123">👨‍💼 Hugo</option>
+                        <option value="victor">👨‍💼 Victor</option>
+                        <option value="eliezer123">👨‍💼 Eliezer</option>
+                    </select>
+                    <div class="invalid-feedback">Selecciona un responsable</div>
+                </div>
+
+                <!-- Ubicación -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-map-marker-alt me-1"></i>Ubicación
+                    </label>
+                    <select name="ubicacion" class="form-select">
+                        <option value="">Selecciona...</option>
+                        <option value="1">🏠 101</option>
+                        <option value="2">🏠 102</option>
+                        <option value="3">🏠 103</option>
+                        <option value="4">🏠 104</option>
+                        <option value="5">🏠 105</option>
+                        <option value="6">🏠 106</option>
+                        <option value="7">🏠 107</option>
+                        <option value="8">🏠 201</option>
+                        <option value="9">🏠 202</option>
+                        <option value="10">🏠 203</option>
+                        <option value="11">🏠 204</option>
+                        <option value="12">🏠 205</option>
+                        <option value="13">🏠 206</option>
+                        <option value="14">🏠 207</option>
+                        <option value="15">🏠 401</option>
+                        <option value="16">🏠 301</option>
+                        <option value="17">🏠 302</option>
+                        <option value="18">🏠 303</option>
+                        <option value="19">🏠 304</option>
+                        <option value="20">🏠 305</option>
+                        <option value="21">🏠 306</option>
+                        <option value="22">🏠 307</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Columna Derecha -->
+            <div class="form-column">
+                <!-- Descripción Compacta -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-align-left me-1"></i>Descripción
+                    </label>
+                    <div class="textarea-wrapper">
+                        <textarea name="descripcion" class="form-control" rows="3" 
+                                  placeholder="Describe el problema y solución propuesta... (máx. 500)" 
+                                  maxlength="500" id="descripcion-textarea"></textarea>
+                        <div class="char-counter">
+                            <span id="char-count">0</span>/<span class="counter-max">500</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Archivo -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-paperclip me-1"></i>Archivo (Opcional)
+                    </label>
+                    <input type="file" name="archivo" class="form-control" accept="image/*,video/*,.pdf,.docx">
+                    <div id="file-preview" class="file-preview"></div>
+                    <small class="form-hint">JPG, PNG, PDF (máx. 10MB)</small>
+                </div>
+
+                <!-- Estado y Prioridad en Mini-Grid -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-info-circle me-1"></i>Estado <span class="required">*</span>
+                        </label>
+                        <select name="estado" class="form-select" required>
+                            <option value="" disabled selected>Pendiente</option>
+                            <option value="Pendiente" selected>⏳ Pendiente</option>
+                            <option value="En progreso">⚙️ En Progreso</option>
+                            <option value="Completado">✅ Completado</option>
+                            <option value="Cancelado">❌ Cancelado</option>
+                        </select>
+                        <div class="invalid-feedback">Selecciona estado</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-exclamation-triangle me-1"></i>Prioridad <span class="required">*</span>
+                        </label>
+                        <select name="prioridad" class="form-select" required>
+                            <option value="" disabled selected>Media</option>
+                            <option value="Baja">🔵 Baja</option>
+                            <option value="Media" selected>🟡 Media</option>
+                            <option value="Alta">🟠 Alta</option>
+                            <option value="Crítica">🔴 Crítica</option>
+                        </select>
+                        <div class="invalid-feedback">Selecciona prioridad</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barra de Acciones Limpia -->
+        <div class="form-actions">
+            <button type="button" class="btn btn-cancel" onclick="window.history.back()">
+                <i class="fas fa-times me-2"></i>Cancelar
+            </button>
+            <button type="submit" class="btn btn-save">
+                <i class="fas fa-save me-2"></i>Guardar Mantenimiento
+                <span class="btn-status d-none">
+                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                    Guardando...
+                </span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    /* ======================================================
+       FORMULARIO CYBERPUNK LIMPIO - VEGAS CORPORATIVO
+       Diseño minimalista, elegante, sin distracciones
+       ====================================================== */
+
+    /* Fuentes */
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+    /* Variables CSS Limpias - Tema Oscuro por Defecto */
+    :root {
+        color-scheme: dark; /* Indica al navegador que es tema oscuro */
+        --primary-neon: #00BCC4;
+        --secondary-neon: #FF2099;
+        --text-primary: #E0E6ED;
+        --text-secondary: rgba(224, 230, 237, 0.7);
+        --bg-dark: #0A0F14;
+        --card-bg: #0F1928; /* Solid, sin opacidad */
+        --input-bg: #121E30; /* Solid para inputs/textarea */
+        --border-glow: rgba(0, 188, 196, 0.15);
+        --shadow-glow: rgba(0, 188, 196, 0.1);
+        --success: #4CAF50;
+        --warning: #FF9800;
+        --error: #FF2099;
+    }
+
+    /* Adaptación para Tema Claro */
+    @media (prefers-color-scheme: light) {
+        :root {
+            color-scheme: light;
+            --primary-neon: #00A0A8; /* Neon ajustado para claro */
+            --secondary-neon: #E00080;
+            --text-primary: #1A1F24; /* Oscuro para texto */
+            --text-secondary: rgba(26, 31, 36, 0.7);
+            --bg-dark: #F8FAFC; /* Fondo claro */
+            --card-bg: #FFFFFF;
+            --input-bg: #F0F4F8; /* Fondo claro para inputs */
+            --border-glow: rgba(0, 0, 0, 0.1);
+            --shadow-glow: rgba(0, 0, 0, 0.05);
+            --success: #388E3C;
+            --warning: #F57C00;
+            --error: #D81B60;
+        }
+
+        .cyber-title {
+            text-shadow: 0 0 6px rgba(0, 160, 168, 0.3);
+        }
+
+        .header-actions .btn {
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .header-actions .btn:hover {
+            background: rgba(0, 160, 168, 0.1);
+        }
+
+        .cyber-alert-error {
+            background: rgba(216, 27, 96, 0.05);
+            border-color: rgba(216, 27, 96, 0.2);
+        }
+
+        .form-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .btn-save {
+            color: #FFFFFF; /* Mantener legible en gradiente */
+        }
+
+        .btn-cancel {
+            color: var(--text-secondary);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(216, 27, 96, 0.05);
+            color: var(--secondary-neon);
+            border-color: var(--secondary-neon);
+        }
+
+        .is-invalid {
+            background: rgba(216, 27, 96, 0.03) !important;
+        }
+
+        .char-counter {
+            color: var(--text-secondary);
+        }
+
+        #char-count {
+            color: var(--primary-neon);
+        }
+    }
+
+    /* Contenedor Principal Limpio */
+    .cyber-maintenance-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 1rem;
+        background: var(--bg-dark); /* Solid */
+        min-height: 100vh;
+        font-family: 'Rajdhani', sans-serif;
+        position: relative;
+    }
+
+    /* Header Minimalista */
+    .cyber-maintenance-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 1.2rem 1.5rem;
+        background: var(--card-bg);
+        border-radius: 12px;
+        border: 1px solid var(--border-glow);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .header-content {
+        flex: 1;
+    }
+
+    .cyber-title {
+        font-family: 'Orbitron', monospace;
+        font-size: 1.6rem;
+        color: var(--primary-neon);
+        margin: 0;
+        letter-spacing: 1.5px;
+        font-weight: 700;
+        text-shadow: 0 0 6px rgba(0, 188, 196, 0.2);
+    }
+
+    .cyber-subtitle {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin: 0.1rem 0 0 0;
+        letter-spacing: 0.5px;
+        font-weight: 400;
+    }
+
+    .header-actions {
+        flex-shrink: 0;
+    }
+
+    .header-actions .btn {
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .header-actions .btn:hover {
+        border-color: var(--primary-neon);
+        background: rgba(0, 188, 196, 0.1);
+        transform: translateY(-1px);
+    }
+
+    /* Alerta de Error Minimalista */
+    .cyber-alert-error {
+        background: rgba(255, 32, 121, 0.08);
+        border: 1px solid rgba(255, 32, 121, 0.2);
+        border-radius: 8px;
+        padding: 0.8rem 1rem;
+        margin-bottom: 1.2rem;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Formulario Compacto */
+    .cyber-maintenance-form {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-glow);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+        margin-bottom: 2rem;
+    }
+
+    /* Grid Responsive */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-column {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    /* Grupos Compactos */
+    .form-group {
+        position: relative;
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.4rem;
+        letter-spacing: 0.3px;
+        display: flex;
+        align-items: center;
+        opacity: 0.9;
+    }
+
+    .form-label i {
+        margin-right: 0.4rem;
+        font-size: 0.9rem;
+        width: 14px;
+        opacity: 0.8;
+    }
+
+    .required {
+        color: var(--error);
+        margin-left: 0.2rem;
+        font-weight: 700;
+    }
+
+    .form-select,
+    .form-control {
+        background: var(--input-bg); /* Solid para mejor consistencia */
+        border: 1px solid var(--border-glow);
+        border-radius: 6px;
+        color: var(--text-primary);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.9rem;
+        padding: 0.6rem 0.8rem;
+        transition: all 0.3s ease;
+        height: auto;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-select:focus,
+    .form-control:focus {
+        border-color: var(--primary-neon);
+        box-shadow: 0 0 0 0.15rem rgba(0, 188, 196, 0.1), inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-select option {
+        background: var(--bg-dark);
+        color: var(--text-primary);
+        padding: 0.5rem;
+    }
+
+    /* Placeholder para mejor visibilidad */
+    .form-control::placeholder {
+        color: var(--text-secondary);
+    }
+
+    /* Textarea Compacto */
+    .form-control[rows="3"] {
+        resize: vertical;
+        min-height: 70px;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    /* Fila Horizontal Compacta */
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+    }
+
+    /* Contador de Caracteres Minimalista */
+    .textarea-wrapper {
+        position: relative;
+    }
+
+    .char-counter {
+        position: absolute;
+        right: 0.8rem;
+        bottom: 0.4rem;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        pointer-events: none;
+    }
+
+    #char-count {
+        color: var(--primary-neon);
+        font-weight: 600;
+    }
+
+    /* Preview de Archivo */
+    .file-preview {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-top: 0.3rem;
+        font-style: italic;
+        word-break: break-word;
+    }
+
+    .file-preview.valid {
+        color: var(--success);
+    }
+
+    .file-preview.error {
+        color: var(--error);
+    }
+
+    /* Hints Minimalistas */
+    .form-hint {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-top: 0.2rem;
+        font-style: italic;
+        letter-spacing: 0.2px;
+    }
+
+    /* Input de Archivo */
+    input[type="file"] {
+        padding: 0.6rem;
+        background: var(--input-bg) !important;
+        border-radius: 6px;
+    }
+
+    input[type="file"]::-webkit-file-upload-button {
+        background: var(--primary-neon);
+        color: var(--bg-dark);
+        border: none;
+        padding: 0.4rem 0.8rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        margin-right: 0.8rem;
+        transition: background 0.3s ease;
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.85rem;
+    }
+
+    input[type="file"]::-webkit-file-upload-button:hover {
+        background: var(--secondary-neon);
+    }
+
+    /* Validación Visual */
+    .is-invalid {
+        border-color: var(--error) !important;
+        box-shadow: 0 0 0 0.15rem rgba(255, 32, 121, 0.15) !important;
+        background: rgba(255, 32, 121, 0.05) !important;
+    }
+
+    .invalid-feedback {
+        font-size: 0.8rem;
+        color: var(--error);
+        margin-top: 0.3rem;
+        font-weight: 500;
+        display: block;
+    }
+
+    /* Acciones Compactas */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-glow);
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        letter-spacing: 0.8px;
+        border-radius: 6px;
+        padding: 0.7rem 1.3rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        text-transform: uppercase;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, var(--primary-neon), var(--secondary-neon));
+        color: var(--bg-dark);
+        box-shadow: 0 3px 12px rgba(0, 188, 196, 0.25);
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 18px rgba(0, 188, 196, 0.35);
+        background: linear-gradient(135deg, var(--secondary-neon), var(--primary-neon));
+    }
+
+    .btn-cancel {
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1px solid var(--border-glow);
+        padding: 0.7rem 1.5rem;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255, 32, 121, 0.08);
+        color: var(--secondary-neon);
+        border-color: var(--secondary-neon);
+        transform: translateY(-1px);
+    }
+
+    /* Status del Botón */
+    .btn-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .spinner-border-sm {
+        width: 0.9rem;
+        height: 0.9rem;
+        border-width: 0.1em;
+    }
+
+    /* Responsive Optimizado */
+    @media (max-width: 992px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 0.6rem;
+        }
+        
+        .cyber-maintenance-header {
+            flex-direction: column;
+            gap: 0.8rem;
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .form-actions {
+            justify-content: center;
+            gap: 0.8rem;
+        }
+        
+        .btn {
+            flex: 1;
+            min-width: auto;
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .cyber-maintenance-container {
+            padding: 0.5rem;
+        }
+        
+        .cyber-maintenance-form {
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .cyber-maintenance-header {
+            padding: 0.8rem;
+        }
+        
+        .cyber-title {
+            font-size: 1.4rem;
+        }
+        
+        .cyber-subtitle {
+            font-size: 0.8rem;
+        }
+        
+        .form-group {
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-label {
+            font-size: 0.8rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .form-select,
+        .form-control {
+            padding: 0.55rem 0.7rem;
+            font-size: 0.85rem;
+        }
+        
+        .form-control[rows="3"] {
+            min-height: 60px;
+        }
+        
+        .char-counter {
+            font-size: 0.7rem;
+            right: 0.6rem;
+            bottom: 0.3rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .cyber-maintenance-header {
+            padding: 0.6rem;
+        }
+        
+        .cyber-maintenance-form {
+            padding: 1rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<script>
+    // ================================================================
+    // JAVASCRIPT OPTIMIZADO - FORMULARIO DE MANTENIMIENTOS
+    // Toggle "Otro", contador, validación, preview de archivo
+    // ================================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle "Otro" para título - MÁS LIMPIO
+        const tituloSelect = document.getElementById('titulo-select');
+        const tituloOtro = document.getElementById('titulo-otro');
+        
+        if (tituloSelect && tituloOtro) {
+            function toggleOtro() {
+                const isOtro = tituloSelect.value === 'otro';
+                tituloOtro.classList.toggle('d-none', !isOtro);
+                tituloOtro.required = isOtro;
+                
+                if (isOtro && !tituloOtro.value.trim()) {
+                    tituloOtro.focus();
+                }
+            }
+            
+            tituloSelect.addEventListener('change', toggleOtro);
+            toggleOtro(); // Estado inicial
+        }
+
+        // Contador de caracteres - MÁS SUAVE
+        const descripcion = document.getElementById('descripcion-textarea');
+        const charCount = document.getElementById('char-count');
+        const maxLength = 500;
+        
+        if (descripcion && charCount) {
+            function updateCounter() {
+                const length = descripcion.value.length;
+                charCount.textContent = length;
+                
+                // Color dinámico
+                const percentage = (length / maxLength) * 100;
+                if (percentage > 90) {
+                    charCount.style.color = '#FF2099';
+                } else if (percentage > 70) {
+                    charCount.style.color = '#FF9800';
+                } else {
+                    charCount.style.color = 'var(--primary-neon)';
+                }
+            }
+            
+            descripcion.addEventListener('input', updateCounter);
+            updateCounter(); // Inicial
+        }
+
+        // Preview y validación de archivo - MEJORADO
+        const fileInput = document.querySelector('input[type="file"]');
+        const filePreview = document.getElementById('file-preview');
+        
+        if (fileInput && filePreview) {
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            
+            fileInput.addEventListener('change', function() {
+                const file = this.files[0];
+                filePreview.className = 'file-preview';
+                
+                if (file) {
+                    // Validar tamaño
+                    if (file.size > maxSize) {
+                        filePreview.textContent = '❌ Archivo demasiado grande (máx. 10MB)';
+                        filePreview.classList.add('error');
+                        this.value = '';
+                    } else {
+                        filePreview.textContent = `✅ ${file.name}`;
+                        filePreview.classList.add('valid');
+                    }
+                } else {
+                    filePreview.textContent = 'Ningún archivo seleccionado';
+                    filePreview.classList.remove('valid', 'error');
+                }
+            });
+        }
+
+        // Validación del formulario - MÁS INTELIGENTE
+        const form = document.querySelector('.cyber-maintenance-form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                let isValid = true;
+                let firstInvalid = null;
+                
+                // Validar todos los campos requeridos
+                const requiredFields = form.querySelectorAll('[required]');
+                requiredFields.forEach(field => {
+                    const value = field.value.trim();
+                    const feedback = field.parentNode.querySelector('.invalid-feedback');
+                    
+                    if (!value) {
+                        field.classList.add('is-invalid');
+                        if (!firstInvalid) firstInvalid = field;
+                        isValid = false;
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                });
+                
+                // Validar título "otro"
+                if (tituloSelect && tituloSelect.value === 'otro') {
+                    const otroValue = tituloOtro.value.trim();
+                    if (!otroValue) {
+                        tituloOtro.classList.add('is-invalid');
+                        if (!firstInvalid) firstInvalid = tituloOtro;
+                        isValid = false;
+                    } else {
+                        tituloOtro.classList.remove('is-invalid');
+                    }
+                }
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    // Scroll suave al primer error
+                    if (firstInvalid) {
+                        firstInvalid.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center' 
+                        });
+                        firstInvalid.focus();
+                        
+                        // Shake animation
+                        firstInvalid.style.animation = 'shake 0.5s ease-in-out';
+                        setTimeout(() => {
+                            firstInvalid.style.animation = '';
+                        }, 500);
+                    }
+                    return false;
+                }
+                
+                // Mostrar loader
+                const submitBtn = form.querySelector('.btn-save');
+                if (submitBtn) {
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = `
+                        <span class="btn-status">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                            Guardando...
+                        </span>
+                    `;
+                    submitBtn.disabled = true;
+                }
+            });
+
+            // Remover validación al escribir
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.classList.remove('is-invalid');
+                });
+                
+                // Auto-remove invalid class on focus
+                input.addEventListener('focus', function() {
+                    this.classList.remove('is-invalid');
+                });
+            });
+        }
+
+        // Auto-select valores por defecto - MÁS INTELIGENTE
+        const estadoSelect = form.querySelector('select[name="estado"]');
+        const prioridadSelect = form.querySelector('select[name="prioridad"]');
+        
+        if (estadoSelect && !estadoSelect.value) {
+            const pendienteOption = estadoSelect.querySelector('option[value="Pendiente"]');
+            if (pendienteOption) {
+                estadoSelect.value = 'Pendiente';
+            }
+        }
+        
+        if (prioridadSelect && !prioridadSelect.value) {
+            const mediaOption = prioridadSelect.querySelector('option[value="Media"]');
+            if (mediaOption) {
+                prioridadSelect.value = 'Media';
+            }
+        }
+
+        // Scroll suave al cargar
+        setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
+    });
+
+    // CSS para animación shake (inline para evitar dependencias)
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .file-preview.error {
+            color: var(--error) !important;
+            font-weight: 500;
+        }
+        
+        .file-preview.valid {
+            color: var(--success) !important;
+            font-weight: 500;
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+{% endblock %}

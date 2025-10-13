@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="cyber-main-content">
+    <div class="cyber-panel" data-aos="fade-up">
+        <h1 class="cyber-title">RESTAURAR BASE DE DATOS</h1>
+        
+        <div class="cyber-form-container">
+            <div class="cyber-form-header">
+                <i class="fas fa-database"></i>
+                <h3>CARGA DE RESPALDO</h3>
+                <p class="cyber-subtitle">Selecciona un archivo .sqlite3 válido</p>
+            </div>
+            
+            <form id="restore-form" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="cyber-file-upload">
+                    <label class="cyber-file-label">
+                        <input type="file" name="backup_file" id="id_backup_file" accept=".sqlite3" required>
+                        <span class="cyber-file-button">
+                            <i class="fas fa-file-upload"></i> SELECCIONAR ARCHIVO
+                        </span>
+                        <span class="cyber-file-name" id="file-name">Ningún archivo seleccionado</span>
+                    </label>
+                    <div id="file-error" class="cyber-error-message"></div>
+                </div>
+                
+                <button type="submit" class="cyber-button danger">
+                    <i class="fas fa-redo"></i> EJECUTAR RESTAURACIÓN
+                </button>
+            </form>
+            
+            <div class="cyber-notification" id="notification"></div>
+            
+            <div class="cyber-warning-box">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>ADVERTENCIA: Esta acción sobrescribirá completamente la base de datos actual. Asegúrate de tener un respaldo reciente.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.cyber-form-container {
+    background: rgba(18, 30, 48, 0.7);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2rem;
+    margin-top: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.cyber-form-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(0, 188, 212, 0.05) 0%,
+        rgba(255, 32, 121, 0.05) 100%
+    );
+    z-index: -1;
+}
+
+.cyber-form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.cyber-form-header i {
+    font-size: 3rem;
+    color: var(--primary-neon);
+    margin-bottom: 1rem;
+    text-shadow: 0 0 10px var(--primary-neon);
+}
+
+.cyber-form-header h3 {
+    color: var(--primary-neon);
+    font-family: 'Orbitron', sans-serif;
+    margin: 0.5rem 0;
+    font-size: 1.5rem;
+}
+
+.cyber-subtitle {
+    color: var(--text-light);
+    opacity: 0.8;
+    font-size: 0.9rem;
+}
+
+.cyber-file-upload {
+    margin: 2rem 0;
+}
+
+.cyber-file-label {
+    display: block;
+    cursor: pointer;
+}
+
+.cyber-file-button {
+    display: block;
+    background: rgba(255, 32, 121, 0.2);
+    color: var(--text-light);
+    padding: 1rem 1.5rem;
+    border-radius: 5px;
+    border: 1px dashed var(--secondary-neon);
+    text-align: center;
+    transition: all 0.3s ease;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+.cyber-file-button:hover {
+    background: rgba(255, 32, 121, 0.3);
+    border-color: var(--primary-neon);
+}
+
+.cyber-file-button i {
+    margin-right: 0.5rem;
+    color: var(--secondary-neon);
+}
+
+.cyber-file-name {
+    display: block;
+    margin-top: 0.8rem;
+    color: var(--accent-neon);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+#id_backup_file {
+    display: none;
+}
+
+.cyber-error-message {
+    color: var(--secondary-neon);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    text-align: center;
+    min-height: 1.2rem;
+    text-shadow: 0 0 5px var(--secondary-neon);
+}
+
+.cyber-button {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 5px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: bold;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 1.5rem 0;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+}
+
+.cyber-button i {
+    margin-right: 0.5rem;
+}
+
+.cyber-button.danger {
+    background: rgba(247, 37, 133, 0.2);
+    color: var(--secondary-neon);
+    border: 1px solid var(--secondary-neon);
+    box-shadow: 0 0 10px rgba(247, 37, 133, 0.3);
+}
+
+.cyber-button.danger:hover {
+    background: rgba(247, 37, 133, 0.3);
+    box-shadow: 0 0 20px rgba(247, 37, 133, 0.5);
+}
+
+.cyber-button.danger::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: all 0.5s ease;
+}
+
+.cyber-button.danger:hover::before {
+    left: 100%;
+}
+
+.cyber-notification {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    border-radius: 5px;
+    text-align: center;
+    display: none;
+}
+
+.cyber-notification.success {
+    background: rgba(76, 201, 240, 0.1);
+    border: 1px solid var(--success-color);
+    color: var(--success-color);
+}
+
+.cyber-notification.error {
+    background: rgba(247, 37, 133, 0.1);
+    border: 1px solid var(--secondary-neon);
+    color: var(--secondary-neon);
+}
+
+.cyber-warning-box {
+    background: rgba(160, 255, 0, 0.1);
+    border: 1px solid var(--accent-neon);
+    border-radius: 5px;
+    padding: 1rem;
+    margin-top: 2rem;
+    display: flex;
+    align-items: flex-start;
+}
+
+.cyber-warning-box i {
+    color: var(--accent-neon);
+    margin-right: 1rem;
+    font-size: 1.2rem;
+}
+
+.cyber-warning-box p {
+    margin: 0;
+    color: var(--accent-neon);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+    .cyber-form-container {
+        padding: 1.5rem;
+    }
+    
+    .cyber-form-header i {
+        font-size: 2.5rem;
+    }
+    
+    .cyber-form-header h3 {
+        font-size: 1.3rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('id_backup_file');
+    const fileName = document.getElementById('file-name');
+    const errorDiv = document.getElementById('file-error');
+    const notification = document.getElementById('notification');
+    const form = document.getElementById('restore-form');
+
+    // Mostrar nombre de archivo seleccionado
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            const selectedFile = this.files[0];
+            fileName.textContent = selectedFile.name;
+            
+            // Validar extensión
+            if (!selectedFile.name.endsWith('.sqlite3')) {
+                errorDiv.textContent = 'ERROR: SOLO SE PERMITEN ARCHIVOS .SQLITE3';
+                this.value = '';
+                fileName.textContent = 'Ningún archivo seleccionado';
+            } else {
+                errorDiv.textContent = '';
+            }
+        }
+    });
+
+    // Envío del formulario con AJAX
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!fileInput.files.length) {
+            errorDiv.textContent = 'ERROR: DEBES SELECCIONAR UN ARCHIVO';
+            return;
+        }
+
+        const formData = new FormData(form);
+        
+        // Mostrar carga
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalText = submitButton.innerHTML;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> PROCESANDO...';
+        submitButton.disabled = true;
+        
+        fetch('{% url "restore" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                notification.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${data.error}`;
+                notification.className = 'cyber-notification error';
+                notification.style.display = 'block';
+            } else if (data.message) {
+                notification.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message}`;
+                notification.className = 'cyber-notification success';
+                notification.style.display = 'block';
+                form.reset();
+                fileName.textContent = 'Ningún archivo seleccionado';
+            }
+        })
+        .catch(error => {
+            notification.innerHTML = `<i class="fas fa-exclamation-circle"></i> ERROR DE CONEXIÓN`;
+            notification.className = 'cyber-notification error';
+            notification.style.display = 'block';
+        })
+        .finally(() => {
+            submitButton.innerHTML = originalText;
+            submitButton.disabled = false;
+        });
+    });
+});
+</script>
+{% endblock %}

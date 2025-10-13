@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="cyber-main-content">
+        <div class="cyber-panel" data-aos="fade-up">
+            <h1 class="cyber-title">RESPALDO DE BASE DE DATOS</h1>
+            
+            <div class="cyber-form-container">
+                <div class="cyber-form-header">
+                    <i class="fas fa-database"></i>
+                    <h3>GENERAR RESPALDO</h3>
+                    <p class="cyber-subtitle">Selecciona el destino del respaldo</p>
+                </div>
+                
+                <form id="backup-form" action="{% url 'bd' %}" method="post">
+                    {% csrf_token %}
+                    
+                    <div class="cyber-radio-group">
+                        <label class="cyber-radio">
+                            <input type="radio" name="backup_destination" value="local" checked>
+                            <span class="cyber-radio-checkmark"></span>
+                            <span class="cyber-radio-label">Almacenamiento local</span>
+                        </label>
+                        
+                        <label class="cyber-radio">
+                            <input type="radio" name="backup_destination" value="google_drive">
+                            <span class="cyber-radio-checkmark"></span>
+                            <span class="cyber-radio-label">Google Drive</span>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="cyber-button danger" onclick="confirmRespaldo(event)">
+                        <i class="fas fa-save"></i> GENERAR RESPALDO
+                    </button>
+                </form>
+                
+                <!-- Resto del código... -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Estilos adicionales para los radio buttons -->
+    <style>
+        .cyber-radio-group {
+            margin: 1.5rem 0;
+        }
+        
+        .cyber-radio {
+            display: block;
+            position: relative;
+            padding-left: 35px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            user-select: none;
+        }
+        
+        .cyber-radio input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .cyber-radio-checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 20px;
+            width: 20px;
+            background-color: transparent;
+            border: 2px solid var(--primary-neon);
+            border-radius: 50%;
+        }
+        
+        .cyber-radio:hover input ~ .cyber-radio-checkmark {
+            box-shadow: 0 0 10px var(--primary-neon);
+        }
+        
+        .cyber-radio input:checked ~ .cyber-radio-checkmark {
+            background-color: var(--primary-neon);
+            box-shadow: 0 0 10px var(--primary-neon);
+        }
+        
+        .cyber-radio-checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+        
+        .cyber-radio input:checked ~ .cyber-radio-checkmark:after {
+            display: block;
+        }
+        
+        .cyber-radio .cyber-radio-checkmark:after {
+            top: 4px;
+            left: 4px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--bg-dark);
+        }
+        
+        .cyber-radio-label {
+            margin-left: 10px;
+            letter-spacing: 0.5px;
+        }
+    </style>
+
+    <script>
+        function confirmRespaldo(e) {
+            e.preventDefault();
+            
+            const destination = document.querySelector('input[name="backup_destination"]:checked').value;
+            let destinationText = destination === 'google_drive' ? 'Google Drive' : 'almacenamiento local';
+            
+            Swal.fire({
+                title: '¿GENERAR RESPALDO?',
+                html: `Esta acción creará una copia de seguridad en <strong>${destinationText}</strong>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#00bcd4',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'CONFIRMAR',
+                cancelButtonText: 'CANCELAR',
+                backdrop: `
+                    rgba(0,0,0,0.7)
+                    url("https://i.gifer.com/ZZ5H.gif")
+                    center top
+                    no-repeat
+                `,
+                customClass: {
+                    title: 'cyber-swal-title',
+                    content: 'cyber-swal-content',
+                    confirmButton: 'cyber-swal-button',
+                    cancelButton: 'cyber-swal-button'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('backup-form').submit();
+                    
+                    // Mostrar notificación de éxito
+                    setTimeout(() => {
+                        Swal.fire({
+                            position: 'center',
+                            icon: 'success',
+                            title: 'RESPALDO COMPLETADO',
+                            html: `El respaldo se ha guardado en <strong>${destinationText}</strong>`,
+                            showConfirmButton: false,
+                            timer: 3000,
+                            customClass: {
+                                title: 'cyber-swal-title',
+                                content: 'cyber-swal-content'
+                            }
+                        });
+                    }, 1500);
+                }
+            });
+        }
+    </script>
+</body>
+{% endblock %}

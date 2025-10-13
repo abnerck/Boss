@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container py-3">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-primary text-white py-2 rounded-top-3">
+                    <h3 class="h5 mb-0 text-center fw-bold">
+                        <i class="fas fa-coins me-1"></i>Nueva Transacción
+                    </h3>
+                </div>
+
+                <div class="card-body p-3">
+                    {% if form.errors %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-1"></i>
+                        <strong>Error!</strong> Por favor corrige los errores en el formulario.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="id_titulo" class="form-label fw-bold">
+                                <i class="fas fa-heading me-1 text-primary"></i>Título <span class="text-danger">*</span>
+                            </label>
+                            {% render_field form.titulo class="form-control" placeholder="Ej: Pago de nómina" required="required" %}
+                            {% if form.titulo.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.titulo.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-exchange-alt me-1 text-primary"></i>Tipo <span class="text-danger">*</span>
+                                </label>
+                                <div class="list-group">
+                                    <label class="list-group-item">
+                                        <input class="form-check-input me-2" type="radio" name="tipo" value="ING" required>
+                                        Ingresos
+                                    </label>
+                                    <label class="list-group-item">
+                                        <input class="form-check-input me-2" type="radio" name="tipo" value="EGR">
+                                        Egresos
+                                    </label>
+                                </div>
+                                {% if form.tipo.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.tipo.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="id_categoria" class="form-label fw-bold">
+                                    <i class="fas fa-tags me-1 text-primary"></i>Categoría <span class="text-danger">*</span>
+                                </label>
+                                {% render_field form.categoria class="form-select" required="required" %}
+                                {% if form.categoria.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.categoria.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_monto" class="form-label fw-bold">
+                                <i class="fas fa-money-bill-wave me-1 text-primary"></i>Monto <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {% render_field form.monto class="form-control" placeholder="0.00" step="0.01" required="required" %}
+                            </div>
+                            {% if form.monto.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.monto.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_descripcion" class="form-label fw-bold">
+                                <i class="fas fa-align-left me-1 text-primary"></i>Descripción
+                            </label>
+                            {% render_field form.descripcion class="form-control" rows="2" placeholder="Descripción del movimiento" %}
+                        </div>
+
+                        <div class="d-grid mt-3 pt-2 border-top">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 0.6rem;
+    }
+    
+    .card-header {
+        padding: 0.7rem 1rem;
+    }
+    
+    .list-group-item {
+        cursor: pointer;
+        padding: 0.5rem 1rem;
+    }
+    
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .form-check-input:checked + .form-checked-content {
+        opacity: .5;
+    }
+    
+    .btn {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+</style>
+
+<script>
+    (function() {
+        'use strict';
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form validation
+            var forms = document.querySelectorAll('.needs-validation');
+            Array.prototype.slice.call(forms).forEach(function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+            
+            // Format amount on blur
+            var montoField = document.getElementById('id_monto');
+            if (montoField) {
+                montoField.addEventListener('blur', function() {
+                    if (this.value) {
+                        this.value = parseFloat(this.value).toFixed(2);
+                    }
+                });
+            }
+        });
+    })();
+</script>
+{% endblock %}

@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-lg animate__animated animate__fadeInDown rounded-4">
+                <!-- Card Header -->
+                <div class="card-header bg-primary text-white py-4 rounded-top-4 d-flex justify-content-between align-items-center"
+                    style="background: linear-gradient(135deg, #1e88e5 0%, #0d47a1 100%);">
+                    <h2 class="h4 mb-0 fw-bold">
+                        <i class="fas fa-money-check-alt me-2"></i> 
+                        {% if edit_mode %}Editar{% else %}Detalles del{% endif %} Registro Financiero
+                    </h2>
+                    <span class="badge bg-light text-primary px-3 py-2 rounded-pill fs-6">
+                        {{ finanza.get_tipo_display }}
+                    </span>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body px-5 py-4">
+                    {% if edit_mode and form %}
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="row g-4">
+                            <!-- Fila 1 -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.titulo.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-heading me-2 text-primary"></i>Título
+                                    </label>
+                                    {{ form.titulo|add_class:"form-control border-2" }}
+                                    {% for error in form.titulo.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="{{ form.tipo.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-exchange-alt me-2 text-primary"></i>Tipo
+                                    </label>
+                                    {{ form.tipo|add_class:"form-select border-2" }}
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="{{ form.categoria.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-tags me-2 text-primary"></i>Categoría
+                                    </label>
+                                    {{ form.categoria|add_class:"form-select border-2" }}
+                                </div>
+                            </div>
+
+                            <!-- Fila 2 -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="{{ form.monto.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-money-bill-wave me-2 text-primary"></i>Monto
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        {{ form.monto|add_class:"form-control border-2" }}
+                                    </div>
+                                    {% for error in form.monto.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="{{ form.fecha.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-calendar-alt me-2 text-primary"></i>Fecha
+                                    </label>
+                                    {{ form.fecha|attr:"type:date"|add_class:"form-control border-2" }}
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="form-label fw-bold">
+                                        <i class="fas fa-user me-2 text-primary"></i>Usuario
+                                    </label>
+                                    <input type="text" class="form-control border-2 bg-light"
+                                        value="{{ finanza.user.get_full_name|default:finanza.user.username }}" readonly>
+                                </div>
+                            </div>
+
+                            <!-- Fila 3 -->
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="{{ form.descripcion.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-align-left me-2 text-primary"></i>Descripción
+                                    </label>
+                                    {{ form.descripcion|add_class:"form-control border-2"|attr:"rows:3" }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                            <a href="{% url 'finanza_detail' finanza.id %}" class="btn btn-secondary px-4">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="fas fa-save me-2"></i>Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+
+                    {% else %}
+                    <!-- Vista de detalles -->
+                    <div class="row g-4">
+                        <!-- Fila 1 -->
+                        <div class="col-md-6">
+                            <div class="detail-card bg-light p-3 rounded-3 h-100">
+                                <h5 class="fw-bold text-muted mb-3">
+                                    <i class="fas fa-heading me-2 text-primary"></i>Título
+                                </h5>
+                                <p class="fs-5">{{ finanza.titulo }}</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="detail-card bg-light p-3 rounded-3 h-100">
+                                <h5 class="fw-bold text-muted mb-3">
+                                    <i class="fas fa-exchange-alt me-2 text-primary"></i>Tipo
+                                </h5>
+                                <p>{{ finanza.get_tipo_display }}</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="detail-card bg-light p-3 rounded-3 h-100">
+                                <h5 class="fw-bold text-muted mb-3">
+                                    <i class="fas fa-tags me-2 text-primary"></i>Categoría
+                                </h5>
+                                <p>{{ finanza.categoria|default:"Sin categoría" }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Fila 2 -->
+                        <div class="col-md-4">
+                            <div class="detail-card bg-light p-3 rounded-3 h-100">
+                                <h5 class="fw-bold text-muted mb-3">
+                                    <i class="fas fa-money-bill-wave me-2 text-primary"></i>Monto
+                                </h5>
+                                <p class="fs-5 {% if finanza.tipo == 'Ingreso' %}text-success{% else %}text-danger{% endif %} fw-bold">
+                                    ${{ finanza.monto|floatformat:2 }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="detail-card bg-light p-3 rounded-3 h-100">
+                                <h5 class="fw-bold text-muted mb-3">
+                                    <i class="fas fa-calendar-alt me-2 text-primary"></i>Fecha
+                                </h5>
+                                <p>{{ finanza.fecha|date:"d/m/Y" }}</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="detail-card bg-light p-3 rounded-3 h-100">
+                                <h5 class="fw-bold text-muted mb-3">
+                                    <i class="fas fa-user me-2 text-primary"></i>Registrado por
+                                </h5>
+                                <p>{{ finanza.user.get_full_name|default:finanza.user.username }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Fila 3 -->
+                        <div class="col-12">
+                            <div class="detail-card bg-light p-3 rounded-3">
+                                <h5 class="fw-bold text-muted mb-3">
+                                    <i class="fas fa-align-left me-2 text-primary"></i>Descripción
+                                </h5>
+                                <div class="text-muted">{{ finanza.descripcion|default:"Sin descripción"|linebreaks }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Card Footer -->
+                <div class="card-footer bg-light px-4 py-3 d-flex justify-content-between align-items-center">
+                    <a href="{% url 'finanzas' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i> Volver a la lista
+                    </a>
+
+                    <div class="d-flex gap-2">
+                        {% if not edit_mode %}
+                        <a href="{% url 'finanza_detail' finanza.id %}?edit=true" class="btn btn-warning">
+                            <i class="fas fa-edit me-2"></i> Editar
+                        </a>
+                        {% endif %}
+                        <form method="post" action="{% url 'delete_finanza' finanza.id %}">
+                            {% csrf_token %}
+                            <button type="button" class="btn btn-outline-danger" onclick="confirmDelete()">
+                                <i class="fas fa-trash-alt me-2"></i> Eliminar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmDelete() {
+        if (confirm("⚠️ ¿Estás seguro de eliminar este registro financiero? Esta acción no se puede deshacer.")) {
+            event.target.closest('form').submit();
+        }
+    }
+    
+    // Validación de formulario
+    (function() {
+        'use strict'
+        const forms = document.querySelectorAll('.needs-validation')
+        
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+
+<style>
+    .card {
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    .detail-card {
+        transition: transform 0.3s ease;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .detail-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 0.5rem;
+        border-width: 2px;
+    }
+
+    .bg-light {
+        background-color: #f8fafc !important;
+    }
+
+    .input-group-text {
+        background-color: #e9ecef;
+        border: 2px solid #dee2e6;
+    }
+    
+    .was-validated .form-control:invalid,
+    .was-validated .form-select:invalid {
+        border-color: #dc3545;
+    }
+    
+    .was-validated .form-control:valid,
+    .was-validated .form-select:valid {
+        border-color: #28a745;
+    }
+</style>
+{% endblock %}

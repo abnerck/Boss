@@ -1,0 +1,407 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="area-detail-container">
+    <div class="area-detail-card">
+        <div class="area-detail-header">
+            <i class="fas fa-building icon-title"></i>
+            <h1>Detalles del Área</h1>
+            <p>Información completa del área registrada</p>
+        </div>
+
+        <div class="area-detail-body">
+            {% if edit_mode %}
+                <!-- FORMULARIO DE EDICIÓN CON EL MISMO FORMATO -->
+                <form method="POST" class="edit-form">
+                    {% csrf_token %}
+                    
+                    <div class="detail-grid">
+                        <!-- Información Principal -->
+                        <div class="detail-section">
+                            <h3><i class="fas fa-info-circle me-2"></i>Información Básica</h3>
+                            <div class="detail-row">
+                                <span class="detail-label">Nombre:</span>
+                                <div class="detail-value">
+                                    {{ form.nombre|add_class:"form-control form-control-sm" }}
+                                </div>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Tipo:</span>
+                                <div class="detail-value">
+                                    {{ form.tipo_area|add_class:"form-select form-select-sm" }}
+                                </div>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Piso:</span>
+                                <div class="detail-value">
+                                    {{ form.numero_piso|add_class:"form-control form-control-sm" }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Estado y Ubicación -->
+                        <div class="detail-section">
+                            <h3><i class="fas fa-map-marked-alt me-2"></i>Ubicación y Estado</h3>
+                            <div class="detail-row">
+                                <span class="detail-label">Ubicación:</span>
+                                <div class="detail-value">
+                                    {{ form.ubicacion|add_class:"form-control form-control-sm" }}
+                                </div>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Estado:</span>
+                                <div class="detail-value">
+                                    {{ form.estado|add_class:"form-select form-select-sm" }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Responsable -->
+                        <div class="detail-section">
+                            <h3><i class="fas fa-user-tie me-2"></i>Responsable</h3>
+                            <div class="detail-row">
+                                <span class="detail-label">Asignado a:</span>
+                                <div class="detail-value">
+                                    {% if area.user %}
+                                        {{ area.user.get_full_name|default:area.user.username }}
+                                    {% else %}
+                                        <span class="text-muted">Sin asignar</span>
+                                    {% endif %}
+                                    <small class="d-block text-muted mt-1">(La asignación de responsable se gestiona desde el perfil de usuario)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fechas -->
+                        <div class="detail-section">
+                            <h3><i class="fas fa-calendar-alt me-2"></i>Registro</h3>
+                            <div class="detail-row">
+                                <span class="detail-label">Fecha de creación:</span>
+                                <span class="detail-value">{{ area.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if form.errors %}
+                        <div class="alert alert-danger mt-3">
+                            <strong>Por favor, corrige los siguientes errores:</strong>
+                            {{ form.errors }}
+                        </div>
+                    {% endif %}
+
+                    <div class="detail-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i> Guardar cambios
+                        </button>
+                        <a href="{% url 'area_detail' area.id %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            {% else %}
+                <!-- DETALLES DEL ÁREA (VISTA ORIGINAL) -->
+                <div class="detail-grid">
+                    <!-- Información Principal -->
+                    <div class="detail-section">
+                        <h3><i class="fas fa-info-circle me-2"></i>Información Básica</h3>
+                        <div class="detail-row">
+                            <span class="detail-label">Nombre:</span>
+                            <span class="detail-value">{{ area.nombre }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Tipo:</span>
+                            <span class="detail-value">{{ area.tipo_area|default:"N/A" }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Piso:</span>
+                            <span class="detail-value">
+                                {% if area.numero_piso %}
+                                    Piso {{ area.numero_piso }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Estado y Ubicación -->
+                    <div class="detail-section">
+                        <h3><i class="fas fa-map-marked-alt me-2"></i>Ubicación y Estado</h3>
+                        <div class="detail-row">
+                            <span class="detail-label">Ubicación:</span>
+                            <span class="detail-value">{{ area.ubicacion|default:"N/A" }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Estado:</span>
+                            <span class="detail-value">
+                                {% if area.estado == 'Libre' %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle me-1"></i> {{ area.estado }}
+                                </span>
+                                {% elif area.estado == 'Ocupado' %}
+                                <span class="badge bg-primary">
+                                    <i class="fas fa-user me-1"></i> {{ area.estado }}
+                                </span>
+                                {% elif area.estado == 'Mantenimiento' %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="fas fa-tools me-1"></i> {{ area.estado }}
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-question-circle me-1"></i> {{ area.estado|default:"Sin estado" }}
+                                </span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Responsable -->
+                    <div class="detail-section">
+                        <h3><i class="fas fa-user-tie me-2"></i>Responsable</h3>
+                        <div class="detail-row">
+                            <span class="detail-label">Asignado a:</span>
+                            <span class="detail-value">
+                                {% if area.user %}
+                                    {{ area.user.get_full_name|default:area.user.username }}
+                                {% else %}
+                                    <span class="text-muted">Sin asignar</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Fechas -->
+                    <div class="detail-section">
+                        <h3><i class="fas fa-calendar-alt me-2"></i>Registro</h3>
+                        <div class="detail-row">
+                            <span class="detail-label">Fecha de creación:</span>
+                            <span class="detail-value">{{ area.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-actions">
+                    <a href="{% url 'area_detail' area.id %}?edit=true" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i> Editar Área
+                    </a>
+                    <a href="{% url 'areas' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Volver al listado
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary: #4361ee;
+        --secondary: #3f37c9;
+        --dark: #212529;
+        --gray: #6c757d;
+    }
+
+    .area-detail-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 2rem;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    .area-detail-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+        overflow: hidden;
+        width: 100%;
+        max-width: 900px;
+    }
+
+    .area-detail-header {
+        padding: 2rem;
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+        color: white;
+        text-align: center;
+    }
+
+    .icon-title {
+        font-size: 2.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        width: 70px;
+        height: 70px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin-bottom: 1rem;
+    }
+
+    .area-detail-body {
+        padding: 2rem;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .detail-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .detail-section h3 {
+        color: var(--primary);
+        font-size: 1.2rem;
+        margin-bottom: 1.2rem;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 0.5rem;
+    }
+
+    .detail-row {
+        display: flex;
+        margin-bottom: 1rem;
+        align-items: center;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: var(--dark);
+        min-width: 120px;
+    }
+
+    .detail-value {
+        color: var(--gray);
+        flex: 1;
+    }
+
+    .detail-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #eee;
+    }
+
+    .btn {
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background-color: var(--primary);
+        border: none;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--secondary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+    }
+
+    .btn-outline-secondary {
+        border: 1px solid var(--gray);
+        color: var(--gray);
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
+    }
+
+    /* Estilos para los campos del formulario */
+    .edit-form .form-control,
+    .edit-form .form-select {
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+        width: 100%;
+        background-color: white;
+    }
+
+    .edit-form .form-control:focus,
+    .edit-form .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+    }
+
+    .alert-danger {
+        border-radius: 10px;
+        padding: 1rem;
+    }
+
+    /* Badges de estado */
+    .badge {
+        font-weight: 500;
+        padding: 0.5em 0.8em;
+        border-radius: 6px;
+    }
+
+    .bg-success {
+        background-color: #28a745 !important;
+    }
+
+    .bg-primary {
+        background-color: #007bff !important;
+    }
+
+    .bg-warning {
+        background-color: #ffc107 !important;
+        color: #212529 !important;
+    }
+
+    .bg-secondary {
+        background-color: #6c757d !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .area-detail-container {
+            padding: 1rem;
+        }
+        
+        .area-detail-header {
+            padding: 1.5rem;
+        }
+        
+        .area-detail-body {
+            padding: 1.5rem;
+        }
+        
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .detail-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .detail-label {
+            min-width: auto;
+        }
+        
+        .detail-actions {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,650 @@
+    {% extends 'base.html' %}
+
+    {% block content %}
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { text-align: center; }
+            h2 { color: #e4dfdf; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+            th, td { border: 1px solid #080808; padding: 8px; text-align: left; }
+            th { background-color: #101010; }
+            .section { margin-bottom: 40px; }
+            .daily { background-color: #050606; }
+            .biweekly { background-color: #1b1a19; }
+        </style>
+    </head>
+    <body>
+        <h1>Programa de Limpieza - Edificio BOSS</h1>
+        <p>Esta vista organiza las actividades de limpieza por área, mostrando el nombre de la actividad y su periodicidad (incluyendo días específicos). Se incluye un registro sugerido con checkboxes para marcar completado. Las filas diarias están en azul claro, y quincenales en amarillo claro.</p>
+
+        <div class="section">
+            <h2>Área de Entrada y Alrededores</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Actividad</th>
+                        <th>Periodicidad</th>
+                        <th>Registro (Marcar Completado)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="daily">
+                        <td>PISO</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>TAPETE DE ENTRADA</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+
+                    <tr class="daily">
+                        <td>AREA DE BASURA</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>VENTANALES</td>
+                        <td>MARTES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>MACETAS Y RIEGO</td>
+                        <td>MARTES Y VIERNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>BOTES DE BASURA</td>
+                        <td>LUNES Y MIERCOLES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Lobby</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Actividad</th>
+                        <th>Periodicidad</th>
+                        <th>Registro (Marcar Completado)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="daily">
+                        <td>PISO</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>MESA</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>ADORNO DE MESA</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>SILLONES</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>PUERTA</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>LAMPARA DE CRISTAL</td>
+                        <td>LUNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>VENTANALES</td>
+                        <td>MARTES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>MACETA (SIN HOJAS SECAS Y REGADAS)</td>
+                        <td>MARTES Y VIERNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>ESPEJO</td>
+                        <td>MIÉRCOLES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="biweekly">
+                        <td>PAREDES</td>
+                        <td>QUINCENAL JUEVES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>HERRERIA</td>
+                        <td>SÁBADO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Escaleras</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Actividad</th>
+                        <th>Periodicidad</th>
+                        <th>Registro (Marcar Completado)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="daily">
+                        <td>DEL LOBBY AL 1º PISO</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>DEL 1º PISO AL 2º PISO</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>DEL 2º PISO AL 3º PISO</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>DEL 3º PISO A LA AZOTEA</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="biweekly">
+                        <td>LIMPIEZA PROFUNDA DEL 1º PISO AL 2º PISO</td>
+                        <td>QUINCENAL LUNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="biweekly">
+                        <td>LIMPIEZA PROFUNDA DEL 2º PISO AL 3º PISO</td>
+                        <td>QUINCENAL MIERCOLES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="biweekly">
+                        <td>LIMPIEZA PROFUNDA DEL 3º PISO A LA AZOTEA</td>
+                        <td>QUINCENAL VIERNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>LIMPIEZA PROFUNDA DEL LOBBY AL 1º PISO</td>
+                        <td>SÁBADO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Elevador</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Actividad</th>
+                        <th>Periodicidad</th>
+                        <th>Registro (Marcar Completado)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="daily">
+                        <td>CAJA DEL ELEVADOR (PAREDES, PISO Y CONTROLES)</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>EXTERIOR ELEVADOR LOBBY</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>EXTERIOR ELEVADOR 1º PISO</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>EXTERIOR ELEVADOR 2º PISO</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>EXTERIOR ELEVADOR 3º PISO</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>1º Piso</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Actividad</th>
+                        <th>Periodicidad</th>
+                        <th>Registro (Marcar Completado)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="daily">
+                        <td>PISOS</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>PAREDES</td>
+                        <td>LUNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>CRISTALES Y BARANDAL DE CRISTAL</td>
+                        <td>JUEVES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>LAMPARAS Y FOCOS</td>
+                        <td>JUEVES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>HERRERIA: PUERTAS Y REJAS</td>
+                        <td>SÁBADO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>TECHOS</td>
+                        <td>VIERNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>2º Piso</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Actividad</th>
+                        <th>Periodicidad</th>
+                        <th>Registro (Marcar Completado)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="daily">
+                        <td>PISOS</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>PAREDES</td>
+                        <td>LUNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>CRISTALES Y BARANDAL DE CRISTAL</td>
+                        <td>JUEVES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>LAMPARAS Y FOCOS</td>
+                        <td>JUEVES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>HERRERIA: PUERTAS Y REJAS</td>
+                        <td>SÁBADO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>TECHOS</td>
+                        <td>VIERNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>3º Piso</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Actividad</th>
+                        <th>Periodicidad</th>
+                        <th>Registro (Marcar Completado)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="daily">
+                        <td>PISOS</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>PAREDES</td>
+                        <td>LUNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>CRISTALES Y BARANDAL DE CRISTAL</td>
+                        <td>JUEVES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>LAMPARAS Y FOCOS</td>
+                        <td>JUEVES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>HERRERIA: PUERTAS Y REJAS</td>
+                        <td>SÁBADO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>TECHOS</td>
+                        <td>VIERNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Azotea (Roof)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Actividad</th>
+                        <th>Periodicidad</th>
+                        <th>Registro (Marcar Completado)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="daily">
+                        <td>REVISION DE NIVEL DE AGUA ALBERCA DEBE LLEGAR A LA CANASTILLA</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>PISO</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>SILLONES</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>MESA</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>CAMASTROS</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>CESTOS DE BASURA</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>PISO ALREDEDOR DE ALBERCA</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>REGADERA</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>COCINETA: BARRA, ENTREPAÑOS Y PISO</td>
+                        <td>LUNES Y VIERNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>PARRILLA</td>
+                        <td>LUNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>BARANDALES ALBERCA</td>
+                        <td>VIERNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Azotea Baños</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Actividad</th>
+                        <th>Periodicidad</th>
+                        <th>Registro (Marcar Completado)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="daily">
+                        <td>PISOS</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>PAREDES</td>
+                        <td>LUNES Y VIERNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="biweekly">
+                        <td>TECHOS</td>
+                        <td>QUINCENAL VIERNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>LAVAMANOS</td>
+                        <td>LUNES - MIERCOLES - VIERNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>EXCUSADOS Y TAPAS</td>
+                        <td>LUNES - MIERCOLES - VIERNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>CESTOS DE BASURA</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>PUERTAS</td>
+                        <td>LUNES Y JUEVES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Gym</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Actividad</th>
+                        <th>Periodicidad</th>
+                        <th>Registro (Marcar Completado)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="biweekly">
+                        <td>PISOS</td>
+                        <td>QUINCENAL VIERNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>PAREDES</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>TECHOS</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>EQUIPOS DE EJERCICIOS</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>VENTANALES</td>
+                        <td>VIERNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Áreas Especiales</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Actividad</th>
+                        <th>Periodicidad</th>
+                        <th>Registro (Marcar Completado)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>PATIO 1º PISO</td>
+                        <td>LUNES - MIERCOLES - VIERNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>ESTACIONAMIENTO</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>ÁREA Y BODEGA DE LIMPIEZA</td>
+                        <td>SÁBADO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="biweekly">
+                        <td>ÁREA DE EQUIPOS A.A.</td>
+                        <td>QUINCENAL VIERNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>OFICINAS</td>
+                        <td>LUNES - JUEVES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="biweekly">
+                        <td>ÁREA CISTERNAS / TANQUE DE GAS</td>
+                        <td>QUINCENAL VIERNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="biweekly">
+                        <td>ÁREA Y BODEGA DE MANTENIMIENTO</td>
+                        <td>QUINCENAL SÁBADO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>{{ libres }} Departamentos Desocupados</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Actividad</th>
+                        <th>Periodicidad</th>
+                        <th>Registro (Marcar Completado)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="daily">
+                        <td>ABRIR REGADERA</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>JALAR AL EXCUSADO</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>ABRIR LLAVE DE LAVAMANOS 3 SEGUNDOS (BAÑO)</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="daily">
+                        <td>ABRIR LLAVE DE LAVAMANOS 3 SEGUNDOS (OTRO)</td>
+                        <td>DIARIO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>PISOS</td>
+                        <td>LUNES - JUEVES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>MUEBLES CLOSETS</td>
+                        <td>LUNES - JUEVES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>VENTANALES</td>
+                        <td>VIERNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>BAÑOS LIMPIEZA PROFUNDA</td>
+                        <td>LUNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>COCINETA</td>
+                        <td>LUNES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr>
+                        <td>BALCONES</td>
+                        <td>JUEVES</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                    <tr class="biweekly">
+                        <td>LAMPARAS Y VENTILADORES</td>
+                        <td>QUINCENAL SÁBADO</td>
+                        <td><input type="checkbox"> Completado</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p>Nota: Los estándares de limpieza generales (sin basura, sin polvo, etc.) aplican a todas las actividades. Para quincenales, anota la fecha de la última realización para rastreo.</p>
+    </body>
+    </html>
+    {% endblock %}
