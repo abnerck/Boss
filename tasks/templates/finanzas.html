@@ -1,72 +1,107 @@
 {% extends 'base.html' %}
+{% load widget_tweaks %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="text-primary fw-bold mb-0">
-            <i class="fas fa-wallet me-2"></i>Gestión de Finanzas
-        </h1>
-        <a href="{% url 'create_finanza' %}" class="btn btn-primary">
-            <i class="fas fa-plus-circle me-2"></i> Nuevo Registro
-        </a>
+<div class="cyber-finanza-container">
+    <!-- Header Limpio y Profesional -->
+    <div class="cyber-maintenance-header">
+        <div class="header-content">
+            <h2 class="cyber-title">
+                <i class="fas fa-wallet me-2"></i>Gestión de Finanzas
+            </h2>
+            <p class="cyber-subtitle">Registro eficiente de transacciones - Vegas Corporativo</p>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'create_finanza' %}" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-plus-circle me-1"></i>Nuevo Registro
+            </a>
+        </div>
     </div>
 
     {% if finanza %}
-    <!-- Filtros optimizados -->
-    <div class="card shadow-sm mb-4 border-0" style="background-color: #f8f9fa;">
-        <div class="card-body py-3">
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <label for="filtroTitulo" class="form-label fw-bold text-muted">Buscar por título:</label>
+    <!-- Filtros avanzados -->
+    <div class="cyber-maintenance-form mb-4">
+        <div class="form-grid">
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="filtroClaveInmueble" class="form-label">
+                        <i class="fas fa-home me-1"></i>Clave Inmueble
+                    </label>
                     <div class="input-group">
-                        <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" class="form-control border-start-0" id="filtroTitulo" placeholder="Título del registro">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" id="filtroClaveInmueble" placeholder="Clave del inmueble">
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <label for="filtroDescripcion" class="form-label fw-bold text-muted">Buscar por descripción:</label>
+                <div class="form-group">
+                    <label for="filtroConcepto" class="form-label">
+                        <i class="fas fa-heading me-1"></i>Concepto
+                    </label>
                     <div class="input-group">
-                        <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" class="form-control border-start-0" id="filtroDescripcion" placeholder="Descripción">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" id="filtroConcepto" placeholder="Concepto">
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <label for="filtroTipo" class="form-label fw-bold text-muted">Filtrar por tipo:</label>
-                    <select id="filtroTipo" class="form-select">
-                        <option value="">Todos</option>
-                        <option value="Ingreso">Ingresos</option>
-                        <option value="Gasto">Gastos</option>
+            </div>
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="filtroStatus" class="form-label">
+                        <i class="fas fa-info-circle me-1"></i>Status
+                    </label>
+                    <select class="form-select" id="filtroStatus">
+                        <option value="">Todos los estados</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Pagado">Pagado</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label for="filtroProveedor" class="form-label">
+                        <i class="fas fa-store me-1"></i>Proveedor
+                    </label>
+                    <input type="text" class="form-control" id="filtroProveedor" placeholder="Nombre del proveedor">
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Tabla de finanzas -->
-    <div class="card shadow-sm border-0">
+    <div class="cyber-maintenance-form">
         <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0">
-                <i class="fas fa-clipboard-list me-2"></i> Listado de Finanzas
+                <i class="fas fa-clipboard-list me-2"></i>Listado de Finanzas
             </h5>
             <div>
-                <button id="btnExportExcel" class="btn btn-success btn-sm">
-                    <i class="fas fa-file-excel me-1"></i> Excel
+                <button id="btnExportExcel" class="btn btn-success btn-sm me-2">
+                    <i class="fas fa-file-excel me-1"></i>Excel
+                </button>
+                <button id="btnExportPDF" class="btn btn-danger btn-sm">
+                    <i class="fas fa-file-pdf me-1"></i>PDF
                 </button>
             </div>
         </div>
-        
+
         <div class="table-responsive">
             <table id="tablaFinanzas" class="table table-hover mb-0">
                 <thead class="table-dark">
                     <tr>
                         <th>#</th>
-                        <th>Título</th>
-                        <th>Tipo</th>
-                        <th>Categoría</th>
-                        <th>Monto</th>
+                        <th>Clave Inmueble</th>
+                        <th>Concepto</th>
+                        <th>Costo</th>
+                        <th>IVA</th>
+                        <th>Total</th>
+                        <th>Solicita</th>
+                        <th>Autoriza</th>
+                        <th>Status</th>
+                        <th>Proveedor</th>
+                        <th>Factura</th>
+                        <th>Cuenta Bancaria</th>
+                        <th>CLABE</th>
+                        <th>Banco</th>
+                        <th>Nombre</th>
+                        <th>RFC</th>
                         <th>Fecha</th>
                         <th>Usuario</th>
-                        <th>Descripción</th>
+                        <th>Observaciones</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -75,72 +110,96 @@
                     <tr class="align-middle">
                         <td class="text-muted">{{ forloop.counter }}</td>
                         <td>
-                            <a href="{% url 'finanza_detail' f.id %}" class="text-decoration-none fw-bold" 
-                               style="color: {% if f.tipo == 'Ingreso' %}#2e8b57{% else %}#c23b22{% endif %}">
-                                {{ f.titulo|truncatechars:25 }}
+                            <a href="{% url 'finanza_detail' f.id %}" class="text-decoration-none fw-bold" style="color: var(--primary-neon);">
+                                {{ f.clave_inmueble|truncatechars:25 }}
                             </a>
                         </td>
+                        <td>{{ f.concepto|truncatechars:25 }}</td>
                         <td class="text-center">
-                            {% if f.tipo == 'Ingreso' %}
-                            <span class="badge rounded-pill" style="background-color: #e6f7ed; color: #2e8b57; border: 1px solid #2e8b57;">
-                                <i class="fas fa-arrow-up me-1"></i> {{ f.tipo }}
+                            <span class="badge bg-danger bg-opacity-10 text-danger">
+                                ${{ f.costo|floatformat:2 }}
                             </span>
-                            {% elif f.tipo == 'Gasto' %}
-                            <span class="badge rounded-pill" style="background-color: #fde8e5; color: #c23b22; border: 1px solid #c23b22;">
-                                <i class="fas fa-arrow-down me-1"></i> {{ f.tipo }}
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark">
+                                ${{ f.iva|floatformat:2 }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-danger bg-opacity-10 text-danger">
+                                ${{ f.total|floatformat:2 }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-primary bg-opacity-10 text-primary">
+                                {{ f.solicita|truncatechars:15 }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark">
+                                {{ f.autoriza|truncatechars:15|default:"-" }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            {% if f.status == 'Pagado' %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-check-circle me-1"></i> {{ f.status }}
                             </span>
                             {% else %}
-                            <span class="badge bg-secondary">
-                                <i class="fas fa-exchange-alt me-1"></i> {{ f.tipo }}
+                            <span class="badge bg-warning text-dark">
+                                <i class="fas fa-clock me-1"></i> {{ f.status }}
                             </span>
                             {% endif %}
                         </td>
                         <td class="text-center">
-                            {% if f.categoria == 'Salario' %}
-                            <span class="badge rounded-pill" style="background-color: #e6f3ff; color: #1a73e8; border: 1px solid #1a73e8;">
-                                {{ f.categoria }}
+                            <span class="badge bg-light text-dark">
+                                {{ f.proveedor|truncatechars:15|default:"-" }}
                             </span>
-                            {% elif f.categoria == 'Comida' %}
-                            <span class="badge rounded-pill" style="background-color: #fff8e6; color: #ff9800; border: 1px solid #ff9800;">
-                                {{ f.categoria }}
-                            </span>
-                            {% elif f.categoria == 'Transporte' %}
-                            <span class="badge rounded-pill" style="background-color: #f0f4ff; color: #3f51b5; border: 1px solid #3f51b5;">
-                                {{ f.categoria }}
-                            </span>
-                            {% elif f.categoria == 'Entretenimiento' %}
-                            <span class="badge rounded-pill" style="background-color: #fce4ff; color: #9c27b0; border: 1px solid #9c27b0;">
-                                {{ f.categoria }}
-                            </span>
-                            {% else %}
-                            <span class="badge rounded-pill bg-light text-dark border border-dark-subtle">
-                                {{ f.categoria|default:"General" }}
-                            </span>
-                            {% endif %}
                         </td>
-                        <td class="text-center fw-bold {% if f.tipo == 'Ingreso' %}text-success{% else %}text-danger{% endif %}">
-                            <span class="d-inline-block px-2 py-1 rounded" 
-                                  style="background-color: {% if f.tipo == 'Ingreso' %}#e6f7ed{% else %}#fde8e5{% endif %}">
-                                ${{ f.monto|floatformat:2 }}
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark">
+                                {{ f.factura|truncatechars:15|default:"-" }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark">
+                                {{ f.cta_bancaria|truncatechars:15|default:"-" }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark">
+                                {{ f.clabe|truncatechars:15|default:"-" }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark">
+                                {{ f.banco|truncatechars:15|default:"-" }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark">
+                                {{ f.nombre|truncatechars:15|default:"-" }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark">
+                                {{ f.rfc|truncatechars:13|default:"-" }}
                             </span>
                         </td>
                         <td class="text-center">
                             <small class="text-muted">
-                                {{ f.fecha|date:"d/m/Y" }}<br>
-                                {% if f.fecha|date:"H:i" != "00:00" %}
-                                {{ f.fecha|date:"H:i" }}
-                                {% endif %}
+                                {{ f.fecha|date:"d/m/Y" }}
                             </small>
                         </td>
                         <td class="text-center">
-                            <span class="badge bg-light text-dark border border-dark-subtle rounded-pill">
-                                <i class="fas fa-user-circle me-1"></i> {{ f.user.username|truncatechars:10 }}
+                            <span class="badge bg-primary bg-opacity-10 text-primary">
+                                <i class="fas fa-user-circle me-1"></i>{{ f.user.username|truncatechars:10 }}
                             </span>
                         </td>
-                        <td>{{ f.descripcion|truncatechars:30|default:"-" }}</td>
+                        <td>{{ f.observaciones|truncatechars:30|default:"-" }}</td>
                         <td>
                             <div class="d-flex gap-2">
-                                <a href="{% url 'finanza_detail' f.id %}" class="btn btn-sm btn-outline-primary rounded-circle" title="Ver detalles">
+                                <a href="{% url 'finanza_detail' f.id %}" class="btn btn-sm btn-outline-primary" title="Ver detalles">
                                     <i class="fas fa-eye"></i>
                                 </a>
                             </div>
@@ -150,21 +209,45 @@
                 </tbody>
             </table>
         </div>
-        
+
         <div class="card-footer bg-light d-flex justify-content-between align-items-center">
             <div class="text-muted">
                 Mostrando <span id="registrosMostrados">{{ finanza|length }}</span> de {{ finanza|length }} registros
             </div>
         </div>
     </div>
+
+    <!-- Sección de Gráficas -->
+    <div class="form-grid mt-4">
+        <div class="form-column">
+            <div class="cyber-maintenance-form h-100">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Distribución por Status</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="form-column">
+            <div class="cyber-maintenance-form h-100">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Distribución por Costo</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="costoChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
     {% else %}
-    <div class="alert alert-info text-center py-5 border-0" style="background-color: #e6f3ff;">
-        <i class="fas fa-wallet fa-4x mb-4" style="color: #1a73e8;"></i>
-        <h4 class="alert-heading fw-bold" style="color: #1a73e8;">¡No hay finanzas registradas!</h4>
+    <div class="cyber-alert-error text-center py-5">
+        <i class="fas fa-wallet fa-4x mb-4" style="color: var(--primary-neon);"></i>
+        <h4 class="alert-heading fw-bold" style="color: var(--text-primary);">¡No hay finanzas registradas!</h4>
         <p class="text-muted">Parece que no has añadido ningún registro financiero todavía.</p>
-        <hr style="border-top-color: #b3d1ff;">
-        <a href="{% url 'create_finanza' %}" class="btn mt-3" style="background-color: #1a73e8; color: white;">
-            <i class="fas fa-plus-circle me-2"></i> Crear Primer Registro
+        <hr style="border-top-color: var(--border-glow);">
+        <a href="{% url 'create_finanza' %}" class="btn btn-save mt-3">
+            <i class="fas fa-plus-circle me-2"></i>Crear Primer Registro
         </a>
     </div>
     {% endif %}
@@ -174,14 +257,29 @@
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css">
 
+<!-- Incluir Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <!-- Incluir jQuery y DataTables JS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <script>
 $(document).ready(function() {
+    // Logotipo en Base64 (marcador de posición, reemplaza con tu propio logotipo)
+    var logoBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAMAAABHPGVmAAAAA1BMVEX///+nxBvIAAAAIElEQVRoge3BAQ0AAADCoPdPbQ8HFAAAAAAAAAAAAPgT1y0AAd9zLeQAAAAASUVORK5CYII=";
+
     // Inicializar DataTable sin paginación
     var table = $('#tablaFinanzas').DataTable({
         paging: false,
@@ -194,12 +292,115 @@ $(document).ready(function() {
                 className: 'btn-success btn-sm',
                 title: 'Reporte_de_Finanzas',
                 exportOptions: {
-                    columns: [0, 1, 2, 3, 4, 5, 6, 7],
+                    columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
                     format: {
                         body: function(data, row, column, node) {
                             return $(data).text().trim() || data;
                         }
                     }
+                }
+            },
+            {
+                extend: 'pdf',
+                text: '<i class="fas fa-file-pdf"></i> PDF',
+                className: 'btn-danger btn-sm',
+                title: 'Reporte de Finanzas',
+                exportOptions: {
+                    columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+                    format: {
+                        body: function(data, row, column, node) {
+                            return $(data).text().trim() || data;
+                        }
+                    }
+                },
+                customize: function(doc) {
+                    doc.pageMargins = [40, 60, 40, 60];
+                    doc['header'] = function(currentPage, pageCount) {
+                        return {
+                            table: {
+                                widths: ['*', 'auto'],
+                                body: [
+                                    [
+                                        {
+                                            image: logoBase64,
+                                            width: 50,
+                                            alignment: 'left'
+                                        },
+                                        {
+                                            text: 'Reporte de Finanzas\n' + new Date().toLocaleDateString('es-ES', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            }),
+                                            style: 'header',
+                                            alignment: 'right'
+                                        }
+                                    ]
+                                ]
+                            },
+                            layout: 'noBorders',
+                            margin: [40, 10]
+                        };
+                    };
+                    doc['footer'] = function(currentPage, pageCount) {
+                        return {
+                            columns: [
+                                {
+                                    text: 'Gestión de Finanzas - Vegas Corporativo',
+                                    alignment: 'left',
+                                    style: 'footer'
+                                },
+                                {
+                                    text: 'Página ' + currentPage.toString() + ' de ' + pageCount,
+                                    alignment: 'right',
+                                    style: 'footer'
+                                }
+                            ],
+                            margin: [40, 0]
+                        };
+                    };
+                    doc.styles = {
+                        header: {
+                            fontSize: 16,
+                            bold: true,
+                            color: '#00BCC4',
+                            margin: [0, 10, 0, 10]
+                        },
+                        footer: {
+                            fontSize: 10,
+                            color: '#666666',
+                            margin: [0, 10]
+                        },
+                        tableHeader: {
+                            fillColor: '#0F1928',
+                            color: '#E0E6ED',
+                            bold: true,
+                            fontSize: 11
+                        },
+                        tableBody: {
+                            fontSize: 10,
+                            color: '#E0E6ED'
+                        }
+                    };
+                    doc.content[1].table.widths = ['5%', '10%', '10%', '8%', '8%', '8%', '8%', '8%', '8%', '8%', '8%', '8%', '8%', '8%', '8%', '8%', '8%', '8%', '10%'];
+                    doc.content[1].table.body.forEach(function(row, index) {
+                        row.forEach(function(cell, colIndex) {
+                            cell.alignment = 'left';
+                            if (index === 0) {
+                                cell.fillColor = '#0F1928';
+                                cell.color = '#E0E6ED';
+                                cell.bold = true;
+                            } else {
+                                cell.fillColor = index % 2 === 0 ? '#121E30' : '#0F1928';
+                            }
+                        });
+                    });
+                    doc.content.splice(1, 0, {
+                        text: 'Reporte de Finanzas',
+                        style: 'header',
+                        alignment: 'center',
+                        margin: [0, 0, 0, 10]
+                    });
                 }
             }
         ],
@@ -214,109 +415,601 @@ $(document).ready(function() {
             $('.dataTables_filter label').contents().filter(function() {
                 return this.nodeType === 3;
             }).remove();
-        },
-        drawCallback: function() {
-            $('#registrosMostrados').text(this.api().rows({search: 'applied'}).count());
         }
     });
-    
-    // Aplicar filtros
-    $('#filtroTitulo').on('keyup', function() {
+
+    // Inicializar gráficos
+    var statusChart = initStatusChart();
+    var costoChart = initCostoChart();
+
+    // Función para inicializar el gráfico de status
+    function initStatusChart() {
+        var ctx = document.getElementById('statusChart').getContext('2d');
+        return new Chart(ctx, {
+            type: 'pie',
+            data: getChartData('status'),
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: 'var(--text-primary)',
+                            font: {
+                                family: 'Rajdhani, sans-serif',
+                                size: 14
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'var(--card-bg)',
+                        titleColor: 'var(--text-primary)',
+                        bodyColor: 'var(--text-primary)',
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw} (${context.formattedValue}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Función para inicializar el gráfico de costos
+    function initCostoChart() {
+        var ctx = document.getElementById('costoChart').getContext('2d');
+        return new Chart(ctx, {
+            type: 'bar',
+            data: getChartData('costo'),
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            color: 'var(--text-primary)',
+                            font: {
+                                family: 'Rajdhani, sans-serif',
+                                size: 12
+                            }
+                        },
+                        grid: {
+                            color: 'var(--border-glow)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: 'var(--text-primary)',
+                            font: {
+                                family: 'Rajdhani, sans-serif',
+                                size: 12
+                            }
+                        },
+                        grid: {
+                            color: 'var(--border-glow)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'var(--card-bg)',
+                        titleColor: 'var(--text-primary)',
+                        bodyColor: 'var(--text-primary)',
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Función para obtener datos para los gráficos
+    function getChartData(type) {
+        var filteredData = table.rows({search: 'applied'}).data();
+        var labels = [];
+        var values = [];
+        var backgroundColors = [];
+
+        if (type === 'status') {
+            var statuses = ['Pendiente', 'Pagado'];
+            var colors = {
+                'Pendiente': 'rgba(255, 193, 7, 0.8)',
+                'Pagado': 'rgba(25, 135, 84, 0.8)'
+            };
+            statuses.forEach(function(status) {
+                var count = 0;
+                filteredData.each(function(row) {
+                    if (row[8].includes(status)) count++;
+                });
+                if (count > 0) {
+                    labels.push(status);
+                    values.push(count);
+                    backgroundColors.push(colors[status]);
+                }
+            });
+        } else if (type === 'costo') {
+            var ranges = ['0-1000', '1001-5000', '5001-10000', '>10000'];
+            var colors = ['rgba(25, 135, 84, 0.8)', 'rgba(13, 110, 253, 0.8)', 'rgba(255, 193, 7, 0.8)', 'rgba(220, 53, 69, 0.8)'];
+            ranges.forEach(function(range, index) {
+                var count = 0;
+                filteredData.each(function(row) {
+                    var costo = parseFloat($(row[3]).text().replace('$', '')) || 0;
+                    if (range === '0-1000' && costo <= 1000) count++;
+                    else if (range === '1001-5000' && costo > 1000 && costo <= 5000) count++;
+                    else if (range === '5001-10000' && costo > 5000 && costo <= 10000) count++;
+                    else if (range === '>10000' && costo > 10000) count++;
+                });
+                if (count > 0) {
+                    labels.push(range);
+                    values.push(count);
+                    backgroundColors.push(colors[index]);
+                }
+            });
+        }
+
+        return {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: backgroundColors,
+                borderColor: backgroundColors,
+                borderWidth: 1
+            }]
+        };
+    }
+
+    // Función para actualizar todos los gráficos
+    function updateCharts() {
+        statusChart.data = getChartData('status');
+        statusChart.update();
+        costoChart.data = getChartData('costo');
+        costoChart.update();
+    }
+
+    // Aplicar filtros y actualizar gráficos
+    $('#filtroClaveInmueble').on('keyup', function() {
         table.column(1).search(this.value).draw();
+        updateCharts();
     });
-    
-    $('#filtroDescripcion').on('keyup', function() {
-        table.column(7).search(this.value).draw();
-    });
-    
-    $('#filtroTipo').on('change', function() {
+
+    $('#filtroConcepto').on('keyup', function() {
         table.column(2).search(this.value).draw();
+        updateCharts();
     });
-    
-    // Botón personalizado para exportar
+
+    $('#filtroStatus').on('change', function() {
+        table.column(8).search(this.value).draw();
+        updateCharts();
+    });
+
+    $('#filtroProveedor').on('keyup', function() {
+        table.column(9).search(this.value).draw();
+        updateCharts();
+    });
+
+    // Actualizar contador de registros mostrados
+    table.on('draw', function() {
+        $('#registrosMostrados').text(table.rows({search: 'applied'}).count());
+    });
+
+    // Botones personalizados para exportar
     $('#btnExportExcel').on('click', function() {
         table.button('.buttons-excel').trigger();
     });
+
+    $('#btnExportPDF').on('click', function() {
+        table.button('.buttons-pdf').trigger();
+    });
+
+    // Actualizar gráficos al cargar la página
+    updateCharts();
 });
 </script>
 
 <style>
-    body {
-        background-color: #f8f9fa;
+    /* ======================================================
+       LISTADO CYBERPUNK LIMPIO - VEGAS CORPORATIVO
+       Diseño minimalista, elegante, sin distracciones
+       ====================================================== */
+
+    /* Variables CSS Limpias - Tema Oscuro por Defecto */
+    :root {
+        color-scheme: dark;
+        --primary-neon: #00BCC4;
+        --secondary-neon: #FF2099;
+        --text-primary: #E0E6ED;
+        --text-secondary: rgba(224, 230, 237, 0.7);
+        --bg-dark: #0A0F14;
+        --card-bg: #0F1928;
+        --input-bg: #121E30;
+        --border-glow: rgba(0, 188, 196, 0.15);
+        --shadow-glow: rgba(0, 188, 196, 0.1);
+        --success: #4CAF50;
+        --warning: #FF9800;
+        --error: #FF2099;
     }
-    .card {
+
+    /* Adaptación para Tema Claro */
+    @media (prefers-color-scheme: light) {
+        :root {
+            color-scheme: light;
+            --primary-neon: #00A0A8;
+            --secondary-neon: #E00080;
+            --text-primary: #1A1F24;
+            --text-secondary: rgba(26, 31, 36, 0.7);
+            --bg-dark: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --input-bg: #F0F4F8;
+            --border-glow: rgba(0, 0, 0, 0.1);
+            --shadow-glow: rgba(0, 0, 0, 0.05);
+            --success: #388E3C;
+            --warning: #F57C00;
+            --error: #D81B60;
+        }
+
+        .cyber-title {
+            text-shadow: 0 0 6px rgba(0, 160, 168, 0.3);
+        }
+
+        .header-actions .btn {
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .header-actions .btn:hover {
+            background: rgba(0, 160, 168, 0.1);
+        }
+
+        .cyber-alert-error {
+            background: rgba(216, 27, 96, 0.05);
+            border-color: rgba(216, 27, 96, 0.2);
+        }
+
+        .form-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .btn-save {
+            color: #FFFFFF;
+        }
+
+        .btn-cancel {
+            color: var(--text-secondary);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(216, 27, 96, 0.05);
+            color: var(--secondary-neon);
+            border-color: var(--secondary-neon);
+        }
+    }
+
+    /* Contenedor Principal */
+    .cyber-finanza-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem;
+        background: var(--bg-dark);
+        min-height: 100vh;
+        font-family: 'Rajdhani', sans-serif;
+        position: relative;
+    }
+
+    /* Header Minimalista */
+    .cyber-maintenance-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 1.2rem 1.5rem;
+        background: var(--card-bg);
         border-radius: 12px;
-        overflow: hidden;
-        border: none;
+        border: 1px solid var(--border-glow);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     }
-    .table {
+
+    .header-content {
+        flex: 1;
+    }
+
+    .cyber-title {
+        font-family: 'Orbitron', monospace;
+        font-size: 1.6rem;
+        color: var(--primary-neon);
+        margin: 0;
+        letter-spacing: 1.5px;
+        font-weight: 700;
+        text-shadow: 0 0 6px rgba(0, 188, 196, 0.2);
+    }
+
+    .cyber-subtitle {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin: 0.1rem 0 0 0;
+        letter-spacing: 0.5px;
+        font-weight: 400;
+    }
+
+    .header-actions .btn {
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .header-actions .btn:hover {
+        border-color: var(--primary-neon);
+        background: rgba(0, 188, 196, 0.1);
+        transform: translateY(-1px);
+    }
+
+    /* Alerta de Error/No Datos */
+    .cyber-alert-error {
+        background: rgba(255, 32, 121, 0.08);
+        border: 1px solid rgba(255, 32, 121, 0.2);
+        border-radius: 8px;
+        padding: 0.8rem 1rem;
+        margin-bottom: 1.2rem;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-weight: 500;
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Formulario de Filtros */
+    .cyber-maintenance-form {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-glow);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+        margin-bottom: 2rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-column {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .form-group {
+        position: relative;
         margin-bottom: 0;
     }
+
+    .form-label {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.4rem;
+        letter-spacing: 0.3px;
+        display: flex;
+        align-items: center;
+        opacity: 0.9;
+    }
+
+    .form-label i {
+        margin-right: 0.4rem;
+        font-size: 0.9rem;
+        width: 14px;
+        opacity: 0.8;
+    }
+
+    .form-select,
+    .form-control {
+        background: var(--input-bg);
+        border: 1px solid var(--border-glow);
+        border-radius: 6px;
+        color: var(--text-primary);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.9rem;
+        padding: 0.6rem 0.8rem;
+        transition: all 0.3s ease;
+        height: auto;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-select:focus,
+    .form-control:focus {
+        border-color: var(--primary-neon);
+        box-shadow: 0 0 0 0.15rem rgba(0, 188, 196, 0.1), inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-select option {
+        background: var(--bg-dark);
+        color: var(--text-primary);
+        padding: 0.5rem;
+    }
+
+    .form-control::placeholder {
+        color: var(--text-secondary);
+    }
+
+    .input-group-text {
+        background: var(--input-bg);
+        border: 1px solid var(--border-glow);
+        color: var(--text-primary);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.9rem;
+        border-radius: 6px 0 0 6px;
+    }
+
+    .input-group .form-control {
+        border-radius: 0 6px 6px 0;
+    }
+
+    /* Tabla */
+    .table {
+        margin-bottom: 0;
+        color: var(--text-primary);
+    }
+
     .table thead th {
-        border-bottom: 2px solid #dee2e6;
+        background: var(--card-bg);
+        border-bottom: 1px solid var(--border-glow);
         text-transform: uppercase;
         font-size: 0.8rem;
         letter-spacing: 0.5px;
-        background-color: #343a40;
-        color: white;
+        color: var(--text-primary);
     }
+
     .table tbody tr {
+        background: var(--card-bg);
         transition: all 0.2s ease;
     }
+
     .table tbody tr:hover {
+        background: rgba(0, 188, 196, 0.1);
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 8px var(--shadow-glow);
     }
+
     .badge {
         font-weight: 500;
         padding: 0.4em 0.8em;
+        border-radius: 4px;
     }
-    .input-group-text {
-        background-color: white;
-        border-right: none;
+
+    .card-footer {
+        background: var(--card-bg);
+        border-top: 1px solid var(--border-glow);
+        color: var(--text-secondary);
     }
-    .form-control.border-start-0 {
-        border-left: none;
-    }
+
+    /* Botones de Exportación */
     .dt-buttons {
         display: none;
     }
-    #btnExportExcel {
-        border-radius: 8px;
-        padding: 0.375rem 0.75rem;
-        font-size: 0.875rem;
-        transition: all 0.2s;
+
+    #btnExportExcel, #btnExportPDF {
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
     }
-    @media (max-width: 768px) {
-        .card-header {
+
+    #btnExportExcel {
+        background: var(--success);
+        color: var(--bg-dark);
+    }
+
+    #btnExportPDF {
+        background: var(--error);
+        color: var(--bg-dark);
+    }
+
+    #btnExportExcel:hover, #btnExportPDF:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 18px var(--shadow-glow);
+    }
+
+    /* Estilos para Gráficos */
+    .chart-card {
+        height: 100%;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 100%;
+        min-height: 250px;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+        }
+
+        .cyber-maintenance-header {
             flex-direction: column;
-            align-items: flex-start;
+            gap: 0.8rem;
+            text-align: center;
+            padding: 1rem;
         }
-        .card-header h5 {
-            margin-bottom: 10px;
-        }
+
         .table-responsive {
             border: none;
         }
     }
-    .text-success {
-        color: #2e8b57 !important;
+
+    @media (max-width: 768px) {
+        .cyber-finanza-container {
+            padding: 0.5rem;
+        }
+
+        .cyber-maintenance-form {
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .cyber-maintenance-header {
+            padding: 0.8rem;
+        }
+
+        .cyber-title {
+            font-size: 1.4rem;
+        }
+
+        .cyber-subtitle {
+            font-size: 0.8rem;
+        }
+
+        .form-label {
+            font-size: 0.8rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .form-select,
+        .form-control {
+            padding: 0.55rem 0.7rem;
+            font-size: 0.85rem;
+        }
     }
-    .text-danger {
-        color: #c23b22 !important;
-    }
-    .btn-outline-primary.rounded-circle {
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .dataTables_wrapper .dataTables_filter {
-        margin-bottom: 10px;
-    }
-    .dataTables_wrapper .dataTable {
-        width: 100% !important;
+
+    @media (max-width: 480px) {
+        .cyber-maintenance-header {
+            padding: 0.6rem;
+        }
+
+        .cyber-maintenance-form {
+            padding: 1rem;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
     }
 </style>
 {% endblock %}

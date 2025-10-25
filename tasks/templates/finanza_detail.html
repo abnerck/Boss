@@ -2,292 +2,1029 @@
 {% load widget_tweaks %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <div class="card border-0 shadow-lg animate__animated animate__fadeInDown rounded-4">
-                <!-- Card Header -->
-                <div class="card-header bg-primary text-white py-4 rounded-top-4 d-flex justify-content-between align-items-center"
-                    style="background: linear-gradient(135deg, #1e88e5 0%, #0d47a1 100%);">
-                    <h2 class="h4 mb-0 fw-bold">
-                        <i class="fas fa-money-check-alt me-2"></i> 
-                        {% if edit_mode %}Editar{% else %}Detalles del{% endif %} Registro Financiero
-                    </h2>
-                    <span class="badge bg-light text-primary px-3 py-2 rounded-pill fs-6">
-                        {{ finanza.get_tipo_display }}
-                    </span>
-                </div>
+<div class="cyber-transaction-container">
+    <!-- Header Limpio y Profesional -->
+    <div class="cyber-maintenance-header">
+        <div class="header-content">
+            <h2 class="cyber-title">
+                <i class="fas fa-money-check-alt me-2"></i>
+                {% if edit_mode %}Editar Transacción{% else %}Detalles de la Transacción{% endif %}
+            </h2>
+            <p class="cyber-subtitle">Gestión eficiente de registros financieros - Vegas Corporativo</p>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'finanzas' %}" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-list me-1"></i>Volver a la Lista
+            </a>
+        </div>
+    </div>
 
-                <!-- Card Body -->
-                <div class="card-body px-5 py-4">
-                    {% if edit_mode and form %}
-                    <form method="post" class="needs-validation" novalidate>
-                        {% csrf_token %}
-                        
-                        {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            {% for error in form.non_field_errors %}
-                                {{ error }}
-                            {% endfor %}
+    <!-- Mensaje de Error (si existe) -->
+    {% if form.errors %}
+    <div class="cyber-alert-error">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        Por favor corrige los errores en el formulario.
+    </div>
+    {% endif %}
+
+    <div class="cyber-maintenance-form">
+        {% if edit_mode and form %}
+        <!-- Formulario de Edición -->
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <div class="form-grid">
+                <!-- Columna Izquierda -->
+                <div class="form-column">
+                    <!-- Clave Inmueble -->
+                    <div class="form-group">
+                        <label for="{{ form.clave_inmueble.id_for_label }}" class="form-label">
+                            <i class="fas fa-home me-1"></i>Clave Inmueble <span class="required">*</span>
+                        </label>
+                        {% render_field form.clave_inmueble class="form-select" required="required" %}
+                        {% if form.clave_inmueble.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.clave_inmueble.errors.0 }}
                         </div>
                         {% endif %}
+                    </div>
 
-                        <div class="row g-4">
-                            <!-- Fila 1 -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="{{ form.titulo.id_for_label }}" class="form-label fw-bold">
-                                        <i class="fas fa-heading me-2 text-primary"></i>Título
-                                    </label>
-                                    {{ form.titulo|add_class:"form-control border-2" }}
-                                    {% for error in form.titulo.errors %}
-                                        <div class="invalid-feedback d-block">{{ error }}</div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="{{ form.tipo.id_for_label }}" class="form-label fw-bold">
-                                        <i class="fas fa-exchange-alt me-2 text-primary"></i>Tipo
-                                    </label>
-                                    {{ form.tipo|add_class:"form-select border-2" }}
-                                </div>
-                            </div>
-
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="{{ form.categoria.id_for_label }}" class="form-label fw-bold">
-                                        <i class="fas fa-tags me-2 text-primary"></i>Categoría
-                                    </label>
-                                    {{ form.categoria|add_class:"form-select border-2" }}
-                                </div>
-                            </div>
-
-                            <!-- Fila 2 -->
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="{{ form.monto.id_for_label }}" class="form-label fw-bold">
-                                        <i class="fas fa-money-bill-wave me-2 text-primary"></i>Monto
-                                    </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">$</span>
-                                        {{ form.monto|add_class:"form-control border-2" }}
-                                    </div>
-                                    {% for error in form.monto.errors %}
-                                        <div class="invalid-feedback d-block">{{ error }}</div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="{{ form.fecha.id_for_label }}" class="form-label fw-bold">
-                                        <i class="fas fa-calendar-alt me-2 text-primary"></i>Fecha
-                                    </label>
-                                    {{ form.fecha|attr:"type:date"|add_class:"form-control border-2" }}
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label class="form-label fw-bold">
-                                        <i class="fas fa-user me-2 text-primary"></i>Usuario
-                                    </label>
-                                    <input type="text" class="form-control border-2 bg-light"
-                                        value="{{ finanza.user.get_full_name|default:finanza.user.username }}" readonly>
-                                </div>
-                            </div>
-
-                            <!-- Fila 3 -->
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <label for="{{ form.descripcion.id_for_label }}" class="form-label fw-bold">
-                                        <i class="fas fa-align-left me-2 text-primary"></i>Descripción
-                                    </label>
-                                    {{ form.descripcion|add_class:"form-control border-2"|attr:"rows:3" }}
-                                </div>
-                            </div>
+                    <!-- Concepto -->
+                    <div class="form-group">
+                        <label for="{{ form.concepto.id_for_label }}" class="form-label">
+                            <i class="fas fa-heading me-1"></i>Concepto <span class="required">*</span>
+                        </label>
+                        {% render_field form.concepto class="form-control" placeholder="Ej: Pago de servicios" required="required" %}
+                        {% if form.concepto.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.concepto.errors.0 }}
                         </div>
+                        {% endif %}
+                    </div>
 
-                        <div class="d-flex justify-content-between mt-4 pt-3 border-top">
-                            <a href="{% url 'finanza_detail' finanza.id %}" class="btn btn-secondary px-4">
-                                <i class="fas fa-times me-2"></i>Cancelar
-                            </a>
-                            <button type="submit" class="btn btn-success px-4">
-                                <i class="fas fa-save me-2"></i>Guardar Cambios
-                            </button>
+                    <!-- Costo -->
+                    <div class="form-group">
+                        <label for="{{ form.costo.id_for_label }}" class="form-label">
+                            <i class="fas fa-money-bill-wave me-1"></i>Costo <span class="required">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            {% render_field form.costo class="form-control" placeholder="0.00" step="0.01" required="required" %}
                         </div>
-                    </form>
-
-                    {% else %}
-                    <!-- Vista de detalles -->
-                    <div class="row g-4">
-                        <!-- Fila 1 -->
-                        <div class="col-md-6">
-                            <div class="detail-card bg-light p-3 rounded-3 h-100">
-                                <h5 class="fw-bold text-muted mb-3">
-                                    <i class="fas fa-heading me-2 text-primary"></i>Título
-                                </h5>
-                                <p class="fs-5">{{ finanza.titulo }}</p>
-                            </div>
+                        {% if form.costo.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.costo.errors.0 }}
                         </div>
+                        {% endif %}
+                    </div>
 
-                        <div class="col-md-3">
-                            <div class="detail-card bg-light p-3 rounded-3 h-100">
-                                <h5 class="fw-bold text-muted mb-3">
-                                    <i class="fas fa-exchange-alt me-2 text-primary"></i>Tipo
-                                </h5>
-                                <p>{{ finanza.get_tipo_display }}</p>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="detail-card bg-light p-3 rounded-3 h-100">
-                                <h5 class="fw-bold text-muted mb-3">
-                                    <i class="fas fa-tags me-2 text-primary"></i>Categoría
-                                </h5>
-                                <p>{{ finanza.categoria|default:"Sin categoría" }}</p>
-                            </div>
-                        </div>
-
-                        <!-- Fila 2 -->
-                        <div class="col-md-4">
-                            <div class="detail-card bg-light p-3 rounded-3 h-100">
-                                <h5 class="fw-bold text-muted mb-3">
-                                    <i class="fas fa-money-bill-wave me-2 text-primary"></i>Monto
-                                </h5>
-                                <p class="fs-5 {% if finanza.tipo == 'Ingreso' %}text-success{% else %}text-danger{% endif %} fw-bold">
-                                    ${{ finanza.monto|floatformat:2 }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="detail-card bg-light p-3 rounded-3 h-100">
-                                <h5 class="fw-bold text-muted mb-3">
-                                    <i class="fas fa-calendar-alt me-2 text-primary"></i>Fecha
-                                </h5>
-                                <p>{{ finanza.fecha|date:"d/m/Y" }}</p>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="detail-card bg-light p-3 rounded-3 h-100">
-                                <h5 class="fw-bold text-muted mb-3">
-                                    <i class="fas fa-user me-2 text-primary"></i>Registrado por
-                                </h5>
-                                <p>{{ finanza.user.get_full_name|default:finanza.user.username }}</p>
-                            </div>
-                        </div>
-
-                        <!-- Fila 3 -->
-                        <div class="col-12">
-                            <div class="detail-card bg-light p-3 rounded-3">
-                                <h5 class="fw-bold text-muted mb-3">
-                                    <i class="fas fa-align-left me-2 text-primary"></i>Descripción
-                                </h5>
-                                <div class="text-muted">{{ finanza.descripcion|default:"Sin descripción"|linebreaks }}
-                                </div>
-                            </div>
+                    <!-- IVA -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-money-bill-wave me-1"></i>IVA (16%)
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="text" class="form-control" id="ivaDisplay" value="{{ finanza.iva|floatformat:2 }}" readonly>
                         </div>
                     </div>
-                    {% endif %}
+
+                    <!-- Total -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-money-bill-wave me-1"></i>Total
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="text" class="form-control" id="totalDisplay" value="{{ finanza.total|floatformat:2 }}" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Solicita -->
+                    <div class="form-group">
+                        <label for="{{ form.solicita.id_for_label }}" class="form-label">
+                            <i class="fas fa-user me-1"></i>Solicita <span class="required">*</span>
+                        </label>
+                        {% render_field form.solicita class="form-control" placeholder="Nombre de quien solicita" required="required" %}
+                        {% if form.solicita.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.solicita.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Autoriza -->
+                    <div class="form-group">
+                        <label for="{{ form.autoriza.id_for_label }}" class="form-label">
+                            <i class="fas fa-user-check me-1"></i>Autoriza
+                        </label>
+                        {% render_field form.autoriza class="form-control" placeholder="Nombre de quien autoriza (opcional)" %}
+                        {% if form.autoriza.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.autoriza.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
 
-                <!-- Card Footer -->
-                <div class="card-footer bg-light px-4 py-3 d-flex justify-content-between align-items-center">
-                    <a href="{% url 'finanzas' %}" class="btn btn-outline-primary">
-                        <i class="fas fa-arrow-left me-2"></i> Volver a la lista
-                    </a>
-
-                    <div class="d-flex gap-2">
-                        {% if not edit_mode %}
-                        <a href="{% url 'finanza_detail' finanza.id %}?edit=true" class="btn btn-warning">
-                            <i class="fas fa-edit me-2"></i> Editar
-                        </a>
+                <!-- Columna Derecha -->
+                <div class="form-column">
+                    <!-- Status -->
+                    <div class="form-group">
+                        <label for="{{ form.status.id_for_label }}" class="form-label">
+                            <i class="fas fa-info-circle me-1"></i>Status
+                        </label>
+                        {% render_field form.status class="form-select" %}
+                        {% if form.status.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.status.errors.0 }}
+                        </div>
                         {% endif %}
-                        <form method="post" action="{% url 'delete_finanza' finanza.id %}">
-                            {% csrf_token %}
-                            <button type="button" class="btn btn-outline-danger" onclick="confirmDelete()">
-                                <i class="fas fa-trash-alt me-2"></i> Eliminar
-                            </button>
-                        </form>
+                    </div>
+
+                    <!-- Proveedor -->
+                    <div class="form-group">
+                        <label for="{{ form.proveedor.id_for_label }}" class="form-label">
+                            <i class="fas fa-store me-1"></i>Proveedor
+                        </label>
+                        {% render_field form.proveedor class="form-control" placeholder="Nombre del proveedor (opcional)" %}
+                        {% if form.proveedor.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.proveedor.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Factura -->
+                    <div class="form-group">
+                        <label for="{{ form.factura.id_for_label }}" class="form-label">
+                            <i class="fas fa-file-invoice me-1"></i>Factura
+                        </label>
+                        {% render_field form.factura class="form-control" placeholder="Número de factura (opcional)" %}
+                        {% if form.factura.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.factura.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Cuenta Bancaria -->
+                    <div class="form-group">
+                        <label for="{{ form.cta_bancaria.id_for_label }}" class="form-label">
+                            <i class="fas fa-credit-card me-1"></i>Cuenta Bancaria
+                        </label>
+                        {% render_field form.cta_bancaria class="form-control" placeholder="Número de cuenta (opcional)" %}
+                        {% if form.cta_bancaria.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.cta_bancaria.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- CLABE -->
+                    <div class="form-group">
+                        <label for="{{ form.clabe.id_for_label }}" class="form-label">
+                            <i class="fas fa-university me-1"></i>CLABE
+                        </label>
+                        {% render_field form.clabe class="form-control" placeholder="CLABE interbancaria (opcional)" %}
+                        {% if form.clabe.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.clabe.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Banco -->
+                    <div class="form-group">
+                        <label for="{{ form.banco.id_for_label }}" class="form-label">
+                            <i class="fas fa-bank me-1"></i>Banco
+                        </label>
+                        {% render_field form.banco class="form-control" placeholder="Nombre del banco (opcional)" %}
+                        {% if form.banco.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.banco.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Nombre del Titular -->
+                    <div class="form-group">
+                        <label for="{{ form.nombre.id_for_label }}" class="form-label">
+                            <i class="fas fa-user me-1"></i>Nombre del Titular
+                        </label>
+                        {% render_field form.nombre class="form-control" placeholder="Nombre del titular (opcional)" %}
+                        {% if form.nombre.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.nombre.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- RFC -->
+                    <div class="form-group">
+                        <label for="{{ form.rfc.id_for_label }}" class="form-label">
+                            <i class="fas fa-id-card me-1"></i>RFC
+                        </label>
+                        {% render_field form.rfc class="form-control" placeholder="RFC del titular (opcional)" %}
+                        {% if form.rfc.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.rfc.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Observaciones -->
+                    <div class="form-group">
+                        <label for="{{ form.observaciones.id_for_label }}" class="form-label">
+                            <i class="fas fa-align-left me-1"></i>Observaciones
+                        </label>
+                        <div class="textarea-wrapper">
+                            {% render_field form.observaciones class="form-control" rows="3" placeholder="Detalles adicionales (opcional)" maxlength="500" %}
+                            <div class="char-counter">
+                                <span id="char-count">0</span>/<span class="counter-max">500</span>
+                            </div>
+                        </div>
+                        {% if form.observaciones.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.observaciones.errors.0 }}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
+
+            <!-- Barra de Acciones -->
+            <div class="form-actions">
+                <a href="{% url 'finanza_detail' finanza.id %}" class="btn btn-cancel">
+                    <i class="fas fa-times me-2"></i>Cancelar
+                </a>
+                <button type="submit" class="btn btn-save">
+                    <i class="fas fa-save me-2"></i>Guardar Cambios
+                    <span class="btn-status d-none">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        Guardando...
+                    </span>
+                </button>
+            </div>
+        </form>
+        {% else %}
+        <!-- Vista de Detalles -->
+        <div class="form-grid">
+            <!-- Columna Izquierda -->
+            <div class="form-column">
+                <div class="detail-card">
+                    <h5 class="detail-title"><i class="fas fa-home me-2"></i>Clave Inmueble</h5>
+                    <p class="detail-text">{{ finanza.clave_inmueble }}</p>
+                </div>
+                <div class="detail-card">
+                    <h5 class="detail-title"><i class="fas fa-heading me-2"></i>Concepto</h5>
+                    <p class="detail-text">{{ finanza.concepto }}</p>
+                </div>
+                <div class="detail-card">
+                    <h5 class="detail-title"><i class="fas fa-money-bill-wave me-2"></i>Costo</h5>
+                    <p class="detail-text text-danger fw-bold">${{ finanza.costo|floatformat:2 }}</p>
+                </div>
+                <div class="detail-card">
+                    <h5 class="detail-title"><i class="fas fa-money-bill-wave me-2"></i>IVA (16%)</h5>
+                    <p class="detail-text">${{ finanza.iva|floatformat:2 }}</p>
+                </div>
+                <div class="detail-card">
+                    <h5 class="detail-title"><i class="fas fa-money-bill-wave me-2"></i>Total</h5>
+                    <p class="detail-text text-danger fw-bold">${{ finanza.total|floatformat:2 }}</p>
+                </div>
+                <div class="detail-card">
+                    <h5 class="detail-title"><i class="fas fa-user me-2"></i>Solicita</h5>
+                    <p class="detail-text">{{ finanza.solicita }}</p>
+                </div>
+                <div class="detail-card">
+                    <h5 class="detail-title"><i class="fas fa-user-check me-2"></i>Autoriza</h5>
+                    <p class="detail-text">{{ finanza.autoriza|default:"Sin autorizar" }}</p>
+                </div>
+            </div>
+            <!-- Columna Derecha -->
+            <div class="form-column">
+                <div class="detail-card">
+                    <h5 class="detail-title"><i class="fas fa-info-circle me-2"></i>Status</h5>
+                    <p class="detail-text">{{ finanza.status|default:"Sin estado" }}</p>
+                </div>
+                <div class="detail-card">
+                    <h5 class="detail-title"><i class="fas fa-store me-2"></i>Proveedor</h5>
+                    <p class="detail-text">{{ finanza.proveedor|default:"Sin proveedor" }}</p>
+                </div>
+                <div class="detail-card">
+                    <h5 class="detail-title"><i class="fas fa-file-invoice me-2"></i>Factura</h5>
+                    <p class="detail-text">{{ finanza.factura|default:"Sin factura" }}</p>
+                </div>
+                <div class="detail-card">
+                    <h5 class="detail-title"><i class="fas fa-credit-card me-2"></i>Cuenta Bancaria</h5>
+                    <p class="detail-text">{{ finanza.cta_bancaria|default:"Sin cuenta" }}</p>
+                </div>
+                <div class="detail-card">
+                    <h5 class="detail-title"><i class="fas fa-university me-2"></i>CLABE</h5>
+                    <p class="detail-text">{{ finanza.clabe|default:"Sin CLABE" }}</p>
+                </div>
+                <div class="detail-card">
+                    <h5 class="detail-title"><i class="fas fa-bank me-2"></i>Banco</h5>
+                    <p class="detail-text">{{ finanza.banco|default:"Sin banco" }}</p>
+                </div>
+                <div class="detail-card">
+                    <h5 class="detail-title"><i class="fas fa-user me-2"></i>Nombre del Titular</h5>
+                    <p class="detail-text">{{ finanza.nombre|default:"Sin titular" }}</p>
+                </div>
+                <div class="detail-card">
+                    <h5 class="detail-title"><i class="fas fa-id-card me-2"></i>RFC</h5>
+                    <p class="detail-text">{{ finanza.rfc|default:"Sin RFC" }}</p>
+                </div>
+                <div class="detail-card">
+                    <h5 class="detail-title"><i class="fas fa-calendar-alt me-2"></i>Fecha</h5>
+                    <p class="detail-text">{{ finanza.fecha|date:"d/m/Y" }}</p>
+                </div>
+                <div class="detail-card">
+                    <h5 class="detail-title"><i class="fas fa-user me-2"></i>Registrado por</h5>
+                    <p class="detail-text">{{ finanza.user.get_full_name|default:finanza.user.username }}</p>
+                </div>
+                <div class="detail-card">
+                    <h5 class="detail-title"><i class="fas fa-align-left me-2"></i>Observaciones</h5>
+                    <p class="detail-text">{{ finanza.observaciones|default:"Sin observaciones"|linebreaks }}</p>
+                </div>
+            </div>
         </div>
+
+        <!-- Barra de Acciones -->
+        <div class="form-actions">
+            <a href="{% url 'finanzas' %}" class="btn btn-cancel">
+                <i class="fas fa-arrow-left me-2"></i>Volver a la Lista
+            </a>
+            <div class="d-flex gap-2">
+                <a href="{% url 'finanza_detail' finanza.id %}?edit=true" class="btn btn-save">
+                    <i class="fas fa-edit me-2"></i>Editar
+                </a>
+                <form method="post" action="{% url 'delete_finanza' finanza.id %}">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-cancel" onclick="confirmDelete()">
+                        <i class="fas fa-trash-alt me-2"></i>Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validación del formulario
+    const form = document.querySelector('.needs-validation');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            let firstInvalid = null;
+
+            const requiredFields = form.querySelectorAll('[required]');
+            requiredFields.forEach(field => {
+                const value = field.value.trim();
+                if (!value) {
+                    field.classList.add('is-invalid');
+                    if (!firstInvalid) firstInvalid = field;
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault();
+                if (firstInvalid) {
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstInvalid.focus();
+                    firstInvalid.style.animation = 'shake 0.5s ease-in-out';
+                    setTimeout(() => {
+                        firstInvalid.style.animation = '';
+                    }, 500);
+                }
+                return false;
+            }
+
+            const submitBtn = form.querySelector('.btn-save');
+            if (submitBtn) {
+                submitBtn.innerHTML = `
+                    <span class="btn-status">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        Guardando...
+                    </span>
+                `;
+                submitBtn.disabled = true;
+            }
+        });
+
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                this.classList.remove('is-invalid');
+            });
+
+            input.addEventListener('focus', function() {
+                this.classList.remove('is-invalid');
+            });
+        });
+    }
+
+    // Contador de caracteres para observaciones
+    const observaciones = document.getElementById('id_observaciones');
+    const charCount = document.getElementById('char-count');
+    const maxLength = 500;
+
+    if (observaciones && charCount) {
+        function updateCounter() {
+            const length = observaciones.value.length;
+            charCount.textContent = length;
+
+            const percentage = (length / maxLength) * 100;
+            if (percentage > 90) {
+                charCount.style.color = '#FF2099';
+            } else if (percentage > 70) {
+                charCount.style.color = '#FF9800';
+            } else {
+                charCount.style.color = 'var(--primary-neon)';
+            }
+        }
+
+        observaciones.addEventListener('input', updateCounter);
+        updateCounter();
+    }
+
+    // Formato de costo y cálculo de IVA/Total
+    const costoField = document.getElementById('id_costo');
+    const ivaField = document.getElementById('ivaDisplay');
+    const totalField = document.getElementById('totalDisplay');
+
+    if (costoField && ivaField && totalField) {
+        function updateIvaTotal() {
+            let costo = parseFloat(costoField.value) || 0;
+            if (costo < 0) {
+                costo = 0;
+                costoField.value = '0.00';
+            }
+            const iva = costo * 0.16;
+            const total = costo + iva;
+            ivaField.value = iva.toFixed(2);
+            totalField.value = total.toFixed(2);
+        }
+
+        costoField.addEventListener('input', updateIvaTotal);
+        costoField.addEventListener('blur', function() {
+            if (this.value) {
+                this.value = parseFloat(this.value).toFixed(2);
+            }
+            updateIvaTotal();
+        });
+
+        updateIvaTotal();
+    }
+
+    // Confirmación de eliminación
     function confirmDelete() {
         if (confirm("⚠️ ¿Estás seguro de eliminar este registro financiero? Esta acción no se puede deshacer.")) {
             event.target.closest('form').submit();
         }
     }
-    
-    // Validación de formulario
-    (function() {
-        'use strict'
-        const forms = document.querySelectorAll('.needs-validation')
-        
-        Array.from(forms).forEach(form => {
-            form.addEventListener('submit', event => {
-                if (!form.checkValidity()) {
-                    event.preventDefault()
-                    event.stopPropagation()
-                }
-                
-                form.classList.add('was-validated')
-            }, false)
-        })
-    })()
+    window.confirmDelete = confirmDelete;
+
+    // Scroll suave al cargar
+    setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
+});
+
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+`;
+document.head.appendChild(style);
 </script>
 
 <style>
-    .card {
-        border-radius: 1rem;
+    /* ======================================================
+       FORMULARIO CYBERPUNK LIMPIO - VEGAS CORPORATIVO
+       Diseño minimalista, elegante, sin distracciones
+       ====================================================== */
+
+    /* Variables CSS Limpias - Tema Oscuro por Defecto */
+    :root {
+        color-scheme: dark;
+        --primary-neon: #00BCC4;
+        --secondary-neon: #FF2099;
+        --text-primary: #E0E6ED;
+        --text-secondary: rgba(224, 230, 237, 0.7);
+        --bg-dark: #0A0F14;
+        --card-bg: #0F1928;
+        --input-bg: #121E30;
+        --border-glow: rgba(0, 188, 196, 0.15);
+        --shadow-glow: rgba(0, 188, 196, 0.1);
+        --success: #4CAF50;
+        --warning: #FF9800;
+        --error: #FF2099;
+    }
+
+    /* Adaptación para Tema Claro */
+    @media (prefers-color-scheme: light) {
+        :root {
+            color-scheme: light;
+            --primary-neon: #00A0A8;
+            --secondary-neon: #E00080;
+            --text-primary: #1A1F24;
+            --text-secondary: rgba(26, 31, 36, 0.7);
+            --bg-dark: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --input-bg: #F0F4F8;
+            --border-glow: rgba(0, 0, 0, 0.1);
+            --shadow-glow: rgba(0, 0, 0, 0.05);
+            --success: #388E3C;
+            --warning: #F57C00;
+            --error: #D81B60;
+        }
+
+        .cyber-title {
+            text-shadow: 0 0 6px rgba(0, 160, 168, 0.3);
+        }
+
+        .header-actions .btn {
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .header-actions .btn:hover {
+            background: rgba(0, 160, 168, 0.1);
+        }
+
+        .cyber-alert-error {
+            background: rgba(216, 27, 96, 0.05);
+            border-color: rgba(216, 27, 96, 0.2);
+        }
+
+        .form-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .btn-save {
+            color: #FFFFFF;
+        }
+
+        .btn-cancel {
+            color: var(--text-secondary);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(216, 27, 96, 0.05);
+            color: var(--secondary-neon);
+            border-color: var(--secondary-neon);
+        }
+
+        .is-invalid {
+            background: rgba(216, 27, 96, 0.03) !important;
+        }
+
+        .char-counter {
+            color: var(--text-secondary);
+        }
+
+        #char-count {
+            color: var(--primary-neon);
+        }
+
+        .detail-card {
+            background: var(--card-bg);
+            border-color: var(--border-glow);
+        }
+    }
+
+    /* Contenedor Principal */
+    .cyber-transaction-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 1rem;
+        background: var(--bg-dark);
+        min-height: 100vh;
+        font-family: 'Rajdhani', sans-serif;
+        position: relative;
+    }
+
+    /* Header Minimalista */
+    .cyber-maintenance-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 1.2rem 1.5rem;
+        background: var(--card-bg);
+        border-radius: 12px;
+        border: 1px solid var(--border-glow);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .header-content {
+        flex: 1;
+    }
+
+    .cyber-title {
+        font-family: 'Orbitron', monospace;
+        font-size: 1.6rem;
+        color: var(--primary-neon);
+        margin: 0;
+        letter-spacing: 1.5px;
+        font-weight: 700;
+        text-shadow: 0 0 6px rgba(0, 188, 196, 0.2);
+    }
+
+    .cyber-subtitle {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin: 0.1rem 0 0 0;
+        letter-spacing: 0.5px;
+        font-weight: 400;
+    }
+
+    .header-actions .btn {
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
         transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    .card:hover {
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    .header-actions .btn:hover {
+        border-color: var(--primary-neon);
+        background: rgba(0, 188, 196, 0.1);
+        transform: translateY(-1px);
     }
 
+    /* Alerta de Error */
+    .cyber-alert-error {
+        background: rgba(255, 32, 121, 0.08);
+        border: 1px solid rgba(255, 32, 121, 0.2);
+        border-radius: 8px;
+        padding: 0.8rem 1rem;
+        margin-bottom: 1.2rem;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Formulario y Detalles */
+    .cyber-maintenance-form {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-glow);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+        margin-bottom: 2rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-column {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .form-group {
+        position: relative;
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.4rem;
+        letter-spacing: 0.3px;
+        display: flex;
+        align-items: center;
+        opacity: 0.9;
+    }
+
+    .form-label i {
+        margin-right: 0.4rem;
+        font-size: 0.9rem;
+        width: 14px;
+        opacity: 0.8;
+    }
+
+    .required {
+        color: var(--error);
+        margin-left: 0.2rem;
+        font-weight: 700;
+    }
+
+    .form-select,
+    .form-control {
+        background: var(--input-bg);
+        border: 1px solid var(--border-glow);
+        border-radius: 6px;
+        color: var(--text-primary);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.9rem;
+        padding: 0.6rem 0.8rem;
+        transition: all 0.3s ease;
+        height: auto;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-select:focus,
+    .form-control:focus {
+        border-color: var(--primary-neon);
+        box-shadow: 0 0 0 0.15rem rgba(0, 188, 196, 0.1), inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-select option {
+        background: var(--bg-dark);
+        color: var(--text-primary);
+        padding: 0.5rem;
+    }
+
+    .form-control::placeholder {
+        color: var(--text-secondary);
+    }
+
+    .form-control[rows="3"] {
+        resize: vertical;
+        min-height: 70px;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    .input-group-text {
+        background: var(--input-bg);
+        border: 1px solid var(--border-glow);
+        color: var(--text-primary);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.9rem;
+        border-radius: 6px 0 0 6px;
+    }
+
+    .input-group .form-control {
+        border-radius: 0 6px 6px 0;
+    }
+
+    .textarea-wrapper {
+        position: relative;
+    }
+
+    .char-counter {
+        position: absolute;
+        right: 0.8rem;
+        bottom: 0.4rem;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        pointer-events: none;
+    }
+
+    #char-count {
+        color: var(--primary-neon);
+        font-weight: 600;
+    }
+
+    .is-invalid {
+        border-color: var(--error) !important;
+        box-shadow: 0 0 0 0.15rem rgba(255, 32, 121, 0.15) !important;
+        background: rgba(255, 32, 121, 0.05) !important;
+    }
+
+    .invalid-feedback {
+        font-size: 0.8rem;
+        color: var(--error);
+        margin-top: 0.3rem;
+        font-weight: 500;
+        display: block;
+    }
+
+    /* Detalles */
     .detail-card {
-        transition: transform 0.3s ease;
-        border: 1px solid rgba(0, 0, 0, 0.05);
+        background: var(--card-bg);
+        border: 1px solid var(--border-glow);
+        border-radius: 8px;
+        padding: 1rem;
+        transition: all 0.3s ease;
     }
 
     .detail-card:hover {
         transform: translateY(-3px);
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        box-shadow: 0 4px 12px var(--shadow-glow);
     }
 
-    .form-control,
-    .form-select {
-        border-radius: 0.5rem;
-        border-width: 2px;
+    .detail-title {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
     }
 
-    .bg-light {
-        background-color: #f8fafc !important;
+    .detail-title i {
+        margin-right: 0.4rem;
+        font-size: 0.9rem;
+        opacity: 0.8;
     }
 
-    .input-group-text {
-        background-color: #e9ecef;
-        border: 2px solid #dee2e6;
+    .detail-text {
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        margin: 0;
+        line-height: 1.4;
     }
-    
-    .was-validated .form-control:invalid,
-    .was-validated .form-select:invalid {
-        border-color: #dc3545;
+
+    .detail-text.text-danger {
+        color: var(--error) !important;
     }
-    
-    .was-validated .form-control:valid,
-    .was-validated .form-select:valid {
-        border-color: #28a745;
+
+    /* Acciones */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-glow);
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        letter-spacing: 0.8px;
+        border-radius: 6px;
+        padding: 0.7rem 1.3rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        text-transform: uppercase;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, var(--primary-neon), var(--secondary-neon));
+        color: var(--bg-dark);
+        box-shadow: 0 3px 12px rgba(0, 188, 196, 0.25);
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 18px rgba(0, 188, 196, 0.35);
+        background: linear-gradient(135deg, var(--secondary-neon), var(--primary-neon));
+    }
+
+    .btn-cancel {
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1px solid var(--border-glow);
+        padding: 0.7rem 1.5rem;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255, 32, 121, 0.08);
+        color: var(--secondary-neon);
+        border-color: var(--secondary-neon);
+        transform: translateY(-1px);
+    }
+
+    .btn-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .spinner-border-sm {
+        width: 0.9rem;
+        height: 0.9rem;
+        border-width: 0.1em;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+        }
+
+        .cyber-maintenance-header {
+            flex-direction: column;
+            gap: 0.8rem;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .form-actions {
+            justify-content: center;
+            gap: 0.8rem;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: auto;
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .cyber-transaction-container {
+            padding: 0.5rem;
+        }
+
+        .cyber-maintenance-form {
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .cyber-maintenance-header {
+            padding: 0.8rem;
+        }
+
+        .cyber-title {
+            font-size: 1.4rem;
+        }
+
+        .cyber-subtitle {
+            font-size: 0.8rem;
+        }
+
+        .form-label,
+        .detail-title {
+            font-size: 0.8rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .form-select,
+        .form-control,
+        .detail-text {
+            padding: 0.55rem 0.7rem;
+            font-size: 0.85rem;
+        }
+
+        .form-control[rows="3"] {
+            min-height: 60px;
+        }
+
+        .char-counter {
+            font-size: 0.7rem;
+            right: 0.6rem;
+            bottom: 0.3rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .cyber-maintenance-header {
+            padding: 0.6rem;
+        }
+
+        .cyber-maintenance-form {
+            padding: 1rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
     }
 </style>
 {% endblock %}

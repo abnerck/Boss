@@ -1,6 +1,7 @@
-    {% extends 'base.html' %}
+{% extends 'base.html' %}
 
-    {% block content %}
+{% block content %}
+    
         <style>
             body { font-family: Arial, sans-serif; margin: 20px; }
             h1 { text-align: center; }
@@ -12,8 +13,7 @@
             .daily { background-color: #050606; }
             .biweekly { background-color: #1b1a19; }
         </style>
-    </head>
-    <body>
+
         <h1>Programa de Limpieza - Edificio BOSS</h1>
         <p>Esta vista organiza las actividades de limpieza por área, mostrando el nombre de la actividad y su periodicidad (incluyendo días específicos). Se incluye un registro sugerido con checkboxes para marcar completado. Las filas diarias están en azul claro, y quincenales en amarillo claro.</p>
 
@@ -38,7 +38,6 @@
                         <td>DIARIO</td>
                         <td><input type="checkbox"> Completado</td>
                     </tr>
-
                     <tr class="daily">
                         <td>AREA DE BASURA</td>
                         <td>DIARIO</td>
@@ -54,7 +53,6 @@
                         <td>MARTES Y VIERNES</td>
                         <td><input type="checkbox"> Completado</td>
                     </tr>
-                    
                     <tr>
                         <td>BOTES DE BASURA</td>
                         <td>LUNES Y MIERCOLES</td>
@@ -645,6 +643,12 @@
         </div>
 
         <p>Nota: Los estándares de limpieza generales (sin basura, sin polvo, etc.) aplican a todas las actividades. Para quincenales, anota la fecha de la última realización para rastreo.</p>
-    </body>
-    </html>
-    {% endblock %}
+
+    {% else %}
+        <div style="text-align: center; margin-top: 50px; color: red;">
+            <h2>🚫 ACCESO DENEGADO</h2>
+            <p>Esta página solo está disponible para <strong>Superusuarios</strong> y <strong>Abner</strong>.</p>
+            <a href="{% url 'home' %}" class="btn btn-primary">Volver al Inicio</a>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from decimal import Decimal 
 
 class Area(models.Model):
     nombre = models.CharField(max_length=100, unique=True)  # Ej: "Departamento 101"
@@ -61,17 +62,36 @@ class Limpieza(models.Model):
         return self.titulo
 
 class Finanza(models.Model):
-    titulo = models.CharField(max_length=100)
-    tipo = models.CharField(max_length=10)
-    categoria = models.CharField(max_length=50, blank=True, null=True)
-    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    clave_inmueble = models.CharField(max_length=50)
+    concepto = models.CharField(max_length=200)
+    costo = models.DecimalField(max_digits=10, decimal_places=2)
+    iva = models.DecimalField(max_digits=10, decimal_places=2, editable=False, default=0)
+    total = models.DecimalField(max_digits=10, decimal_places=2, editable=False, default=0)
+    solicita = models.CharField(max_length=100)
+    autoriza = models.CharField(max_length=100, blank=True, null=True)
     fecha = models.DateField(auto_now_add=True)
-    descripcion = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=50, blank=True, null=True)
+    proveedor = models.CharField(max_length=150, blank=True, null=True)
+    factura = models.CharField(max_length=100, blank=True, null=True)
+    observaciones = models.TextField(blank=True, null=True)
+    cta_bancaria = models.CharField(max_length=20, blank=True, null=True)
+    clabe = models.CharField(max_length=18, blank=True, null=True)
+    banco = models.CharField(max_length=100, blank=True, null=True)
+    nombre = models.CharField(max_length=150, blank=True, null=True)
+    rfc = models.CharField(max_length=13, blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    def save(self, *args, **kwargs):
+        # Convert float to Decimal for precise calculation
+        IVA_RATE = Decimal('0.16')
+        # Calculate IVA (16% of costo)
+        self.iva = (self.costo * IVA_RATE).quantize(Decimal('0.01'))
+        # Calculate total (costo + iva)
+        self.total = (self.costo + self.iva).quantize(Decimal('0.01'))
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.titulo} - {self.tipo} - ${self.monto}"
-    
+        return f"{self.clave_inmueble} - {self.concepto} - ${self.total}"
 
 class EntradaAlrededores(models.Model):
     nombre = models.CharField(max_length=200)          # PISO, TAPETE DE ENTRADA, etc.

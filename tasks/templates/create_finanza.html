@@ -2,163 +2,848 @@
 {% load widget_tweaks %}
 
 {% block content %}
-<div class="container py-3">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm rounded-3">
-                <div class="card-header bg-primary text-white py-2 rounded-top-3">
-                    <h3 class="h5 mb-0 text-center fw-bold">
-                        <i class="fas fa-coins me-1"></i>Nueva Transacción
-                    </h3>
-                </div>
+<div class="cyber-transaction-container">
+    <!-- Header Limpio y Profesional -->
+    <div class="cyber-maintenance-header">
+        <div class="header-content">
+            <h2 class="cyber-title">
+                <i class="fas fa-coins me-2"></i>Nueva Transacción
+            </h2>
+            <p class="cyber-subtitle">Registro rápido y eficiente - Vegas Corporativo</p>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'finanzas' %}" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-list me-1"></i>Ver Lista
+            </a>
+        </div>
+    </div>
 
-                <div class="card-body p-3">
-                    {% if form.errors %}
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle me-1"></i>
-                        <strong>Error!</strong> Por favor corrige los errores en el formulario.
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <!-- Mensaje de Error (si existe) -->
+    {% if form.errors %}
+    <div class="cyber-alert-error">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        Por favor corrige los errores en el formulario.
+    </div>
+    {% endif %}
+
+    <!-- Formulario Compacto y Limpio -->
+    <form method="post" class="cyber-maintenance-form" novalidate>
+        {% csrf_token %}
+        <div class="form-grid">
+            <!-- Columna Izquierda -->
+            <div class="form-column">
+                <!-- Clave Inmueble -->
+                <div class="form-group">
+                    <label for="id_clave_inmueble" class="form-label">
+                        <i class="fas fa-home me-1"></i>Clave Inmueble <span class="required">*</span>
+                    </label>
+                    <select name="clave_inmueble" class="form-select" id="id_clave_inmueble" required>
+                        <option value="" disabled selected>Selecciona una clave</option>
+                        <option value="boss8025">boss8025</option>
+                        <option value="C1438">C1438</option>
+                    </select>
+                    {% if form.clave_inmueble.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.clave_inmueble.errors.0 }}
                     </div>
                     {% endif %}
+                </div>
 
-                    <form method="post" class="needs-validation" novalidate>
-                        {% csrf_token %}
+                <!-- Concepto -->
+                <div class="form-group">
+                    <label for="id_concepto" class="form-label">
+                        <i class="fas fa-heading me-1"></i>Concepto <span class="required">*</span>
+                    </label>
+                    {% render_field form.concepto class="form-control" placeholder="Ej: Pago de servicios" required="required" %}
+                    {% if form.concepto.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.concepto.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
 
-                        <div class="mb-3">
-                            <label for="id_titulo" class="form-label fw-bold">
-                                <i class="fas fa-heading me-1 text-primary"></i>Título <span class="text-danger">*</span>
-                            </label>
-                            {% render_field form.titulo class="form-control" placeholder="Ej: Pago de nómina" required="required" %}
-                            {% if form.titulo.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.titulo.errors.0 }}
-                            </div>
-                            {% endif %}
+                <!-- Costo -->
+                <div class="form-group">
+                    <label for="id_costo" class="form-label">
+                        <i class="fas fa-money-bill-wave me-1"></i>Costo <span class="required">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        {% render_field form.costo class="form-control" placeholder="0.00" step="0.01" required="required" %}
+                    </div>
+                    {% if form.costo.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.costo.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Solicita -->
+                <div class="form-group">
+                    <label for="id_solicita" class="form-label">
+                        <i class="fas fa-user me-1"></i>Solicita <span class="required">*</span>
+                    </label>
+                    {% render_field form.solicita class="form-control" placeholder="Nombre de quien solicita" required="required" %}
+                    {% if form.solicita.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.solicita.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Autoriza -->
+                <div class="form-group">
+                    <label for="id_autoriza" class="form-label">
+                        <i class="fas fa-user-check me-1"></i>Autoriza
+                    </label>
+                    {% render_field form.autoriza class="form-control" placeholder="Nombre de quien autoriza (opcional)" %}
+                    {% if form.autoriza.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.autoriza.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Proveedor -->
+                <div class="form-group">
+                    <label for="id_proveedor" class="form-label">
+                        <i class="fas fa-store me-1"></i>Proveedor
+                    </label>
+                    {% render_field form.proveedor class="form-control" placeholder="Nombre del proveedor (opcional)" %}
+                    {% if form.proveedor.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.proveedor.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Columna Derecha -->
+            <div class="form-column">
+                <!-- Factura -->
+                <div class="form-group">
+                    <label for="id_factura" class="form-label">
+                        <i class="fas fa-file-invoice me-1"></i>Factura
+                    </label>
+                    {% render_field form.factura class="form-control" placeholder="Número de factura (opcional)" %}
+                    {% if form.factura.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.factura.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Observaciones -->
+                <div class="form-group">
+                    <label for="id_observaciones" class="form-label">
+                        <i class="fas fa-align-left me-1"></i>Observaciones
+                    </label>
+                    <div class="textarea-wrapper">
+                        {% render_field form.observaciones class="form-control" rows="3" placeholder="Detalles adicionales (opcional)" maxlength="500" %}
+                        <div class="char-counter">
+                            <span id="char-count">0</span>/<span class="counter-max">500</span>
                         </div>
+                    </div>
+                    {% if form.observaciones.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.observaciones.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
 
-                        <div class="row g-2">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-exchange-alt me-1 text-primary"></i>Tipo <span class="text-danger">*</span>
-                                </label>
-                                <div class="list-group">
-                                    <label class="list-group-item">
-                                        <input class="form-check-input me-2" type="radio" name="tipo" value="ING" required>
-                                        Ingresos
-                                    </label>
-                                    <label class="list-group-item">
-                                        <input class="form-check-input me-2" type="radio" name="tipo" value="EGR">
-                                        Egresos
-                                    </label>
-                                </div>
-                                {% if form.tipo.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ form.tipo.errors.0 }}
-                                </div>
-                                {% endif %}
-                            </div>
+                <!-- Cuenta Bancaria -->
+                <div class="form-group">
+                    <label for="id_cta_bancaria" class="form-label">
+                        <i class="fas fa-credit-card me-1"></i>Cuenta Bancaria
+                    </label>
+                    {% render_field form.cta_bancaria class="form-control" placeholder="Número de cuenta (opcional)" %}
+                    {% if form.cta_bancaria.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.cta_bancaria.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label for="id_categoria" class="form-label fw-bold">
-                                    <i class="fas fa-tags me-1 text-primary"></i>Categoría <span class="text-danger">*</span>
-                                </label>
-                                {% render_field form.categoria class="form-select" required="required" %}
-                                {% if form.categoria.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ form.categoria.errors.0 }}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
+                <!-- CLABE -->
+                <div class="form-group">
+                    <label for="id_clabe" class="form-label">
+                        <i class="fas fa-university me-1"></i>CLABE
+                    </label>
+                    {% render_field form.clabe class="form-control" placeholder="CLABE interbancaria (opcional)" %}
+                    {% if form.clabe.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.clabe.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
 
-                        <div class="mb-3">
-                            <label for="id_monto" class="form-label fw-bold">
-                                <i class="fas fa-money-bill-wave me-1 text-primary"></i>Monto <span class="text-danger">*</span>
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                {% render_field form.monto class="form-control" placeholder="0.00" step="0.01" required="required" %}
-                            </div>
-                            {% if form.monto.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.monto.errors.0 }}
-                            </div>
-                            {% endif %}
-                        </div>
+                <!-- Banco -->
+                <div class="form-group">
+                    <label for="id_banco" class="form-label">
+                        <i class="fas fa-bank me-1"></i>Banco
+                    </label>
+                    {% render_field form.banco class="form-control" placeholder="Nombre del banco (opcional)" %}
+                    {% if form.banco.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.banco.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
 
-                        <div class="mb-3">
-                            <label for="id_descripcion" class="form-label fw-bold">
-                                <i class="fas fa-align-left me-1 text-primary"></i>Descripción
-                            </label>
-                            {% render_field form.descripcion class="form-control" rows="2" placeholder="Descripción del movimiento" %}
-                        </div>
+                <!-- Nombre del Titular -->
+                <div class="form-group">
+                    <label for="id_nombre" class="form-label">
+                        <i class="fas fa-user me-1"></i>Nombre del Titular
+                    </label>
+                    {% render_field form.nombre class="form-control" placeholder="Nombre del titular (opcional)" %}
+                    {% if form.nombre.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.nombre.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
 
-                        <div class="d-grid mt-3 pt-2 border-top">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i>Guardar
-                            </button>
-                        </div>
-                    </form>
+                <!-- RFC -->
+                <div class="form-group">
+                    <label for="id_rfc" class="form-label">
+                        <i class="fas fa-id-card me-1"></i>RFC
+                    </label>
+                    {% render_field form.rfc class="form-control" placeholder="RFC del titular (opcional)" %}
+                    {% if form.rfc.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.rfc.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Status -->
+                <div class="form-group">
+                    <label for="id_status" class="form-label">
+                        <i class="fas fa-info-circle me-1"></i>Status
+                    </label>
+                    <select name="status" class="form-select" id="id_status">
+                        <option value="" selected>Selecciona un estado</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Completado">Completado</option>
+                    </select>
+                    {% if form.status.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.status.errors.0 }}
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- Barra de Acciones Limpia -->
+        <div class="form-actions">
+            <button type="button" class="btn btn-cancel" onclick="window.history.back()">
+                <i class="fas fa-times me-2"></i>Cancelar
+            </button>
+            <button type="submit" class="btn btn-save">
+                <i class="fas fa-save me-2"></i>Guardar Transacción
+                <span class="btn-status d-none">
+                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                    Guardando...
+                </span>
+            </button>
+        </div>
+    </form>
 </div>
 
 <style>
-    .card {
-        border-radius: 0.6rem;
+    /* ======================================================
+       FORMULARIO CYBERPUNK LIMPIO - VEGAS CORPORATIVO
+       Diseño minimalista, elegante, sin distracciones
+       ====================================================== */
+
+    /* Fuentes */
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+    /* Variables CSS Limpias - Tema Oscuro por Defecto */
+    :root {
+        color-scheme: dark;
+        --primary-neon: #00BCC4;
+        --secondary-neon: #FF2099;
+        --text-primary: #E0E6ED;
+        --text-secondary: rgba(224, 230, 237, 0.7);
+        --bg-dark: #0A0F14;
+        --card-bg: #0F1928;
+        --input-bg: #121E30;
+        --border-glow: rgba(0, 188, 196, 0.15);
+        --shadow-glow: rgba(0, 188, 196, 0.1);
+        --success: #4CAF50;
+        --warning: #FF9800;
+        --error: #FF2099;
     }
-    
-    .card-header {
-        padding: 0.7rem 1rem;
+
+    /* Adaptación para Tema Claro */
+    @media (prefers-color-scheme: light) {
+        :root {
+            color-scheme: light;
+            --primary-neon: #00A0A8;
+            --secondary-neon: #E00080;
+            --text-primary: #1A1F24;
+            --text-secondary: rgba(26, 31, 36, 0.7);
+            --bg-dark: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --input-bg: #F0F4F8;
+            --border-glow: rgba(0, 0, 0, 0.1);
+            --shadow-glow: rgba(0, 0, 0, 0.05);
+            --success: #388E3C;
+            --warning: #F57C00;
+            --error: #D81B60;
+        }
+
+        .cyber-title {
+            text-shadow: 0 0 6px rgba(0, 160, 168, 0.3);
+        }
+
+        .header-actions .btn {
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .header-actions .btn:hover {
+            background: rgba(0, 160, 168, 0.1);
+        }
+
+        .cyber-alert-error {
+            background: rgba(216, 27, 96, 0.05);
+            border-color: rgba(216, 27, 96, 0.2);
+        }
+
+        .form-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .btn-save {
+            color: #FFFFFF;
+        }
+
+        .btn-cancel {
+            color: var(--text-secondary);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(216, 27, 96, 0.05);
+            color: var(--secondary-neon);
+            border-color: var(--secondary-neon);
+        }
+
+        .is-invalid {
+            background: rgba(216, 27, 96, 0.03) !important;
+        }
+
+        .char-counter {
+            color: var(--text-secondary);
+        }
+
+        #char-count {
+            color: var(--primary-neon);
+        }
     }
-    
-    .list-group-item {
-        cursor: pointer;
+
+    /* Contenedor Principal Limpio */
+    .cyber-transaction-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 1rem;
+        background: var(--bg-dark);
+        min-height: 100vh;
+        font-family: 'Rajdhani', sans-serif;
+        position: relative;
+    }
+
+    /* Header Minimalista */
+    .cyber-maintenance-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 1.2rem 1.5rem;
+        background: var(--card-bg);
+        border-radius: 12px;
+        border: 1px solid var(--border-glow);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .header-content {
+        flex: 1;
+    }
+
+    .cyber-title {
+        font-family: 'Orbitron', monospace;
+        font-size: 1.6rem;
+        color: var(--primary-neon);
+        margin: 0;
+        letter-spacing: 1.5px;
+        font-weight: 700;
+        text-shadow: 0 0 6px rgba(0, 188, 196, 0.2);
+    }
+
+    .cyber-subtitle {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin: 0.1rem 0 0 0;
+        letter-spacing: 0.5px;
+        font-weight: 400;
+    }
+
+    .header-actions {
+        flex-shrink: 0;
+    }
+
+    .header-actions .btn {
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        border-radius: 6px;
         padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
-    
-    .list-group-item:hover {
-        background-color: #f8f9fa;
+
+    .header-actions .btn:hover {
+        border-color: var(--primary-neon);
+        background: rgba(0, 188, 196, 0.1);
+        transform: translateY(-1px);
     }
-    
-    .form-check-input:checked + .form-checked-content {
-        opacity: .5;
-    }
-    
-    .btn {
-        padding: 0.5rem;
+
+    /* Alerta de Error Minimalista */
+    .cyber-alert-error {
+        background: rgba(255, 32, 121, 0.08);
+        border: 1px solid rgba(255, 32, 121, 0.2);
+        border-radius: 8px;
+        padding: 0.8rem 1rem;
+        margin-bottom: 1.2rem;
+        color: var(--text-primary);
         font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Formulario Compacto */
+    .cyber-maintenance-form {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-glow);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+        margin-bottom: 2rem;
+    }
+
+    /* Grid Responsive */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-column {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    /* Grupos Compactos */
+    .form-group {
+        position: relative;
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.4rem;
+        letter-spacing: 0.3px;
+        display: flex;
+        align-items: center;
+        opacity: 0.9;
+    }
+
+    .form-label i {
+        margin-right: 0.4rem;
+        font-size: 0.9rem;
+        width: 14px;
+        opacity: 0.8;
+    }
+
+    .required {
+        color: var(--error);
+        margin-left: 0.2rem;
+        font-weight: 700;
+    }
+
+    .form-select,
+    .form-control {
+        background: var(--input-bg);
+        border: 1px solid var(--border-glow);
+        border-radius: 6px;
+        color: var(--text-primary);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.9rem;
+        padding: 0.6rem 0.8rem;
+        transition: all 0.3s ease;
+        height: auto;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-select:focus,
+    .form-control:focus {
+        border-color: var(--primary-neon);
+        box-shadow: 0 0 0 0.15rem rgba(0, 188, 196, 0.1), inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-select option {
+        background: var(--bg-dark);
+        color: var(--text-primary);
+        padding: 0.5rem;
+    }
+
+    .form-control::placeholder {
+        color: var(--text-secondary);
+    }
+
+    .form-control[rows="3"] {
+        resize: vertical;
+        min-height: 70px;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    .input-group-text {
+        background: var(--input-bg);
+        border: 1px solid var(--border-glow);
+        color: var(--text-primary);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.9rem;
+        border-radius: 6px 0 0 6px;
+    }
+
+    .input-group .form-control {
+        border-radius: 0 6px 6px 0;
+    }
+
+    .textarea-wrapper {
+        position: relative;
+    }
+
+    .char-counter {
+        position: absolute;
+        right: 0.8rem;
+        bottom: 0.4rem;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        pointer-events: none;
+    }
+
+    #char-count {
+        color: var(--primary-neon);
+        font-weight: 600;
+    }
+
+    .is-invalid {
+        border-color: var(--error) !important;
+        box-shadow: 0 0 0 0.15rem rgba(255, 32, 121, 0.15) !important;
+        background: rgba(255, 32, 121, 0.05) !important;
+    }
+
+    .invalid-feedback {
+        font-size: 0.8rem;
+        color: var(--error);
+        margin-top: 0.3rem;
+        font-weight: 500;
+        display: block;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-glow);
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        letter-spacing: 0.8px;
+        border-radius: 6px;
+        padding: 0.7rem 1.3rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        text-transform: uppercase;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, var(--primary-neon), var(--secondary-neon));
+        color: var(--bg-dark);
+        box-shadow: 0 3px 12px rgba(0, 188, 196, 0.25);
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 18px rgba(0, 188, 196, 0.35);
+        background: linear-gradient(135deg, var(--secondary-neon), var(--primary-neon));
+    }
+
+    .btn-cancel {
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1px solid var(--border-glow);
+        padding: 0.7rem 1.5rem;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255, 32, 121, 0.08);
+        color: var(--secondary-neon);
+        border-color: var(--secondary-neon);
+        transform: translateY(-1px);
+    }
+
+    .btn-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .spinner-border-sm {
+        width: 0.9rem;
+        height: 0.9rem;
+        border-width: 0.1em;
+    }
+
+    /* Responsive Optimizado */
+    @media (max-width: 992px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+        }
+
+        .cyber-maintenance-header {
+            flex-direction: column;
+            gap: 0.8rem;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .form-actions {
+            justify-content: center;
+            gap: 0.8rem;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: auto;
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .cyber-transaction-container {
+            padding: 0.5rem;
+        }
+
+        .cyber-maintenance-form {
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .cyber-maintenance-header {
+            padding: 0.8rem;
+        }
+
+        .cyber-title {
+            font-size: 1.4rem;
+        }
+
+        .cyber-subtitle {
+            font-size: 0.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.5rem;
+        }
+
+        .form-label {
+            font-size: 0.8rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .form-select,
+        .form-control {
+            padding: 0.55rem 0.7rem;
+            font-size: 0.85rem;
+        }
+
+        .form-control[rows="3"] {
+            min-height: 60px;
+        }
+
+        .char-counter {
+            font-size: 0.7rem;
+            right: 0.6rem;
+            bottom: 0.3rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .cyber-maintenance-header {
+            padding: 0.6rem;
+        }
+
+        .cyber-maintenance-form {
+            padding: 1rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
     }
 </style>
 
 <script>
-    (function() {
-        'use strict';
-        document.addEventListener('DOMContentLoaded', function() {
-            // Form validation
-            var forms = document.querySelectorAll('.needs-validation');
-            Array.prototype.slice.call(forms).forEach(function(form) {
-                form.addEventListener('submit', function(event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    form.classList.add('was-validated');
-                }, false);
-            });
-            
-            // Format amount on blur
-            var montoField = document.getElementById('id_monto');
-            if (montoField) {
-                montoField.addEventListener('blur', function() {
-                    if (this.value) {
-                        this.value = parseFloat(this.value).toFixed(2);
+    document.addEventListener('DOMContentLoaded', function() {
+        // Validación del formulario
+        const form = document.querySelector('.cyber-maintenance-form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                let isValid = true;
+                let firstInvalid = null;
+
+                const requiredFields = form.querySelectorAll('[required]');
+                requiredFields.forEach(field => {
+                    const value = field.value.trim();
+                    if (!value) {
+                        field.classList.add('is-invalid');
+                        if (!firstInvalid) firstInvalid = field;
+                        isValid = false;
+                    } else {
+                        field.classList.remove('is-invalid');
                     }
                 });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    if (firstInvalid) {
+                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstInvalid.focus();
+                        firstInvalid.style.animation = 'shake 0.5s ease-in-out';
+                        setTimeout(() => {
+                            firstInvalid.style.animation = '';
+                        }, 500);
+                    }
+                    return false;
+                }
+
+                const submitBtn = form.querySelector('.btn-save');
+                if (submitBtn) {
+                    submitBtn.innerHTML = `
+                        <span class="btn-status">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                            Guardando...
+                        </span>
+                    `;
+                    submitBtn.disabled = true;
+                }
+            });
+
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.classList.remove('is-invalid');
+                });
+
+                input.addEventListener('focus', function() {
+                    this.classList.remove('is-invalid');
+                });
+            });
+        }
+
+        // Contador de caracteres para observaciones
+        const observaciones = document.getElementById('id_observaciones');
+        const charCount = document.getElementById('char-count');
+        const maxLength = 500;
+
+        if (observaciones && charCount) {
+            function updateCounter() {
+                const length = observaciones.value.length;
+                charCount.textContent = length;
+
+                const percentage = (length / maxLength) * 100;
+                if (percentage > 90) {
+                    charCount.style.color = '#FF2099';
+                } else if (percentage > 70) {
+                    charCount.style.color = '#FF9800';
+                } else {
+                    charCount.style.color = 'var(--primary-neon)';
+                }
             }
-        });
-    })();
+
+            observaciones.addEventListener('input', updateCounter);
+            updateCounter();
+        }
+
+        // Formato de costo
+        const costoField = document.getElementById('id_costo');
+        if (costoField) {
+            costoField.addEventListener('blur', function() {
+                if (this.value) {
+                    this.value = parseFloat(this.value).toFixed(2);
+                }
+            });
+        }
+
+        // Scroll suave al cargar
+        setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
+    });
+
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+    `;
+    document.head.appendChild(style);
 </script>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 {% endblock %}
