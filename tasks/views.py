@@ -18,6 +18,10 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.contrib import messages
 from cleaning.views import cleaning_schedule ,cleaning_reports
+from django.db.models import Sum, Count, Q
+from django.utils import timezone
+from datetime import timedelta
+import calendar
 
 
 def password_reset_view(request):
@@ -432,3 +436,77 @@ def calendario_de_limpieza(request):
 
 
 
+@login_required
+@user_passes_test(lambda u: u.is_superuser)  # Solo admins
+def administracion(request):
+    hoy = timezone.now().date()
+    inicio_semana = hoy - timedelta(days=hoy.weekday())  # Lunes
+    fin_semana = inicio_semana + timedelta(days=6)
+    inicio_mes = hoy.replace(day=1)
+    fin_mes = inicio_mes.replace(month=inicio_mes.month % 12 + 1, day=1) - timedelta(days=1)
+
+    # === FINANZAS ===
+    finanzas_semana = Finanza.objects.filter(fecha__range=[inicio_semana, fin_semana])
+    finanzas_mes = Finanza.objects.filter(fecha__range=[inicio_mes, fin_mes])
+
+    total_semana = finanzas_semana.aggregate(total=Sum('total'))['total'] or 0
+    total_mes = finanzas_mes.aggregate(total=Sum('total'))['total'] or 0
+
+    gastos_por_proveedor = finanzas_mes.values('proveedor').annotate(
+        total=Sum('total'), count=Count('id')
+    ).exclude(proveedor__isnull=True).exclude(proveedor='')[:5]
+
+    # === MANTENIMIENTOS ===
+    mant_pendientes = Mantenimientos.objects.filter(~Q(estado="Completado")).count()
+    mant_completados_semana = Mantenimientos.objects.filter(
+        estado="Completado", fecha_completado__range=[inicio_semana, fin_semana]
+    ).count()
+
+    mant_por_prioridad = Mantenimientos.objects.values('prioridad').annotate(
+        count=Count('id')
+    ).exclude(prioridad__isnull=True).exclude(prioridad='')
+
+    # === LIMPIEZA ===
+    limpieza_pendiente = Limpieza.objects.filter(estado='Pendiente').count()
+    limpieza_completada_semana = Limpieza.objects.filter(
+        estado='Completado', fecha_programada__range=[inicio_semana, fin_semana]
+    ).count()
+
+    limpieza_hoy = Limpieza.objects.filter(
+        fecha_programada__date=hoy
+    ).order_by('fecha_programada')
+
+    # === ÁREAS ===
+    areas_ocupadas = Area.objects.filter(estado="Ocupado").count()
+    areas_libres = Area.objects.filter(estado="Libre").count()
+    total_areas = Area.objects.count()
+
+    context = {
+        # Finanzas
+        'total_gastos_semana': total_semana,
+        'total_gastos_mes': total_mes,
+        'gastos_por_proveedor': gastos_por_proveedor,
+
+        # Mantenimientos
+        'mant_pendientes': mant_pendientes,
+        'mant_completados_semana': mant_completados_semana,
+        'mant_por_prioridad': mant_por_prioridad,
+
+        # Limpieza
+        'limpieza_pendiente': limpieza_pendiente,
+        'limpieza_completada_semana': limpieza_completada_semana,
+        'limpieza_hoy': limpieza_hoy,
+
+        # Áreas
+        'areas_ocupadas': areas_ocupadas,
+        'areas_libres': areas_libres,
+        'total_areas': total_areas,
+
+        # Fechas
+        'hoy': hoy,
+        'inicio_semana': inicio_semana,
+        'fin_semana': fin_semana,
+        'nombre_mes': calendar.month_name[hoy.month],
+    }
+
+    return render(request, 'administracion.html', context)

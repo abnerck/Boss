@@ -62,7 +62,7 @@ urlpatterns = [
     path('restore/', views.restore_database, name='restore'),
 
     path('cleaning/', include('cleaning.urls')),
-
+    path('administracion/', views.administracion, name='administracion'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
