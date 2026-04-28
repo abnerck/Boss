@@ -77,49 +77,16 @@
                     <label class="form-label">
                         <i class="fas fa-user-tie me-1"></i>Responsable <span class="required">*</span>
                     </label>
-                    <select name="responsable" class="form-select" required>
-                        <option value="" disabled selected>Selecciona...</option>
-                        <option value="Osel">👨‍💼 Osel</option>
-                        <option value="benja">👨‍💼 Benja</option>
-                        <option value="Samuel">👨‍💼 Samuel</option>
-                        <option value="Oscar">👨‍💼 Oscar</option>
-                        <option value="Hugo123">👨‍💼 Hugo</option>
-                        <option value="victor">👨‍💼 Victor</option>
-                        <option value="eliezer123">👨‍💼 Eliezer</option>
-                    </select>
+                    {% render_field form.responsable class="form-select" required="required" %}
                     <div class="invalid-feedback">Selecciona un responsable</div>
                 </div>
 
-                <!-- Ubicación -->
+                <!-- Área -->
                 <div class="form-group">
                     <label class="form-label">
-                        <i class="fas fa-map-marker-alt me-1"></i>Ubicación
+                        <i class="fas fa-map-marker-alt me-1"></i>Área
                     </label>
-                    <select name="ubicacion" class="form-select">
-                        <option value="">Selecciona...</option>
-                        <option value="1">🏠 101</option>
-                        <option value="2">🏠 102</option>
-                        <option value="3">🏠 103</option>
-                        <option value="4">🏠 104</option>
-                        <option value="5">🏠 105</option>
-                        <option value="6">🏠 106</option>
-                        <option value="7">🏠 107</option>
-                        <option value="8">🏠 201</option>
-                        <option value="9">🏠 202</option>
-                        <option value="10">🏠 203</option>
-                        <option value="11">🏠 204</option>
-                        <option value="12">🏠 205</option>
-                        <option value="13">🏠 206</option>
-                        <option value="14">🏠 207</option>
-                        <option value="15">🏠 401</option>
-                        <option value="16">🏠 301</option>
-                        <option value="17">🏠 302</option>
-                        <option value="18">🏠 303</option>
-                        <option value="19">🏠 304</option>
-                        <option value="20">🏠 305</option>
-                        <option value="21">🏠 306</option>
-                        <option value="22">🏠 307</option>
-                    </select>
+                    {% render_field form.ubicacion class="form-select" %}
                 </div>
             </div>
 
@@ -156,6 +123,8 @@
                         <label class="form-label">
                             <i class="fas fa-info-circle me-1"></i>Estado <span class="required">*</span>
                         </label>
+                        {% render_field form.estado class="form-select" required="required" %}
+                        {% comment %}
                         <select name="estado" class="form-select" required>
                             <option value="" disabled selected>Pendiente</option>
                             <option value="Pendiente" selected>⏳ Pendiente</option>
@@ -163,6 +132,7 @@
                             <option value="Completado">✅ Completado</option>
                             <option value="Cancelado">❌ Cancelado</option>
                         </select>
+                        {% endcomment %}
                         <div class="invalid-feedback">Selecciona estado</div>
                     </div>
 
@@ -170,6 +140,8 @@
                         <label class="form-label">
                             <i class="fas fa-exclamation-triangle me-1"></i>Prioridad <span class="required">*</span>
                         </label>
+                        {% render_field form.prioridad class="form-select" required="required" %}
+                        {% comment %}
                         <select name="prioridad" class="form-select" required>
                             <option value="" disabled selected>Media</option>
                             <option value="Baja">🔵 Baja</option>
@@ -177,6 +149,7 @@
                             <option value="Alta">🟠 Alta</option>
                             <option value="Crítica">🔴 Crítica</option>
                         </select>
+                        {% endcomment %}
                         <div class="invalid-feedback">Selecciona prioridad</div>
                     </div>
                 </div>

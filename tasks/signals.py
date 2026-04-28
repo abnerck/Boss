@@ -11,7 +11,9 @@ from datetime import datetime
 
 @receiver(user_logged_in)
 def user_logged_in_handler(sender, request, user, **kwargs):
-    superuser = User.objects.get(is_superuser=True)
+    superuser = User.objects.filter(is_superuser=True).first()
+    if not superuser or not superuser.email:
+        return
     
     current_date = datetime.now().date()
     # REGISTRO NUEVO 

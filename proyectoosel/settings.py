@@ -177,9 +177,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     'tasks',
     'widget_tweaks',
     'cleaning',  # <-- Agrega esta línea
+    'csv_analysis',
 ]
 
 MIDDLEWARE = [
@@ -287,3 +289,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 SESSION_COOKIE_AGE = 900 # 30 minutos en segundos
+
+DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY', 'sk-6d583b1280674676b2802bc320c389ef')
+DEEPSEEK_MODEL = os.environ.get('DEEPSEEK_MODEL', 'deepseek-v4-flash')

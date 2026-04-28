@@ -34,7 +34,7 @@ class Mantenimientos(models.Model):
     def save(self, *args, **kwargs):
         if self.estado == "Completado" and self.fecha_completado is None:
             self.fecha_completado = timezone.now()
-        elif self.estado != "Completado ":
+        elif self.estado != "Completado":
             self.fecha_completado = None
         super().save(*args, **kwargs)
 
@@ -82,11 +82,9 @@ class Finanza(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
-        # Convert float to Decimal for precise calculation
+        self.costo = Decimal(str(self.costo))
         IVA_RATE = Decimal('0.16')
-        # Calculate IVA (16% of costo)
         self.iva = (self.costo * IVA_RATE).quantize(Decimal('0.01'))
-        # Calculate total (costo + iva)
         self.total = (self.costo + self.iva).quantize(Decimal('0.01'))
         super().save(*args, **kwargs)
 

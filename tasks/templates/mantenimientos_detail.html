@@ -49,14 +49,14 @@
                                 <label for="id_titulo" class="form-label fw-bold">
                                     <i class="fas fa-heading me-2 text-primary"></i>Título
                                 </label>
-                                {% render_field form.titulo class="form-control border-2" %}
+                                {% render_field form.titulo class="form-select border-2" %}
                             </div>
 
                             <div class="col-md-6 mb-4">
                                 <label for="id_responsable" class="form-label fw-bold">
                                     <i class="fas fa-user-tie me-2 text-primary"></i>Responsable
                                 </label>
-                                {% render_field form.responsable class="form-control border-2" %}
+                                {% render_field form.responsable class="form-select border-2" %}
                             </div>
                         </div>
 
@@ -70,9 +70,9 @@
                         <div class="row">
                             <div class="col-md-4 mb-4">
                                 <label for="id_ubicacion" class="form-label fw-bold">
-                                    <i class="fas fa-map-marker-alt me-2 text-primary"></i>Ubicación
+                                    <i class="fas fa-map-marker-alt me-2 text-primary"></i>Área
                                 </label>
-                                {% render_field form.ubicacion class="form-control border-2" %}
+                                {% render_field form.ubicacion class="form-select border-2" %}
                             </div>
 
                             <div class="col-md-4 mb-4">
@@ -133,9 +133,9 @@
 
                             <div class="mb-4">
                                 <h5 class="fw-bold text-muted">
-                                    <i class="fas fa-map-marker-alt me-2 text-primary"></i>Ubicación
+                                    <i class="fas fa-map-marker-alt me-2 text-primary"></i>Área
                                 </h5>
-                                <p class="ps-4">{{ mantenimiento.ubicacion|default:"No especificada" }}</p>
+                                <p class="ps-4">{{ mantenimiento.ubicacion|default:"Sin área" }}</p>
                             </div>
                         </div>
 

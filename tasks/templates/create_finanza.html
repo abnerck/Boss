@@ -37,11 +37,7 @@
                     <label for="id_clave_inmueble" class="form-label">
                         <i class="fas fa-home me-1"></i>Clave Inmueble <span class="required">*</span>
                     </label>
-                    <select name="clave_inmueble" class="form-select" id="id_clave_inmueble" required>
-                        <option value="" disabled selected>Selecciona una clave</option>
-                        <option value="boss8025">boss8025</option>
-                        <option value="C1438">C1438</option>
-                    </select>
+                    {% render_field form.clave_inmueble class="form-select" required="required" %}
                     {% if form.clave_inmueble.errors %}
                     <div class="invalid-feedback">
                         {{ form.clave_inmueble.errors.0 }}
@@ -221,11 +217,7 @@
                     <label for="id_status" class="form-label">
                         <i class="fas fa-info-circle me-1"></i>Status
                     </label>
-                    <select name="status" class="form-select" id="id_status">
-                        <option value="" selected>Selecciona un estado</option>
-                        <option value="Pendiente">Pendiente</option>
-                        <option value="Completado">Completado</option>
-                    </select>
+                    {% render_field form.status class="form-select" %}
                     {% if form.status.errors %}
                     <div class="invalid-feedback">
                         {{ form.status.errors.0 }}

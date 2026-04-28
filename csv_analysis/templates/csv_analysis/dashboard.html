@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+{% load humanize widget_tweaks %}
+
+{% block content %}
+<div class="csv-dashboard">
+    <header class="csv-header">
+        <div>
+            <h1>Analisis CSV</h1>
+            <p>Importa reportes mensuales, revisa ingresos y pregunta a la IA sobre los datos cargados.</p>
+        </div>
+    </header>
+
+    {% if messages %}
+    <div class="csv-messages">
+        {% for message in messages %}
+        <div class="csv-alert {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <section class="csv-grid">
+        <form class="csv-panel" method="post" action="{% url 'csv_analysis:upload' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h2><i class="fas fa-file-upload"></i> Importar CSV</h2>
+            <div class="csv-form-grid">
+                <label>Nombre
+                    {{ upload_form.title|add_class:"csv-input" }}
+                </label>
+                <label>Mes
+                    {{ upload_form.month|add_class:"csv-input" }}
+                </label>
+                <label>Año
+                    {{ upload_form.year|add_class:"csv-input" }}
+                </label>
+                <label>Archivo
+                    {{ upload_form.file|add_class:"csv-input" }}
+                </label>
+            </div>
+            <button class="csv-button" type="submit"><i class="fas fa-save"></i> Subir CSV</button>
+        </form>
+
+        <form class="csv-panel" method="get">
+            <h2><i class="fas fa-filter"></i> Filtros</h2>
+            <div class="csv-form-grid">
+                <label>Reporte
+                    <select class="csv-input" name="upload">
+                        <option value="">Todos</option>
+                        {% for upload in uploads %}
+                        <option value="{{ upload.id }}" {% if active_filters.upload == upload.id|stringformat:"s" %}selected{% endif %}>
+                            {{ upload.title }} - {{ upload.month|stringformat:"02d" }}/{{ upload.year }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Año
+                    <input class="csv-input" type="number" name="year" value="{{ active_filters.year }}" placeholder="2026">
+                </label>
+                <label>Mes
+                    <input class="csv-input" type="number" name="month" value="{{ active_filters.month }}" min="1" max="12" placeholder="3">
+                </label>
+            </div>
+            <button class="csv-button" type="submit"><i class="fas fa-search"></i> Aplicar</button>
+        </form>
+    </section>
+
+    <section class="metrics">
+        <div class="metric"><span>Total importado</span><strong>${{ total_income|floatformat:2|intcomma }}</strong></div>
+        <div class="metric"><span>Registros</span><strong>{{ total_rows|intcomma }}</strong></div>
+        <div class="metric"><span>Promedio</span><strong>${{ average|floatformat:2|intcomma }}</strong></div>
+        <div class="metric"><span>Unidades</span><strong>{{ units_count|intcomma }}</strong></div>
+    </section>
+
+    <section class="csv-grid charts">
+        <div class="csv-panel"><h2>Ingresos por area/unidad</h2><canvas id="unitChart"></canvas></div>
+        <div class="csv-panel"><h2>Forma de pago</h2><canvas id="methodChart"></canvas></div>
+        <div class="csv-panel wide"><h2>Evolucion mensual</h2><canvas id="monthChart"></canvas></div>
+    </section>
+
+    <section class="csv-panel">
+        <h2><i class="fas fa-robot"></i> Preguntar a la IA</h2>
+        <form method="post" class="ai-form" id="aiQuestionForm" action="{% url 'csv_analysis:ask' %}">
+            {% csrf_token %}
+            <input type="hidden" name="ai_action" value="ask_ai">
+            <label>Pregunta sobre los CSV cargados
+                {{ question_form.question|add_class:"csv-input" }}
+            </label>
+            <button class="csv-button" type="submit"><i class="fas fa-paper-plane"></i> Preguntar</button>
+        </form>
+        <h3 class="ai-answer-title" id="aiAnswerTitle" {% if not answer %}style="display:none"{% endif %}>Respuesta de la IA</h3>
+        <div class="ai-answer" id="aiAnswerBox" {% if not answer %}style="display:none"{% endif %}>{{ answer|linebreaks }}</div>
+        <p class="muted ai-hint" id="aiAnswerHint" {% if answer %}style="display:none"{% endif %}>La respuesta aparecerá aquí debajo después de hacer una pregunta.</p>
+    </section>
+
+    <section class="csv-panel">
+        <h2><i class="fas fa-database"></i> CSV cargados</h2>
+        <div class="upload-list">
+            {% for upload in uploads %}
+            <div class="upload-row">
+                <div>
+                    <strong>{{ upload.title }}</strong>
+                    <span>{{ upload.original_filename }} - {{ upload.month|stringformat:"02d" }}/{{ upload.year }} - {{ upload.rows.count }} filas</span>
+                </div>
+                <form method="post" action="{% url 'csv_analysis:delete' upload.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="csv-link-button">Eliminar</button>
+                </form>
+            </div>
+            {% empty %}
+            <p class="muted">Todavia no hay CSV importados.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="csv-panel">
+        <h2><i class="fas fa-table"></i> Registros</h2>
+        <input id="csvSearch" class="csv-input table-search" placeholder="Buscar en registros...">
+        <div class="table-wrap">
+            <table id="csvTable">
+                <thead>
+                    <tr>
+                        <th>Mes</th>
+                        <th>Fecha</th>
+                        <th>Area/Unidad</th>
+                        <th>Forma</th>
+                        <th>Concepto</th>
+                        <th>Total</th>
+                        <th>Comentarios</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <td>{{ row.upload.month|stringformat:"02d" }}/{{ row.upload.year }}</td>
+                        <td>{{ row.date_text }}</td>
+                        <td>{{ row.unit }}</td>
+                        <td>{{ row.payment_method }}</td>
+                        <td>{{ row.concept }}</td>
+                        <td>${{ row.total|floatformat:2|intcomma }}</td>
+                        <td>{{ row.comments }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7">No hay registros con los filtros actuales.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+{{ unit_chart|json_script:"unit-chart-data" }}
+{{ method_chart|json_script:"method-chart-data" }}
+{{ month_chart|json_script:"month-chart-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+function parsed(id) {
+    return JSON.parse(JSON.parse(document.getElementById(id).textContent));
+}
+function moneyChart(canvasId, data, type) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    new Chart(ctx, {
+        type,
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: 'Total MXN',
+                data: data.totals,
+                backgroundColor: ['#00bcd4', '#ff2079', '#a0ff00', '#7c3aed', '#f59e0b', '#22c55e', '#ef4444', '#38bdf8'],
+                borderColor: '#00bcd4',
+                tension: 0.25
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { labels: { color: '#e0e6ed' } } },
+            scales: type === 'doughnut' ? {} : {
+                x: { ticks: { color: '#e0e6ed' }, grid: { color: 'rgba(255,255,255,.08)' } },
+                y: { ticks: { color: '#e0e6ed' }, grid: { color: 'rgba(255,255,255,.08)' } }
+            }
+        }
+    });
+}
+moneyChart('unitChart', parsed('unit-chart-data'), 'bar');
+moneyChart('methodChart', parsed('method-chart-data'), 'doughnut');
+moneyChart('monthChart', parsed('month-chart-data'), 'line');
+
+document.getElementById('csvSearch')?.addEventListener('input', function () {
+    const term = this.value.toLowerCase();
+    document.querySelectorAll('#csvTable tbody tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+    });
+});
+
+document.getElementById('aiQuestionForm')?.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const button = form.querySelector('button[type="submit"]');
+    const title = document.getElementById('aiAnswerTitle');
+    const box = document.getElementById('aiAnswerBox');
+    const hint = document.getElementById('aiAnswerHint');
+    const original = button.innerHTML;
+
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Consultando...';
+    title.style.display = '';
+    box.style.display = '';
+    hint.style.display = 'none';
+    box.textContent = 'Consultando la IA...';
+
+    try {
+        const response = await fetch(form.getAttribute('action') + window.location.search, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const contentType = response.headers.get('content-type') || '';
+        const data = contentType.includes('application/json')
+            ? await response.json()
+            : { error: await response.text() };
+        if (!response.ok) {
+            throw new Error(data.error || 'Django respondio con HTTP ' + response.status);
+        }
+        box.textContent = data.answer || data.error || 'No se recibio respuesta.';
+    } catch (error) {
+        box.textContent = 'No se pudo consultar la IA: ' + error;
+    } finally {
+        button.disabled = false;
+        button.innerHTML = original;
+        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+});
+</script>
+
+<style>
+.csv-dashboard { color: #e0e6ed; max-width: 1220px; margin: 0 auto; }
+.csv-header { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.csv-header h1 { color: #00bcd4; font-family: Orbitron, sans-serif; margin: 0; }
+.csv-header p, .muted { color: rgba(224,230,237,.72); }
+.csv-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.csv-panel { background: rgba(18,30,48,.92); border: 1px solid rgba(0,188,212,.28); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+.csv-panel h2 { font-size: 1.05rem; color: #00bcd4; margin: 0 0 .8rem; }
+.wide { grid-column: 1 / -1; }
+.csv-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.csv-form-grid label, .ai-form label { display: flex; flex-direction: column; gap: .35rem; font-weight: 600; }
+.csv-input { width: 100%; border: 1px solid rgba(0,188,212,.28); background: #121e30; color: #e0e6ed; border-radius: 6px; padding: .6rem .75rem; }
+.csv-button, .csv-link-button { border: 0; border-radius: 6px; background: linear-gradient(135deg, #00bcd4, #ff2079); color: #06101a; font-weight: 700; padding: .65rem 1rem; margin-top: .8rem; }
+.csv-link-button { margin: 0; padding: .45rem .7rem; }
+.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; margin-bottom: 1rem; }
+.metric { background: #101b2b; border: 1px solid rgba(0,188,212,.28); border-radius: 8px; padding: 1rem; }
+.metric span { display: block; color: rgba(224,230,237,.7); }
+.metric strong { display: block; font-size: 1.45rem; color: #fff; }
+.ai-form { display: grid; gap: .75rem; }
+.ai-answer-title { color: #a0ff00; font-size: 1rem; margin: 1rem 0 .4rem; }
+.ai-answer { background: rgba(0,188,212,.08); border: 1px solid rgba(0,188,212,.25); border-radius: 8px; padding: 1rem; }
+.ai-hint { margin: .8rem 0 0; }
+.upload-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .75rem 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+.upload-row span { display: block; color: rgba(224,230,237,.68); font-size: .9rem; }
+.table-wrap { overflow-x: auto; }
+.table-search { margin-bottom: .75rem; }
+table { width: 100%; border-collapse: collapse; min-width: 900px; }
+th, td { border-bottom: 1px solid rgba(255,255,255,.08); padding: .65rem; text-align: left; vertical-align: top; }
+th { color: #00bcd4; }
+.csv-alert { padding: .65rem .8rem; border-radius: 6px; margin-bottom: .5rem; background: rgba(0,188,212,.12); border: 1px solid rgba(0,188,212,.25); }
+@media (max-width: 900px) { .csv-grid, .metrics, .csv-form-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
