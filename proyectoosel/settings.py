@@ -24,9 +24,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-eoj19haxw5v2r$b47j4rpw12$&(lhopzp+n!q=owsj3^x8r^g5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.22.31']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '192.168.22.31',
+    'vegascorporativo.mx',
+    'www.vegascorporativo.mx',
+    'vegascorporativo.pythonanywhere.com',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://vegascorporativo.mx',
+    'https://www.vegascorporativo.mx',
+    'https://vegascorporativo.pythonanywhere.com',
+]
 
  
 
@@ -161,9 +174,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-eoj19haxw5v2r$b47j4rpw12$&(lhopzp+n!q=owsj3^x8r^g5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.100.8','192.168.22.31']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '192.168.100.8',
+    '192.168.22.31',
+    'vegascorporativo.mx',
+    'www.vegascorporativo.mx',
+    'vegascorporativo.pythonanywhere.com',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://vegascorporativo.mx',
+    'https://www.vegascorporativo.mx',
+    'https://vegascorporativo.pythonanywhere.com',
+]
 
  
 
