@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-from decimal import Decimal 
+from decimal import Decimal
 
 class Area(models.Model):
     nombre = models.CharField(max_length=100, unique=True)  # Ej: "Departamento 101"
@@ -19,6 +19,7 @@ class Mantenimientos(models.Model):
     titulo = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_final = models.DateField(null=True, blank=True)
     fecha_completado = models.DateTimeField(null=True, blank=True)
     responsable = models.CharField(max_length=100)
     
@@ -62,7 +63,43 @@ class Limpieza(models.Model):
         return self.titulo
 
 class Finanza(models.Model):
+    TIPO_MOVIMIENTO_CHOICES = [
+        ('Egreso', 'Egreso'),
+        ('Ingreso', 'Ingreso'),
+    ]
+
+    CATEGORIA_CHOICES = [
+        ('Renta', 'Renta'),
+        ('Gas', 'Gas'),
+        ('Agua', 'Agua'),
+        ('Luz', 'Luz'),
+        ('Luz area comun', 'Luz area comun'),
+        ('Internet', 'Internet'),
+        ('Mantenimiento Mayaj', 'Mantenimiento Mayaj'),
+        ('Otro', 'Otro'),
+    ]
+
+    MES_CHOICES = [
+        (1, 'Enero'),
+        (2, 'Febrero'),
+        (3, 'Marzo'),
+        (4, 'Abril'),
+        (5, 'Mayo'),
+        (6, 'Junio'),
+        (7, 'Julio'),
+        (8, 'Agosto'),
+        (9, 'Septiembre'),
+        (10, 'Octubre'),
+        (11, 'Noviembre'),
+        (12, 'Diciembre'),
+    ]
+
     clave_inmueble = models.CharField(max_length=50)
+    departamento = models.CharField(max_length=100, blank=True, null=True)
+    mes = models.PositiveSmallIntegerField(choices=MES_CHOICES, null=True, blank=True)
+    anio = models.PositiveIntegerField(null=True, blank=True)
+    tipo_movimiento = models.CharField(max_length=20, choices=TIPO_MOVIMIENTO_CHOICES, default='Egreso')
+    categoria = models.CharField(max_length=100, choices=CATEGORIA_CHOICES, default='Otro')
     concepto = models.CharField(max_length=200)
     costo = models.DecimalField(max_digits=10, decimal_places=2)
     iva = models.DecimalField(max_digits=10, decimal_places=2, editable=False, default=0)
@@ -73,6 +110,13 @@ class Finanza(models.Model):
     status = models.CharField(max_length=50, blank=True, null=True)
     proveedor = models.CharField(max_length=150, blank=True, null=True)
     factura = models.CharField(max_length=100, blank=True, null=True)
+    fecha_pago = models.DateField(blank=True, null=True)
+    gas = models.DecimalField(max_digits=10, decimal_places=2, default=0, blank=True)
+    fecha_pago_gas = models.DateField(blank=True, null=True)
+    agua = models.DecimalField(max_digits=10, decimal_places=2, default=0, blank=True)
+    fecha_pago_agua = models.DateField(blank=True, null=True)
+    luz = models.DecimalField(max_digits=10, decimal_places=2, default=0, blank=True)
+    fecha_pago_luz = models.DateField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
     cta_bancaria = models.CharField(max_length=20, blank=True, null=True)
     clabe = models.CharField(max_length=18, blank=True, null=True)
@@ -82,10 +126,12 @@ class Finanza(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
-        self.costo = Decimal(str(self.costo))
-        IVA_RATE = Decimal('0.16')
-        self.iva = (self.costo * IVA_RATE).quantize(Decimal('0.01'))
-        self.total = (self.costo + self.iva).quantize(Decimal('0.01'))
+        self.costo = Decimal(str(self.costo or 0))
+        self.gas = Decimal(str(self.gas or 0))
+        self.agua = Decimal(str(self.agua or 0))
+        self.luz = Decimal(str(self.luz or 0))
+        self.iva = Decimal('0.00')
+        self.total = (self.costo + self.gas + self.agua + self.luz).quantize(Decimal('0.01'))
         super().save(*args, **kwargs)
 
     def __str__(self):

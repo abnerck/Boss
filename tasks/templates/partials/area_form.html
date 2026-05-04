@@ -1,0 +1,55 @@
+{% load widget_tweaks %}
+
+<form method="post" class="cyber-maintenance-form" novalidate>
+    {% csrf_token %}
+
+    <div class="form-grid">
+        <div class="form-column">
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-signature me-1"></i>Nombre del area <span class="required">*</span>
+                </label>
+                {% render_field form.nombre class="form-control" required="required" placeholder="Ej: Lobby, Pasillo piso 1, Departamento 101" %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-layer-group me-1"></i>Numero de piso
+                </label>
+                {% render_field form.numero_piso class="form-control" min="0" placeholder="0, 1, 2..." %}
+            </div>
+        </div>
+
+        <div class="form-column">
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-tag me-1"></i>Tipo de area
+                </label>
+                {% render_field form.tipo_area class="form-select" %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-info-circle me-1"></i>Estado
+                </label>
+                {% render_field form.estado class="form-select" %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-map-marker-alt me-1"></i>Ubicacion
+                </label>
+                {% render_field form.ubicacion class="form-control" placeholder="Ej: BOSS8025, roof top, planta baja" %}
+            </div>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <a href="{% if area %}{% url 'area_detail' area.id %}{% else %}{% url 'areas' %}{% endif %}" class="btn btn-cancel">
+            <i class="fas fa-times me-2"></i>Cancelar
+        </a>
+        <button type="submit" class="btn btn-save">
+            <i class="fas fa-save me-2"></i>{{ submit_label|default:"Guardar Area" }}
+        </button>
+    </div>
+</form>

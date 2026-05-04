@@ -315,7 +315,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-SESSION_COOKIE_AGE = 900 # 30 minutos en segundos
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
+SESSION_SAVE_EVERY_REQUEST = True
 
 DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY', 'sk-6d583b1280674676b2802bc320c389ef')
 DEEPSEEK_MODEL = os.environ.get('DEEPSEEK_MODEL', 'deepseek-v4-flash')

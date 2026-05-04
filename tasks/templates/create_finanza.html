@@ -23,6 +23,7 @@
     <div class="cyber-alert-error">
         <i class="fas fa-exclamation-triangle me-2"></i>
         Por favor corrige los errores en el formulario.
+        {{ form.non_field_errors }}
     </div>
     {% endif %}
 
@@ -45,6 +46,43 @@
                     {% endif %}
                 </div>
 
+                <div class="form-group">
+                    <label for="id_departamento" class="form-label">
+                        <i class="fas fa-door-open me-1"></i>Departamento
+                    </label>
+                    {% render_field form.departamento class="form-control" placeholder="Ej: Departamento 101" %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_mes" class="form-label">
+                            <i class="fas fa-calendar me-1"></i>Mes
+                        </label>
+                        {% render_field form.mes class="form-select" %}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_anio" class="form-label">
+                            <i class="fas fa-calendar-days me-1"></i>Año
+                        </label>
+                        {% render_field form.anio class="form-control" placeholder="2026" %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_tipo_movimiento" class="form-label">
+                            <i class="fas fa-right-left me-1"></i>Tipo
+                        </label>
+                        {% render_field form.tipo_movimiento class="form-select" %}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_categoria" class="form-label">
+                            <i class="fas fa-tags me-1"></i>Categoría
+                        </label>
+                        {% render_field form.categoria class="form-select" %}
+                    </div>
+                </div>
+
                 <!-- Concepto -->
                 <div class="form-group">
                     <label for="id_concepto" class="form-label">
@@ -61,7 +99,7 @@
                 <!-- Costo -->
                 <div class="form-group">
                     <label for="id_costo" class="form-label">
-                        <i class="fas fa-money-bill-wave me-1"></i>Costo <span class="required">*</span>
+                        <i class="fas fa-money-bill-wave me-1"></i>Renta/Importe <span class="required">*</span>
                     </label>
                     <div class="input-group">
                         <span class="input-group-text">$</span>
@@ -72,6 +110,13 @@
                         {{ form.costo.errors.0 }}
                     </div>
                     {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_fecha_pago" class="form-label">
+                        <i class="fas fa-calendar-check me-1"></i>Fecha de pago
+                    </label>
+                    {% render_field form.fecha_pago class="form-control" %}
                 </div>
 
                 <!-- Solicita -->
@@ -127,6 +172,39 @@
                         {{ form.factura.errors.0 }}
                     </div>
                     {% endif %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_gas" class="form-label"><i class="fas fa-fire me-1"></i>Gas</label>
+                        {% render_field form.gas class="form-control" placeholder="0.00" step="0.01" %}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_fecha_pago_gas" class="form-label"><i class="fas fa-calendar-check me-1"></i>Pago gas</label>
+                        {% render_field form.fecha_pago_gas class="form-control" %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_agua" class="form-label"><i class="fas fa-droplet me-1"></i>Agua</label>
+                        {% render_field form.agua class="form-control" placeholder="0.00" step="0.01" %}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_fecha_pago_agua" class="form-label"><i class="fas fa-calendar-check me-1"></i>Pago agua</label>
+                        {% render_field form.fecha_pago_agua class="form-control" %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_luz" class="form-label"><i class="fas fa-bolt me-1"></i>Luz</label>
+                        {% render_field form.luz class="form-control" placeholder="0.00" step="0.01" %}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_fecha_pago_luz" class="form-label"><i class="fas fa-calendar-check me-1"></i>Pago luz</label>
+                        {% render_field form.fecha_pago_luz class="form-control" %}
+                    </div>
                 </div>
 
                 <!-- Observaciones -->
@@ -445,6 +523,12 @@
         display: flex;
         flex-direction: column;
         gap: 1rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
     }
 
     /* Grupos Compactos */

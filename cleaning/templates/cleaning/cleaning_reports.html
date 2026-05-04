@@ -296,6 +296,52 @@
         animation: scanline 10s infinite linear;
     }
 
+    /* Vista de reportes mas limpia para lectura operativa */
+    .stats-card {
+        background: #ffffff;
+        border: 1px solid #d9e2ec;
+        box-shadow: 0 8px 22px rgba(15, 28, 45, 0.08);
+    }
+    .stats-card::before,
+    .stats-card:hover::before {
+        display: none;
+    }
+    .table {
+        background: #ffffff;
+        border: 1px solid #d9e2ec;
+        border-radius: 8px;
+    }
+    .table th {
+        background: #eef2f7;
+        color: #1f3654;
+        border-bottom: 1px solid #d9e2ec;
+        text-shadow: none;
+    }
+    .table td {
+        color: #162033;
+        border-bottom: 1px solid #e6edf3;
+    }
+    .table tr:hover {
+        background: #f8fbfd;
+    }
+    .status-badge {
+        border-radius: 999px;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+    .status-completed {
+        background: #e8f5ee;
+        color: #176b45;
+        border: 1px solid #b7dfca;
+        text-shadow: none;
+    }
+    .status-pending {
+        background: #fff4e5;
+        color: #965900;
+        border: 1px solid #ffd28a;
+        text-shadow: none;
+    }
+
     @keyframes scanline {
         0% { transform: translateY(-100%); }
         100% { transform: translateY(100%); }
@@ -412,7 +458,77 @@
         {% endif %}
     </div>
 
-    <h1 class="cyber-title">📊 REPORTE DE LIMPIEZA</h1>
+    <h1 class="cyber-title">REPORTE DE LIMPIEZA</h1>
+</div>
+
+<div class="cyber-panel" data-aos="fade-up">
+    <h3 style="color: var(--primary-neon); font-family: 'Orbitron', sans-serif;">
+        <i class="fas fa-filter"></i> REPORTE POR PERIODO
+    </h3>
+    <form method="get" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: end; margin: 1rem 0;">
+        <div>
+            <label for="period" style="color: var(--primary-neon); display: block;">Periodo</label>
+            <select id="period" name="period" class="date-picker">
+                <option value="diario" {% if period == 'diario' %}selected{% endif %}>Diario</option>
+                <option value="semanal" {% if period == 'semanal' %}selected{% endif %}>Semanal</option>
+                <option value="quincenal" {% if period == 'quincenal' %}selected{% endif %}>Quincenal</option>
+                <option value="mensual" {% if period == 'mensual' %}selected{% endif %}>Mensual</option>
+                <option value="anual" {% if period == 'anual' %}selected{% endif %}>Anual</option>
+            </select>
+        </div>
+        <div>
+            <label for="period_date" style="color: var(--primary-neon); display: block;">Fecha base</label>
+            <input type="date" id="period_date" name="date" value="{{ selected_date|date:'Y-m-d' }}" class="date-picker">
+        </div>
+        <button class="date-btn" type="submit">Generar reporte</button>
+        <button class="date-btn" type="button" onclick="window.print()">Imprimir</button>
+    </form>
+    <div class="stats-grid">
+        <div class="stats-card">
+            <h4 style="color: var(--accent-neon);">Periodo: {{ period_start|date:"d/m/Y" }} al {{ period_end|date:"d/m/Y" }}</h4>
+            <h2 style="color: var(--primary-neon); font-family: 'Orbitron', sans-serif; font-size: 2.2rem; text-align: center;">
+                {{ period_stats.completed }}/{{ period_stats.total }}
+            </h2>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ period_stats.percentage }}%">
+                    {{ period_stats.percentage }}%
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+                <span class="completed">{{ period_stats.completed }} completadas</span>
+                <span class="pending">{{ period_stats.pending }} pendientes</span>
+            </div>
+        </div>
+        <div class="stats-card">
+            <h4 style="color: var(--accent-neon);">Resumen por usuario</h4>
+            {% for stat in period_by_user %}
+            <div style="display: flex; justify-content: space-between; margin: .6rem 0;">
+                <span>{{ stat.user__username|default:"Sin usuario" }}</span>
+                <strong style="color: var(--primary-neon);">{{ stat.completed }}/{{ stat.total }}</strong>
+            </div>
+            {% empty %}
+            <p style="color: var(--text-light);">No hay registros en este periodo.</p>
+            {% endfor %}
+        </div>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Area</th>
+                <th>Actividades completadas</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for area in period_by_area %}
+            <tr>
+                <td>{{ area.activity__area }}</td>
+                <td class="completed">{{ area.completed }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="2">No hay actividades completadas en este periodo.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
 <!-- Resumen de últimos 7 días -->

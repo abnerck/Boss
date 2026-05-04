@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime, date, timedelta
 from collections import defaultdict
 import json
+import calendar
 from .models import Activity, CleaningLog
 
 # Lista COMPLETA de actividades
@@ -231,6 +232,27 @@ def cleaning_reports(request):
         selected_date = date.today()
     
     today = date.today()
+    period = request.GET.get('period', 'diario')
+    if period not in ['diario', 'semanal', 'quincenal', 'mensual', 'anual']:
+        period = 'diario'
+    if period == 'semanal':
+        report_start = selected_date - timedelta(days=selected_date.weekday())
+        report_end = report_start + timedelta(days=6)
+    elif period == 'quincenal':
+        report_start = selected_date.replace(day=1 if selected_date.day <= 15 else 16)
+        last_day = calendar.monthrange(selected_date.year, selected_date.month)[1]
+        report_end = selected_date.replace(day=15 if selected_date.day <= 15 else last_day)
+    elif period == 'mensual':
+        report_start = selected_date.replace(day=1)
+        report_end = selected_date.replace(day=calendar.monthrange(selected_date.year, selected_date.month)[1])
+    elif period == 'anual':
+        report_start = selected_date.replace(month=1, day=1)
+        report_end = selected_date.replace(month=12, day=31)
+    else:
+        report_start = selected_date
+        report_end = selected_date
+    if report_end > today:
+        report_end = today
     yesterday = selected_date - timedelta(days=1)
     tomorrow = selected_date + timedelta(days=1)
     
@@ -316,6 +338,27 @@ def cleaning_reports(request):
     grouped_history = defaultdict(list)
     for log in logs_all:
         grouped_history[log.date.strftime('%Y-%m-%d')].append(log)
+
+    period_logs = CleaningLog.objects.filter(
+        date__gte=report_start,
+        date__lte=report_end,
+    ).select_related('activity', 'user')
+    period_completed = period_logs.filter(completed=True).count()
+    period_total = 0
+    current = report_start
+    while current <= report_end:
+        day_name = spanish_days.get(current.strftime('%A'), 'LUNES')
+        period_total += Activity.objects.filter(
+            Q(frequency__exact='DIARIO') | Q(frequency__icontains=day_name)
+        ).count()
+        current += timedelta(days=1)
+    period_by_area = period_logs.filter(completed=True).values('activity__area').annotate(
+        completed=Count('id')
+    ).order_by('activity__area')
+    period_by_user = period_logs.values('user__username').annotate(
+        completed=Count('id', filter=Q(completed=True)),
+        total=Count('id'),
+    ).order_by('user__username')
     
     context = {
         'grouped_history': dict(grouped_history),
@@ -330,6 +373,17 @@ def cleaning_reports(request):
         'pending_activities': pending_activities,
         'last_7_days': last_7_days,
         'week_stats': week_stats,
-        'start_of_week': start_of_week
+        'start_of_week': start_of_week,
+        'period': period,
+        'period_start': report_start,
+        'period_end': report_end,
+        'period_stats': {
+            'completed': period_completed,
+            'total': period_total,
+            'pending': max(period_total - period_completed, 0),
+            'percentage': round((period_completed / period_total * 100) if period_total > 0 else 0),
+        },
+        'period_by_area': period_by_area,
+        'period_by_user': period_by_user,
     }
     return render(request, 'cleaning/cleaning_reports.html', context)

@@ -7,7 +7,7 @@
     <div class="cyber-maintenance-header">
         <div class="header-content">
             <h2 class="cyber-title">
-                <i class="fas fa-wallet me-2"></i>Gestión de Finanzas
+                <i class="fas fa-wallet me-2"></i>Gestion de Finanzas
             </h2>
             <p class="cyber-subtitle">Registro eficiente de transacciones - Vegas Corporativo</p>
         </div>
@@ -17,6 +17,74 @@
             </a>
         </div>
     </div>
+
+    <div class="form-grid mb-4">
+        <div class="cyber-maintenance-form">
+            <h5 class="mb-2"><i class="fas fa-arrow-trend-up me-2"></i>Ingresos</h5>
+            <h3 class="text-success">${{ ingresos|floatformat:2 }}</h3>
+        </div>
+        <div class="cyber-maintenance-form">
+            <h5 class="mb-2"><i class="fas fa-arrow-trend-down me-2"></i>Egresos</h5>
+            <h3 class="text-danger">${{ egresos|floatformat:2 }}</h3>
+        </div>
+        <div class="cyber-maintenance-form">
+            <h5 class="mb-2"><i class="fas fa-scale-balanced me-2"></i>Total</h5>
+            <h3 class="{% if balance >= 0 %}text-success{% else %}text-danger{% endif %}">${{ balance|floatformat:2 }}</h3>
+        </div>
+    </div>
+
+    <form method="get" class="cyber-maintenance-form mb-4">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="mes" class="form-label">Mes</label>
+                <select id="mes" name="mes" class="form-select">
+                    <option value="">Todos</option>
+                    {% for value,label in months %}
+                    <option value="{{ value }}" {% if selected_month == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="anio" class="form-label">Año</label>
+                <input id="anio" name="anio" class="form-control" value="{{ selected_year }}" placeholder="2026">
+            </div>
+            <div class="form-group d-flex align-items-end">
+                <button class="btn btn-save" type="submit">Filtrar</button>
+            </div>
+        </div>
+    </form>
+
+    {% if comparativo %}
+    <div class="cyber-maintenance-form mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Comparativo mensual</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Periodo</th>
+                        <th>Ingresos</th>
+                        <th>Egresos</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for periodo in comparativo %}
+                    <tr>
+                        <td>{{ periodo.mes }}/{{ periodo.anio }}</td>
+                        <td class="text-success">${{ periodo.ingresos|floatformat:2 }}</td>
+                        <td class="text-danger">${{ periodo.egresos|floatformat:2 }}</td>
+                        <td class="{% if periodo.balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                            ${{ periodo.balance|floatformat:2 }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
 
     {% if finanza %}
     <!-- Filtros avanzados -->
@@ -85,9 +153,16 @@
                     <tr>
                         <th>#</th>
                         <th>Clave Inmueble</th>
+                        <th>Departamento</th>
+                        <th>Mes/Año</th>
+                        <th>Tipo</th>
+                        <th>Categoría</th>
                         <th>Concepto</th>
-                        <th>Costo</th>
-                        <th>IVA</th>
+                        <th>Renta/Importe</th>
+                        <th>Gas</th>
+                        <th>Agua</th>
+                        <th>Luz</th>
+                        <th>Fechas de pago</th>
                         <th>Total</th>
                         <th>Solicita</th>
                         <th>Autoriza</th>
@@ -114,6 +189,16 @@
                                 {{ f.clave_inmueble|truncatechars:25 }}
                             </a>
                         </td>
+                        <td>{{ f.departamento|default:"-" }}</td>
+                        <td>{{ f.get_mes_display|default:"-" }} {{ f.anio|default:"" }}</td>
+                        <td>
+                            {% if f.tipo_movimiento == 'Ingreso' %}
+                            <span class="badge bg-success">{{ f.tipo_movimiento }}</span>
+                            {% else %}
+                            <span class="badge bg-danger">{{ f.tipo_movimiento }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ f.categoria|default:"-" }}</td>
                         <td>{{ f.concepto|truncatechars:25 }}</td>
                         <td class="text-center">
                             <span class="badge bg-danger bg-opacity-10 text-danger">
@@ -122,8 +207,24 @@
                         </td>
                         <td class="text-center">
                             <span class="badge bg-light text-dark">
-                                ${{ f.iva|floatformat:2 }}
+                                ${{ f.gas|floatformat:2 }}
                             </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark">
+                                ${{ f.agua|floatformat:2 }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark">
+                                ${{ f.luz|floatformat:2 }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <small class="text-muted d-block">Renta: {{ f.fecha_pago|date:"d/m/Y"|default:"-" }}</small>
+                            <small class="text-muted d-block">Gas: {{ f.fecha_pago_gas|date:"d/m/Y"|default:"-" }}</small>
+                            <small class="text-muted d-block">Agua: {{ f.fecha_pago_agua|date:"d/m/Y"|default:"-" }}</small>
+                            <small class="text-muted d-block">Luz: {{ f.fecha_pago_luz|date:"d/m/Y"|default:"-" }}</small>
                         </td>
                         <td class="text-center">
                             <span class="badge bg-danger bg-opacity-10 text-danger">
@@ -292,7 +393,7 @@ $(document).ready(function() {
                 className: 'btn-success btn-sm',
                 title: 'Reporte_de_Finanzas',
                 exportOptions: {
-                    columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+                    columns: ':visible:not(:last-child)',
                     format: {
                         body: function(data, row, column, node) {
                             return $(data).text().trim() || data;
@@ -306,7 +407,7 @@ $(document).ready(function() {
                 className: 'btn-danger btn-sm',
                 title: 'Reporte de Finanzas',
                 exportOptions: {
-                    columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+                    columns: ':visible:not(:last-child)',
                     format: {
                         body: function(data, row, column, node) {
                             return $(data).text().trim() || data;
@@ -346,7 +447,7 @@ $(document).ready(function() {
                         return {
                             columns: [
                                 {
-                                    text: 'Gestión de Finanzas - Vegas Corporativo',
+                                    text: 'Gestion de Finanzas - Vegas Corporativo',
                                     alignment: 'left',
                                     style: 'footer'
                                 },
@@ -382,7 +483,6 @@ $(document).ready(function() {
                             color: '#E0E6ED'
                         }
                     };
-                    doc.content[1].table.widths = ['5%', '10%', '10%', '8%', '8%', '8%', '8%', '8%', '8%', '8%', '8%', '8%', '8%', '8%', '8%', '8%', '8%', '8%', '10%'];
                     doc.content[1].table.body.forEach(function(row, index) {
                         row.forEach(function(cell, colIndex) {
                             cell.alignment = 'left';
@@ -527,7 +627,7 @@ $(document).ready(function() {
             statuses.forEach(function(status) {
                 var count = 0;
                 filteredData.each(function(row) {
-                    if (row[8].includes(status)) count++;
+                    if (row[15].includes(status)) count++;
                 });
                 if (count > 0) {
                     labels.push(status);
@@ -541,7 +641,7 @@ $(document).ready(function() {
             ranges.forEach(function(range, index) {
                 var count = 0;
                 filteredData.each(function(row) {
-                    var costo = parseFloat($(row[3]).text().replace('$', '')) || 0;
+                    var costo = parseFloat($(row[7]).text().replace('$', '')) || 0;
                     if (range === '0-1000' && costo <= 1000) count++;
                     else if (range === '1001-5000' && costo > 1000 && costo <= 5000) count++;
                     else if (range === '5001-10000' && costo > 5000 && costo <= 10000) count++;
@@ -581,17 +681,17 @@ $(document).ready(function() {
     });
 
     $('#filtroConcepto').on('keyup', function() {
-        table.column(2).search(this.value).draw();
+        table.column(6).search(this.value).draw();
         updateCharts();
     });
 
     $('#filtroStatus').on('change', function() {
-        table.column(8).search(this.value).draw();
+        table.column(15).search(this.value).draw();
         updateCharts();
     });
 
     $('#filtroProveedor').on('keyup', function() {
-        table.column(9).search(this.value).draw();
+        table.column(16).search(this.value).draw();
         updateCharts();
     });
 

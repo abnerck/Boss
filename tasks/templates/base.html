@@ -584,18 +584,6 @@
                 </li>
 
                 <li class="cyber-menu-item">
-                    <a href="/limpiezas/" class="cyber-menu-link">
-                        <span class="cyber-menu-icon">
-                            <i class="fas fa-broom"></i>
-                        </span>
-                        <span class="cyber-menu-text">LIMPIEZAS</span>
-                        {% if user.is_superuser %}
-                        <span class="cyber-menu-badge">{{ user.limpieza_set.count }}</span>
-                        {% endif %}
-                    </a>
-                </li>
-
-                <li class="cyber-menu-item">
                     <a href="/finanzas/" class="cyber-menu-link">
                         <span class="cyber-menu-icon">
                             <i class="fas fa-money-check-alt"></i>

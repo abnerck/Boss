@@ -4,7 +4,7 @@
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="text-dark fw-bold mb-0">
-            <i class="fas fa-tools me-2"></i>Gestión de Mantenimientos
+            <i class="fas fa-tools me-2"></i>Gestion de Mantenimientos
         </h1>
         <a href="{% url 'create_mantenimientos' %}" class="btn btn-danger">
             <i class="fas fa-plus-circle me-2"></i> Nuevo Mantenimiento
@@ -17,7 +17,7 @@
         <div class="card-body">
             <div class="row g-3 d-flex align-items-center">
                 <div class="col-md-3 text-start">
-                    <label for="filtroTitulo" class="form-label">Buscar por título:</label>
+                    <label for="filtroTitulo" class="form-label">Buscar por titulo:</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-search"></i></span>
                         <input type="text" class="form-control" id="filtroTitulo" placeholder="Título del mantenimiento">
@@ -44,7 +44,7 @@
                     <label for="filtroPrioridad" class="form-label">Filtrar por prioridad:</label>
                     <select class="form-select" id="filtroPrioridad">
                         <option value="">Todas las prioridades</option>
-                        <option value="Crítica">Crítica</option>
+                        <option value="Critica">Critica</option>
                         <option value="Alta">Alta</option>
                         <option value="Media">Media</option>
                         <option value="Baja">Baja</option>
@@ -75,12 +75,13 @@
                 <thead class="table-dark">
                     <tr>
                         <th>#</th>
-                        <th>Título</th>
+                        <th>Titulo</th>
                         <th>Responsable</th>
-                        <th>Ubicación</th>
+                        <th>Ubicacion</th>
                         <th>Estado</th>
                         <th>Prioridad</th>
                         <th>Fecha Inicio</th>
+                        <th>Fecha Final</th>
                         <th>Creador</th>
                         <th>Acciones</th>
                     </tr>
@@ -93,7 +94,7 @@
                             <a href="{% url 'mantenimientos_detail' m.id %}" class="text-decoration-none fw-bold text-dark">
                                 {{ m.titulo|truncatechars:30 }}
                             </a>
-                            <small class="text-muted d-block">{{ m.descripcion|truncatechars:40|default:"Sin descripción" }}</small>
+                            <small class="text-muted d-block">{{ m.descripcion|truncatechars:40|default:"Sin descripcion" }}</small>
                         </td>
                         <td>
                             <span class="badge bg-primary bg-opacity-10 text-primary">
@@ -121,7 +122,7 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if m.prioridad == 'Crítica' %}
+                            {% if m.prioridad == 'Critica' %}
                             <span class="badge bg-danger">
                                 <i class="fas fa-exclamation-triangle me-1"></i> {{ m.prioridad }}
                             </span>
@@ -143,6 +144,11 @@
                             <small class="text-muted">
                                 {{ m.fecha_creacion|date:"d/m/Y" }}<br>
                                 {{ m.fecha_creacion|date:"H:i" }}
+                            </small>
+                        </td>
+                        <td>
+                            <small class="text-muted">
+                                {{ m.fecha_final|date:"d/m/Y"|default:"Sin fecha" }}
                             </small>
                         </td>
                         <td>
@@ -199,8 +205,8 @@
     {% else %}
     <div class="alert alert-info text-center py-5">
         <i class="fas fa-clipboard-list fa-4x text-info mb-4"></i>
-        <h4 class="alert-heading fw-bold">¡No hay mantenimientos registrados!</h4>
-        <p>Parece que no has añadido ningún mantenimiento todavía.</p>
+        <h4 class="alert-heading fw-bold">No hay mantenimientos registrados</h4>
+        <p>Parece que no has anadido ningun mantenimiento todavia.</p>
         <hr>
         <a href="{% url 'create_mantenimientos' %}" class="btn btn-info mt-3">
             <i class="fas fa-plus-circle me-2"></i> Crear Primer Mantenimiento
@@ -241,7 +247,7 @@ $(document).ready(function() {
                 className: 'btn-success btn-sm',
                 title: 'Reporte de Mantenimientos',
                 exportOptions: {
-                    columns: [0, 1, 2, 3, 4, 5, 6],
+                    columns: [0, 1, 2, 3, 4, 5, 6, 7],
                     format: {
                         body: function (data, row, column, node) {
                             // Limpiar el contenido de las celdas para exportación
@@ -259,7 +265,7 @@ $(document).ready(function() {
                 className: 'btn-danger btn-sm',
                 title: 'Reporte de Mantenimientos',
                 exportOptions: {
-                    columns: [0, 1, 2, 3, 4, 5, 6],
+                    columns: [0, 1, 2, 3, 4, 5, 6, 7],
                     format: {
                         body: function (data, row, column, node) {
                             // Limpiar el contenido de las celdas para exportación
@@ -308,7 +314,7 @@ $(document).ready(function() {
                         return {
                             columns: [
                                 {
-                                    text: 'Gestión de Mantenimientos - Empresa XYZ',
+                                    text: 'Gestion de Mantenimientos - Vegas Corporativo',
                                     alignment: 'left',
                                     style: 'footer'
                                 },
@@ -470,9 +476,9 @@ $(document).ready(function() {
             });
         } else if (type === 'prioridad') {
             // Datos para gráfico de prioridades
-            var prioridades = ['Crítica', 'Alta', 'Media', 'Baja'];
+            var prioridades = ['Critica', 'Alta', 'Media', 'Baja'];
             var colors = {
-                'Crítica': 'rgba(220, 53, 69, 0.8)',
+                'Critica': 'rgba(220, 53, 69, 0.8)',
                 'Alta': 'rgba(255, 193, 7, 0.8)',
                 'Media': 'rgba(13, 110, 253, 0.8)',
                 'Baja': 'rgba(108, 117, 125, 0.8)'

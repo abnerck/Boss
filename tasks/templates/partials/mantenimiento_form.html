@@ -1,0 +1,100 @@
+{% load widget_tweaks %}
+
+<form method="post" enctype="multipart/form-data" class="cyber-maintenance-form" novalidate>
+    {% csrf_token %}
+
+    <div class="form-grid">
+        <div class="form-column">
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-heading me-1"></i>Titulo <span class="required">*</span>
+                </label>
+                {% render_field form.titulo class="form-select" required="required" id="titulo-select" %}
+                <div class="invalid-feedback">Selecciona un titulo</div>
+            </div>
+
+            <div class="form-group">
+                {% render_field form.titulo_otro class="form-control d-none" placeholder="Especifica el titulo..." maxlength="100" id="titulo-otro" %}
+                <div class="invalid-feedback">Especifica el titulo</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-user-tie me-1"></i>Responsable <span class="required">*</span>
+                </label>
+                {% render_field form.responsable class="form-select" required="required" %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-map-marker-alt me-1"></i>Area
+                </label>
+                {% render_field form.ubicacion class="form-select" %}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-calendar-plus me-1"></i>Fecha inicio
+                    </label>
+                    <input class="form-control" value="{% if mantenimiento %}{{ mantenimiento.fecha_creacion|date:'d/m/Y H:i' }}{% else %}Se asigna al guardar{% endif %}" readonly>
+                    <small class="form-hint">Fecha en que se reporto el mantenimiento.</small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-calendar-check me-1"></i>Fecha final
+                    </label>
+                    {% render_field form.fecha_final class="form-control" %}
+                    <small class="form-hint">Fecha objetivo o fecha de cierre.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-column">
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-align-left me-1"></i>Descripcion
+                </label>
+                {% render_field form.descripcion class="form-control" rows="4" maxlength="500" id="descripcion-textarea" placeholder="Describe el problema y la solucion propuesta..." %}
+                <div class="char-counter"><span id="char-count">0</span>/<span class="counter-max">500</span></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-paperclip me-1"></i>Archivo
+                </label>
+                {% render_field form.archivo class="form-control" accept="image/*,video/*,.pdf,.docx" %}
+                {% if mantenimiento and mantenimiento.archivo %}
+                <small class="form-hint">Archivo actual: {{ mantenimiento.archivo.name }}</small>
+                {% else %}
+                <small class="form-hint">JPG, PNG, PDF, DOCX o video.</small>
+                {% endif %}
+                <div id="file-preview" class="file-preview"></div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-info-circle me-1"></i>Estado <span class="required">*</span>
+                    </label>
+                    {% render_field form.estado class="form-select" required="required" %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-exclamation-triangle me-1"></i>Prioridad <span class="required">*</span>
+                    </label>
+                    {% render_field form.prioridad class="form-select" required="required" %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <a href="{% if mantenimiento %}{% url 'mantenimientos_detail' mantenimiento.id %}{% else %}{% url 'mantenimientos' %}{% endif %}" class="btn btn-cancel">
+            <i class="fas fa-times me-2"></i>Cancelar
+        </a>
+        <button type="submit" class="btn btn-save">
+            <i class="fas fa-save me-2"></i>{{ submit_label|default:"Guardar Mantenimiento" }}
+        </button>
+    </div>
+</form>

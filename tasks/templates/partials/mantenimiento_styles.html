@@ -1,0 +1,161 @@
+<style>
+    :root {
+        --primary-neon: #00BCC4;
+        --secondary-neon: #FF2099;
+        --text-primary: #E0E6ED;
+        --text-secondary: rgba(224, 230, 237, 0.7);
+        --bg-dark: #0A0F14;
+        --card-bg: #0F1928;
+        --input-bg: #121E30;
+        --border-glow: rgba(0, 188, 196, 0.15);
+        --success: #4CAF50;
+        --warning: #FF9800;
+        --error: #FF2099;
+    }
+    .cyber-maintenance-container {
+        max-width: 1050px;
+        margin: 0 auto;
+        padding: 1rem;
+        background: var(--bg-dark);
+        min-height: 100vh;
+        font-family: 'Rajdhani', sans-serif;
+    }
+    .cyber-maintenance-header,
+    .cyber-maintenance-form,
+    .cyber-detail-panel {
+        background: var(--card-bg);
+        border: 1px solid var(--border-glow);
+        border-radius: 12px;
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+    }
+    .cyber-maintenance-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 1.2rem 1.5rem;
+    }
+    .cyber-title {
+        font-family: 'Orbitron', monospace;
+        font-size: 1.6rem;
+        color: var(--primary-neon);
+        margin: 0;
+        letter-spacing: 1.5px;
+        font-weight: 700;
+    }
+    .cyber-subtitle {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin: 0.15rem 0 0;
+    }
+    .cyber-maintenance-form,
+    .cyber-detail-panel {
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .form-grid,
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+    }
+    .form-column {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+    }
+    .form-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.4rem;
+        display: flex;
+        align-items: center;
+    }
+    .required { color: var(--error); margin-left: 0.2rem; }
+    .form-control,
+    .form-select {
+        background: var(--input-bg);
+        border: 1px solid var(--border-glow);
+        border-radius: 6px;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        padding: 0.6rem 0.8rem;
+    }
+    .form-control:focus,
+    .form-select:focus {
+        background: var(--input-bg);
+        color: var(--text-primary);
+        border-color: var(--primary-neon);
+        box-shadow: 0 0 0 0.15rem rgba(0, 188, 196, 0.1);
+    }
+    .form-hint,
+    .file-preview,
+    .char-counter {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+    .textarea-wrapper,
+    .form-group { position: relative; }
+    .char-counter {
+        position: absolute;
+        right: 0.8rem;
+        bottom: 0.4rem;
+    }
+    .form-actions,
+    .detail-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-glow);
+        flex-wrap: wrap;
+    }
+    .btn-save {
+        background: linear-gradient(135deg, var(--primary-neon), var(--secondary-neon));
+        color: #061018;
+        border: none;
+        font-weight: 700;
+    }
+    .btn-cancel {
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1px solid var(--border-glow);
+    }
+    .detail-card {
+        background: var(--input-bg);
+        border: 1px solid var(--border-glow);
+        border-radius: 8px;
+        padding: 1rem;
+        min-height: 86px;
+    }
+    .detail-label {
+        color: var(--text-secondary);
+        font-size: 0.78rem;
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .detail-value {
+        color: var(--text-primary);
+        margin: 0;
+        font-size: 1rem;
+    }
+    .detail-description {
+        grid-column: 1 / -1;
+        white-space: pre-wrap;
+    }
+    @media (max-width: 768px) {
+        .cyber-maintenance-header { flex-direction: column; gap: 0.8rem; text-align: center; }
+        .form-row { grid-template-columns: 1fr; }
+        .form-actions, .detail-actions { flex-direction: column; }
+        .form-actions .btn, .detail-actions .btn { width: 100%; justify-content: center; }
+    }
+</style>
