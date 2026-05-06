@@ -71,12 +71,12 @@ class Finanza(models.Model):
 
     CATEGORIA_CHOICES = [
         ('Renta', 'Renta'),
-        ('Gas', 'Gas'),
-        ('Agua', 'Agua'),
-        ('Luz', 'Luz'),
-        ('Luz area comun', 'Luz area comun'),
+        ('Servicios', 'Servicios'),
+        ('Mantenimiento', 'Mantenimiento'),
+        ('Administrativo', 'Administrativo'),
         ('Internet', 'Internet'),
-        ('Mantenimiento Mayaj', 'Mantenimiento Mayaj'),
+        ('Luz area comun', 'Luz area comun'),
+        ('Agua', 'Agua'),
         ('Otro', 'Otro'),
     ]
 

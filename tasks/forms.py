@@ -198,10 +198,12 @@ class FinanzaForm(ModelForm):
         tipo_movimiento = cleaned_data.get('tipo_movimiento')
         categoria = cleaned_data.get('categoria')
 
-        if categoria == 'Renta':
+        if categoria in ['Renta', 'Servicios']:
             cleaned_data['tipo_movimiento'] = 'Ingreso'
-        elif tipo_movimiento == 'Ingreso' and categoria != 'Renta':
-            raise forms.ValidationError('Los ingresos deben registrarse con la categoria Renta.')
+        elif tipo_movimiento == 'Ingreso' and categoria not in ['Renta', 'Servicios']:
+            raise forms.ValidationError('Los ingresos deben registrarse con categoria Renta o Servicios.')
+        elif tipo_movimiento == 'Egreso' and categoria in ['Renta', 'Servicios']:
+            raise forms.ValidationError('Renta y Servicios se registran como ingresos.')
 
         return cleaned_data
 
@@ -213,6 +215,11 @@ class FinanzaForm(ModelForm):
             area_choices.insert(0, (current_departamento, current_departamento))
         self.fields['departamento'].choices = [('', 'Selecciona un area/departamento...'), *area_choices]
         self.fields['departamento'].label = 'Area o departamento'
+
+        current_categoria = self.instance.categoria if self.instance and self.instance.pk else None
+        categoria_choices = list(self.fields['categoria'].choices)
+        if current_categoria and current_categoria not in {value for value, _label in categoria_choices}:
+            self.fields['categoria'].choices = [(current_categoria, current_categoria), *categoria_choices]
 
 
 class RestoreForm(forms.Form):

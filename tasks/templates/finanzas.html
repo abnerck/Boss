@@ -24,6 +24,14 @@
             <h3 class="text-success">${{ ingresos|floatformat:2 }}</h3>
         </div>
         <div class="cyber-maintenance-form">
+            <h5 class="mb-2"><i class="fas fa-building me-2"></i>Rentas</h5>
+            <h3 class="text-success">${{ ingresos_renta|floatformat:2 }}</h3>
+        </div>
+        <div class="cyber-maintenance-form">
+            <h5 class="mb-2"><i class="fas fa-file-invoice-dollar me-2"></i>Servicios cobrados</h5>
+            <h3 class="text-info">${{ ingresos_servicios|floatformat:2 }}</h3>
+        </div>
+        <div class="cyber-maintenance-form">
             <h5 class="mb-2"><i class="fas fa-arrow-trend-down me-2"></i>Egresos</h5>
             <h3 class="text-danger">${{ egresos|floatformat:2 }}</h3>
         </div>
@@ -35,6 +43,19 @@
 
     <form method="get" class="cyber-maintenance-form mb-4">
         <div class="form-grid">
+            <div class="form-group">
+                <label for="clave_inmueble" class="form-label">Inmueble</label>
+                <select id="clave_inmueble" name="clave_inmueble" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="boss8025" {% if selected_property == 'boss8025' %}selected{% endif %}>boss8025</option>
+                    <option value="C1438" {% if selected_property == 'C1438' %}selected{% endif %}>C1438</option>
+                    {% for property in property_choices %}
+                        {% if property != 'boss8025' and property != 'C1438' %}
+                        <option value="{{ property }}" {% if selected_property == property %}selected{% endif %}>{{ property }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
             <div class="form-group">
                 <label for="mes" class="form-label">Mes</label>
                 <select id="mes" name="mes" class="form-select">
@@ -53,6 +74,58 @@
             </div>
         </div>
     </form>
+
+    <div class="form-grid mb-4">
+        <div class="cyber-maintenance-form h-100">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Ingresos por origen</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="ingresosOrigenChart" height="240"></canvas>
+            </div>
+        </div>
+        <div class="cyber-maintenance-form h-100">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Egresos por rubro</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="egresosCategoriaChart" height="240"></canvas>
+            </div>
+        </div>
+        <div class="cyber-maintenance-form h-100">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-door-open me-2"></i>Ingresos por departamento</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="ingresosDepartamentoChart" height="240"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-grid mb-4">
+        <div class="cyber-maintenance-form h-100">
+            <h5 class="mb-3"><i class="fas fa-list-check me-2"></i>Egresos detallados</h5>
+            {% for item in egresos_por_categoria %}
+            <div class="finance-row">
+                <span>{{ item.categoria|default:"Sin categoria" }}</span>
+                <strong>${{ item.total|floatformat:2 }}</strong>
+            </div>
+            {% empty %}
+            <p class="text-muted mb-0">Sin egresos en este periodo.</p>
+            {% endfor %}
+        </div>
+        <div class="cyber-maintenance-form h-100">
+            <h5 class="mb-3"><i class="fas fa-building-user me-2"></i>Rentas y servicios por departamento</h5>
+            {% for item in ingresos_por_departamento %}
+            <div class="finance-row">
+                <span>{{ item.departamento|default:"Sin departamento" }}</span>
+                <strong>${{ item.total|floatformat:2 }}</strong>
+            </div>
+            {% empty %}
+            <p class="text-muted mb-0">Sin ingresos por departamento en este periodo.</p>
+            {% endfor %}
+        </div>
+    </div>
 
     {% if comparativo %}
     <div class="cyber-maintenance-form mb-4">
@@ -380,6 +453,94 @@
 $(document).ready(function() {
     // Logotipo en Base64 (marcador de posición, reemplaza con tu propio logotipo)
     var logoBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAMAAABHPGVmAAAAA1BMVEX///+nxBvIAAAAIElEQVRoge3BAQ0AAADCoPdPbQ8HFAAAAAAAAAAAAPgT1y0AAd9zLeQAAAAASUVORK5CYII=";
+
+    function chartDataWithPercent(labels, values) {
+        const total = values.reduce((sum, value) => sum + Number(value || 0), 0);
+        return labels.map((label, index) => {
+            const value = Number(values[index] || 0);
+            const percent = total > 0 ? Math.round((value / total) * 100) : 0;
+            return `${label} (${percent}%)`;
+        });
+    }
+
+    function initFinanceDoughnut(id, labels, values, colors) {
+        const canvas = document.getElementById(id);
+        if (!canvas) return null;
+        const total = values.reduce((sum, value) => sum + Number(value || 0), 0);
+        const percentLabels = {
+            id: `${id}PercentLabels`,
+            afterDatasetsDraw(chart) {
+                const meta = chart.getDatasetMeta(0);
+                const dataset = chart.data.datasets[0];
+                const chartTotal = dataset.data.reduce((sum, value) => sum + Number(value || 0), 0);
+                const { ctx } = chart;
+
+                ctx.save();
+                ctx.font = '700 12px Rajdhani, Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                meta.data.forEach((arc, index) => {
+                    const value = Number(dataset.data[index] || 0);
+                    if (!value || !chartTotal) return;
+                    const percent = Math.round((value / chartTotal) * 100);
+                    const position = arc.tooltipPosition();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+                    ctx.lineWidth = 3;
+                    ctx.strokeText(`${percent}%`, position.x, position.y);
+                    ctx.fillText(`${percent}%`, position.x, position.y);
+                });
+                ctx.restore();
+            }
+        };
+
+        return new Chart(canvas.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: chartDataWithPercent(labels, values),
+                datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }]
+            },
+            plugins: [percentLabels],
+            options: {
+                responsive: true,
+                cutout: '58%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: 'var(--text-primary)', font: { family: 'Rajdhani, sans-serif', size: 13 } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = Number(context.raw || 0);
+                                const percent = total > 0 ? Math.round((value / total) * 100) : 0;
+                                return `${context.label}: $${value.toFixed(2)} (${percent}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    initFinanceDoughnut(
+        'ingresosOrigenChart',
+        ['Renta', 'Servicios'],
+        [Number('{{ ingresos_renta|floatformat:2 }}'), Number('{{ ingresos_servicios|floatformat:2 }}')],
+        ['rgba(25, 135, 84, 0.85)', 'rgba(13, 202, 240, 0.85)']
+    );
+    initFinanceDoughnut(
+        'egresosCategoriaChart',
+        [{% for item in egresos_por_categoria %}'{{ item.categoria|default:"Sin categoria"|escapejs }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        [{% for item in egresos_por_categoria %}Number('{{ item.total|floatformat:2 }}'){% if not forloop.last %},{% endif %}{% endfor %}],
+        ['rgba(220, 53, 69, 0.85)', 'rgba(255, 193, 7, 0.85)', 'rgba(13, 110, 253, 0.85)', 'rgba(111, 66, 193, 0.85)', 'rgba(108, 117, 125, 0.85)']
+    );
+    initFinanceDoughnut(
+        'ingresosDepartamentoChart',
+        [{% for item in ingresos_por_departamento %}'{{ item.departamento|default:"Sin departamento"|escapejs }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        [{% for item in ingresos_por_departamento %}Number('{{ item.total|floatformat:2 }}'){% if not forloop.last %},{% endif %}{% endfor %}],
+        ['rgba(25, 135, 84, 0.85)', 'rgba(13, 110, 253, 0.85)', 'rgba(32, 201, 151, 0.85)', 'rgba(255, 193, 7, 0.85)', 'rgba(102, 16, 242, 0.85)', 'rgba(214, 51, 132, 0.85)']
+    );
 
     // Inicializar DataTable sin paginación
     var table = $('#tablaFinanzas').DataTable({
@@ -951,6 +1112,28 @@ $(document).ready(function() {
 
     .form-control::placeholder {
         color: var(--text-secondary);
+    }
+
+    .finance-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.65rem 0;
+        border-bottom: 1px solid var(--border-glow);
+        color: var(--text-primary);
+    }
+
+    .finance-row:last-child {
+        border-bottom: 0;
+    }
+
+    .finance-row span {
+        color: var(--text-secondary);
+    }
+
+    .finance-row strong {
+        color: var(--text-primary);
+        white-space: nowrap;
     }
 
     .input-group-text {

@@ -1,5 +1,6 @@
 import calendar
 import os
+from decimal import Decimal
 from datetime import timedelta
 
 from django.contrib import messages
@@ -227,18 +228,46 @@ def delete_usuario(request, user_id):
 def finanzas(request):
     selected_year = request.GET.get('anio')
     selected_month = request.GET.get('mes')
+    selected_property = request.GET.get('clave_inmueble')
     finanza_base = Finanza.objects.select_related('user').all()
     finanza = finanza_base.order_by('-fecha', '-id')
 
+    if selected_property:
+        finanza = finanza.filter(clave_inmueble=selected_property)
     if selected_year:
         finanza = finanza.filter(anio=selected_year)
     if selected_month:
         finanza = finanza.filter(mes=selected_month)
 
-    ingresos = finanza.filter(tipo_movimiento='Ingreso').aggregate(total=Sum('total'))['total'] or 0
-    egresos = finanza.filter(tipo_movimiento='Egreso').aggregate(total=Sum('total'))['total'] or 0
+    ingresos_qs = finanza.filter(tipo_movimiento='Ingreso')
+    egresos_qs = finanza.filter(tipo_movimiento='Egreso')
+    ingresos = ingresos_qs.aggregate(total=Sum('total'))['total'] or Decimal('0')
+    egresos = egresos_qs.aggregate(total=Sum('total'))['total'] or Decimal('0')
     balance = ingresos - egresos
+
+    ingresos_renta = ingresos_qs.aggregate(total=Sum('costo'))['total'] or Decimal('0')
+    servicios_agregados = ingresos_qs.aggregate(
+        gas=Sum('gas'),
+        agua=Sum('agua'),
+        luz=Sum('luz'),
+    )
+    ingresos_servicios = (
+        (servicios_agregados['gas'] or Decimal('0')) +
+        (servicios_agregados['agua'] or Decimal('0')) +
+        (servicios_agregados['luz'] or Decimal('0'))
+    )
+    ingresos_servicios += ingresos_qs.filter(categoria='Servicios').aggregate(total=Sum('costo'))['total'] or Decimal('0')
+
+    egresos_por_categoria = egresos_qs.values('categoria').annotate(total=Sum('total')).order_by('-total')
+    ingresos_por_departamento = ingresos_qs.values('departamento').annotate(total=Sum('total')).order_by('-total')[:12]
     por_categoria = finanza.values('tipo_movimiento', 'categoria').annotate(total=Sum('total')).order_by('tipo_movimiento', 'categoria')
+    categoria_total = ingresos + egresos
+    categoria_resumen = []
+    for item in por_categoria:
+        total = item['total'] or Decimal('0')
+        item['percent'] = round((total / categoria_total * 100) if categoria_total else 0, 1)
+        categoria_resumen.append(item)
+
     por_periodo = (
         finanza_base.exclude(mes__isnull=True).exclude(anio__isnull=True)
         .values('anio', 'mes', 'tipo_movimiento')
@@ -266,12 +295,19 @@ def finanzas(request):
         'ingresos': ingresos,
         'egresos': egresos,
         'balance': balance,
+        'ingresos_renta': ingresos_renta,
+        'ingresos_servicios': ingresos_servicios,
+        'egresos_por_categoria': egresos_por_categoria,
+        'ingresos_por_departamento': ingresos_por_departamento,
         'por_categoria': por_categoria,
+        'categoria_resumen': categoria_resumen,
         'por_periodo': por_periodo,
         'comparativo': comparativo,
         'selected_year': selected_year or '',
         'selected_month': selected_month or '',
+        'selected_property': selected_property or '',
         'months': Finanza.MES_CHOICES,
+        'property_choices': Finanza.objects.values_list('clave_inmueble', flat=True).distinct().order_by('clave_inmueble'),
     })
 
 
