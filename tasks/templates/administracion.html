@@ -3,6 +3,63 @@
 {% block title %}Panel de Administracion{% endblock %}
 
 {% block content %}
+<style>
+    .admin-dashboard {
+        background: #f5f7fb;
+        color: #1f2937;
+        min-height: calc(100vh - 56px);
+    }
+    .admin-dashboard h1,
+    .admin-dashboard h2,
+    .admin-dashboard h3,
+    .admin-dashboard h4,
+    .admin-dashboard h5,
+    .admin-dashboard h6,
+    .admin-dashboard p,
+    .admin-dashboard td,
+    .admin-dashboard th,
+    .admin-dashboard label {
+        color: #1f2937 !important;
+        text-shadow: none !important;
+    }
+    .admin-dashboard .text-muted,
+    .admin-dashboard small {
+        color: #475569 !important;
+        text-shadow: none !important;
+    }
+    .admin-dashboard .table {
+        color: #1f2937;
+    }
+    .admin-dashboard .table thead th {
+        background: #eef2f7;
+        border-bottom-color: #d8e0ea;
+        color: #334155 !important;
+    }
+    .admin-dashboard .badge {
+        color: #fff !important;
+    }
+    .metric-card, .panel {
+        background: #fff;
+        border: 1px solid #e3e8ef;
+        border-radius: 8px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, .06);
+    }
+    .metric-card { padding: 18px; border-left: 5px solid #0d6efd; min-height: 138px; }
+    .metric-card span { display: block; color: #64748b !important; font-size: .82rem; text-transform: uppercase; font-weight: 700; }
+    .metric-card strong { display: block; color: #111827 !important; font-size: 1.9rem; line-height: 1.2; margin: 8px 0; }
+    .metric-card small { color: #475569 !important; }
+    .accent-blue { border-left-color: #0d6efd; }
+    .accent-orange { border-left-color: #f59f00; }
+    .accent-green { border-left-color: #198754; }
+    .accent-purple { border-left-color: #7048e8; }
+    .panel { padding: 18px; height: 100%; }
+    .panel-title { font-weight: 800; color: #1f2937 !important; margin-bottom: 14px; text-shadow: none !important; }
+    .mini-list div { display: flex; justify-content: space-between; gap: 14px; padding: 9px 0; border-bottom: 1px solid #edf2f7; }
+    .mini-list div:last-child { border-bottom: 0; }
+    .mini-list span { color: #475569 !important; }
+    .mini-list strong { color: #111827 !important; }
+</style>
+
 <div class="container-fluid py-4 admin-dashboard">
     <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
         <div>
@@ -220,61 +277,4 @@ makeChart(
     ['#ffc107', '#0d6efd', '#6c757d', '#198754', '#dc3545']
 );
 </script>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-    .admin-dashboard {
-        background: #f5f7fb;
-        color: #1f2937;
-        min-height: calc(100vh - 56px);
-    }
-    .admin-dashboard h1,
-    .admin-dashboard h2,
-    .admin-dashboard h3,
-    .admin-dashboard h4,
-    .admin-dashboard h5,
-    .admin-dashboard h6,
-    .admin-dashboard p,
-    .admin-dashboard td,
-    .admin-dashboard th,
-    .admin-dashboard label {
-        color: #1f2937;
-    }
-    .admin-dashboard .text-muted,
-    .admin-dashboard small {
-        color: #64748b !important;
-    }
-    .admin-dashboard .table {
-        color: #1f2937;
-    }
-    .admin-dashboard .table thead th {
-        background: #eef2f7;
-        border-bottom-color: #d8e0ea;
-        color: #334155;
-    }
-    .admin-dashboard .badge {
-        color: #fff;
-    }
-    .metric-card, .panel {
-        background: #fff;
-        border: 1px solid #e3e8ef;
-        border-radius: 8px;
-        box-shadow: 0 8px 20px rgba(15, 23, 42, .06);
-    }
-    .metric-card { padding: 18px; border-left: 5px solid #0d6efd; min-height: 138px; }
-    .metric-card span { display: block; color: #64748b; font-size: .82rem; text-transform: uppercase; font-weight: 700; }
-    .metric-card strong { display: block; color: #111827; font-size: 1.9rem; line-height: 1.2; margin: 8px 0; }
-    .metric-card small { color: #64748b; }
-    .accent-blue { border-left-color: #0d6efd; }
-    .accent-orange { border-left-color: #f59f00; }
-    .accent-green { border-left-color: #198754; }
-    .accent-purple { border-left-color: #7048e8; }
-    .panel { padding: 18px; height: 100%; }
-    .panel-title { font-weight: 800; color: #1f2937; margin-bottom: 14px; }
-    .mini-list div { display: flex; justify-content: space-between; gap: 14px; padding: 9px 0; border-bottom: 1px solid #edf2f7; }
-    .mini-list div:last-child { border-bottom: 0; }
-    .mini-list span { color: #475569; }
-    .mini-list strong { color: #111827; }
-</style>
 {% endblock %}
