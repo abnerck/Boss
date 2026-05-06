@@ -78,7 +78,7 @@
     <div class="form-grid mb-4">
         <div class="cyber-maintenance-form h-100">
             <div class="card-header bg-dark text-white">
-                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Ingresos por origen</h5>
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Ingresos por rubro</h5>
             </div>
             <div class="card-body">
                 <canvas id="ingresosOrigenChart" height="240"></canvas>
@@ -123,6 +123,17 @@
             </div>
             {% empty %}
             <p class="text-muted mb-0">Sin ingresos por departamento en este periodo.</p>
+            {% endfor %}
+        </div>
+        <div class="cyber-maintenance-form h-100">
+            <h5 class="mb-3"><i class="fas fa-scale-balanced me-2"></i>Balance por departamento</h5>
+            {% for item in movimientos_por_departamento %}
+            <div class="finance-row">
+                <span>{{ item.departamento|default:"Sin departamento" }}</span>
+                <strong class="{% if item.balance >= 0 %}text-success{% else %}text-danger{% endif %}">${{ item.balance|floatformat:2 }}</strong>
+            </div>
+            {% empty %}
+            <p class="text-muted mb-0">Sin movimientos por departamento en este periodo.</p>
             {% endfor %}
         </div>
     </div>
@@ -231,22 +242,12 @@
                         <th>Tipo</th>
                         <th>Categoría</th>
                         <th>Concepto</th>
-                        <th>Renta/Importe</th>
-                        <th>Gas</th>
-                        <th>Agua</th>
-                        <th>Luz</th>
-                        <th>Fechas de pago</th>
-                        <th>Total</th>
+                        <th>Monto</th>
+                        <th>Fecha de pago</th>
                         <th>Solicita</th>
-                        <th>Autoriza</th>
                         <th>Status</th>
                         <th>Proveedor</th>
                         <th>Factura</th>
-                        <th>Cuenta Bancaria</th>
-                        <th>CLABE</th>
-                        <th>Banco</th>
-                        <th>Nombre</th>
-                        <th>RFC</th>
                         <th>Fecha</th>
                         <th>Usuario</th>
                         <th>Observaciones</th>
@@ -279,39 +280,11 @@
                             </span>
                         </td>
                         <td class="text-center">
-                            <span class="badge bg-light text-dark">
-                                ${{ f.gas|floatformat:2 }}
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge bg-light text-dark">
-                                ${{ f.agua|floatformat:2 }}
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge bg-light text-dark">
-                                ${{ f.luz|floatformat:2 }}
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            <small class="text-muted d-block">Renta: {{ f.fecha_pago|date:"d/m/Y"|default:"-" }}</small>
-                            <small class="text-muted d-block">Gas: {{ f.fecha_pago_gas|date:"d/m/Y"|default:"-" }}</small>
-                            <small class="text-muted d-block">Agua: {{ f.fecha_pago_agua|date:"d/m/Y"|default:"-" }}</small>
-                            <small class="text-muted d-block">Luz: {{ f.fecha_pago_luz|date:"d/m/Y"|default:"-" }}</small>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge bg-danger bg-opacity-10 text-danger">
-                                ${{ f.total|floatformat:2 }}
-                            </span>
+                            <small class="text-muted">{{ f.fecha_pago|date:"d/m/Y"|default:"-" }}</small>
                         </td>
                         <td class="text-center">
                             <span class="badge bg-primary bg-opacity-10 text-primary">
                                 {{ f.solicita|truncatechars:15 }}
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge bg-light text-dark">
-                                {{ f.autoriza|truncatechars:15|default:"-" }}
                             </span>
                         </td>
                         <td class="text-center">
@@ -333,31 +306,6 @@
                         <td class="text-center">
                             <span class="badge bg-light text-dark">
                                 {{ f.factura|truncatechars:15|default:"-" }}
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge bg-light text-dark">
-                                {{ f.cta_bancaria|truncatechars:15|default:"-" }}
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge bg-light text-dark">
-                                {{ f.clabe|truncatechars:15|default:"-" }}
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge bg-light text-dark">
-                                {{ f.banco|truncatechars:15|default:"-" }}
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge bg-light text-dark">
-                                {{ f.nombre|truncatechars:15|default:"-" }}
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge bg-light text-dark">
-                                {{ f.rfc|truncatechars:13|default:"-" }}
                             </span>
                         </td>
                         <td class="text-center">
@@ -525,9 +473,9 @@ $(document).ready(function() {
 
     initFinanceDoughnut(
         'ingresosOrigenChart',
-        ['Renta', 'Servicios'],
-        [Number('{{ ingresos_renta|floatformat:2 }}'), Number('{{ ingresos_servicios|floatformat:2 }}')],
-        ['rgba(25, 135, 84, 0.85)', 'rgba(13, 202, 240, 0.85)']
+        [{% for item in ingresos_por_categoria %}'{{ item.categoria|default:"Sin categoria"|escapejs }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        [{% for item in ingresos_por_categoria %}Number('{{ item.total|floatformat:2 }}'){% if not forloop.last %},{% endif %}{% endfor %}],
+        ['rgba(25, 135, 84, 0.85)', 'rgba(13, 202, 240, 0.85)', 'rgba(32, 201, 151, 0.85)', 'rgba(13, 110, 253, 0.85)', 'rgba(255, 193, 7, 0.85)']
     );
     initFinanceDoughnut(
         'egresosCategoriaChart',
@@ -788,7 +736,7 @@ $(document).ready(function() {
             statuses.forEach(function(status) {
                 var count = 0;
                 filteredData.each(function(row) {
-                    if (row[15].includes(status)) count++;
+                    if (row[10].includes(status)) count++;
                 });
                 if (count > 0) {
                     labels.push(status);
@@ -847,12 +795,12 @@ $(document).ready(function() {
     });
 
     $('#filtroStatus').on('change', function() {
-        table.column(15).search(this.value).draw();
+        table.column(10).search(this.value).draw();
         updateCharts();
     });
 
     $('#filtroProveedor').on('keyup', function() {
-        table.column(16).search(this.value).draw();
+        table.column(11).search(this.value).draw();
         updateCharts();
     });
 

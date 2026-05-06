@@ -101,7 +101,7 @@
                     <!-- Costo -->
                     <div class="form-group">
                         <label for="{{ form.costo.id_for_label }}" class="form-label">
-                            <i class="fas fa-money-bill-wave me-1"></i>Renta/Importe <span class="required">*</span>
+                            <i class="fas fa-money-bill-wave me-1"></i>Monto del movimiento <span class="required">*</span>
                         </label>
                         <div class="input-group">
                             <span class="input-group-text">$</span>
@@ -161,39 +161,6 @@
 
                 <!-- Columna Derecha -->
                 <div class="form-column">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="{{ form.gas.id_for_label }}" class="form-label"><i class="fas fa-fire me-1"></i>Gas</label>
-                            {% render_field form.gas class="form-control" placeholder="0.00" step="0.01" %}
-                        </div>
-                        <div class="form-group">
-                            <label for="{{ form.fecha_pago_gas.id_for_label }}" class="form-label"><i class="fas fa-calendar-check me-1"></i>Pago gas</label>
-                            {% render_field form.fecha_pago_gas class="form-control" %}
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="{{ form.agua.id_for_label }}" class="form-label"><i class="fas fa-droplet me-1"></i>Agua</label>
-                            {% render_field form.agua class="form-control" placeholder="0.00" step="0.01" %}
-                        </div>
-                        <div class="form-group">
-                            <label for="{{ form.fecha_pago_agua.id_for_label }}" class="form-label"><i class="fas fa-calendar-check me-1"></i>Pago agua</label>
-                            {% render_field form.fecha_pago_agua class="form-control" %}
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="{{ form.luz.id_for_label }}" class="form-label"><i class="fas fa-bolt me-1"></i>Luz</label>
-                            {% render_field form.luz class="form-control" placeholder="0.00" step="0.01" %}
-                        </div>
-                        <div class="form-group">
-                            <label for="{{ form.fecha_pago_luz.id_for_label }}" class="form-label"><i class="fas fa-calendar-check me-1"></i>Pago luz</label>
-                            {% render_field form.fecha_pago_luz class="form-control" %}
-                        </div>
-                    </div>
-
                     <!-- Status -->
                     <div class="form-group">
                         <label for="{{ form.status.id_for_label }}" class="form-label">
@@ -346,20 +313,8 @@
                     <p class="detail-text">{{ finanza.concepto }}</p>
                 </div>
                 <div class="detail-card">
-                    <h5 class="detail-title"><i class="fas fa-money-bill-wave me-2"></i>Renta/Importe</h5>
-                    <p class="detail-text text-danger fw-bold">${{ finanza.costo|floatformat:2 }}</p>
-                </div>
-                <div class="detail-card">
-                    <h5 class="detail-title"><i class="fas fa-fire me-2"></i>Gas</h5>
-                    <p class="detail-text">${{ finanza.gas|floatformat:2 }} - {{ finanza.fecha_pago_gas|date:"d/m/Y"|default:"Sin fecha" }}</p>
-                </div>
-                <div class="detail-card">
-                    <h5 class="detail-title"><i class="fas fa-droplet me-2"></i>Agua</h5>
-                    <p class="detail-text">${{ finanza.agua|floatformat:2 }} - {{ finanza.fecha_pago_agua|date:"d/m/Y"|default:"Sin fecha" }}</p>
-                </div>
-                <div class="detail-card">
-                    <h5 class="detail-title"><i class="fas fa-bolt me-2"></i>Luz</h5>
-                    <p class="detail-text">${{ finanza.luz|floatformat:2 }} - {{ finanza.fecha_pago_luz|date:"d/m/Y"|default:"Sin fecha" }}</p>
+                    <h5 class="detail-title"><i class="fas fa-money-bill-wave me-2"></i>Monto</h5>
+                    <p class="detail-text text-danger fw-bold">${{ finanza.total|floatformat:2 }}</p>
                 </div>
                 <div class="detail-card">
                     <h5 class="detail-title"><i class="fas fa-money-bill-wave me-2"></i>Total</h5>

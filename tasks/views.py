@@ -230,10 +230,12 @@ def finanzas(request):
     selected_month = request.GET.get('mes')
     selected_property = request.GET.get('clave_inmueble')
     finanza_base = Finanza.objects.select_related('user').all()
+    analysis_base = finanza_base
     finanza = finanza_base.order_by('-fecha', '-id')
 
     if selected_property:
         finanza = finanza.filter(clave_inmueble=selected_property)
+        analysis_base = analysis_base.filter(clave_inmueble=selected_property)
     if selected_year:
         finanza = finanza.filter(anio=selected_year)
     if selected_month:
@@ -245,21 +247,26 @@ def finanzas(request):
     egresos = egresos_qs.aggregate(total=Sum('total'))['total'] or Decimal('0')
     balance = ingresos - egresos
 
-    ingresos_renta = ingresos_qs.aggregate(total=Sum('costo'))['total'] or Decimal('0')
-    servicios_agregados = ingresos_qs.aggregate(
-        gas=Sum('gas'),
-        agua=Sum('agua'),
-        luz=Sum('luz'),
-    )
-    ingresos_servicios = (
-        (servicios_agregados['gas'] or Decimal('0')) +
-        (servicios_agregados['agua'] or Decimal('0')) +
-        (servicios_agregados['luz'] or Decimal('0'))
-    )
-    ingresos_servicios += ingresos_qs.filter(categoria='Servicios').aggregate(total=Sum('costo'))['total'] or Decimal('0')
+    ingresos_renta = ingresos_qs.filter(categoria='Renta').aggregate(total=Sum('total'))['total'] or Decimal('0')
+    ingresos_servicios = ingresos_qs.filter(categoria__in=['Gas', 'Agua', 'Luz', 'Servicios']).aggregate(total=Sum('total'))['total'] or Decimal('0')
 
     egresos_por_categoria = egresos_qs.values('categoria').annotate(total=Sum('total')).order_by('-total')
     ingresos_por_departamento = ingresos_qs.values('departamento').annotate(total=Sum('total')).order_by('-total')[:12]
+    ingresos_por_categoria = ingresos_qs.values('categoria').annotate(total=Sum('total')).order_by('-total')
+    movimientos_por_departamento = (
+        finanza.exclude(departamento__isnull=True).exclude(departamento='')
+        .values('departamento')
+        .annotate(
+            ingresos=Sum('total', filter=Q(tipo_movimiento='Ingreso')),
+            egresos=Sum('total', filter=Q(tipo_movimiento='Egreso')),
+        )
+        .order_by('departamento')
+    )
+    for item in movimientos_por_departamento:
+        item['ingresos'] = item['ingresos'] or Decimal('0')
+        item['egresos'] = item['egresos'] or Decimal('0')
+        item['balance'] = item['ingresos'] - item['egresos']
+
     por_categoria = finanza.values('tipo_movimiento', 'categoria').annotate(total=Sum('total')).order_by('tipo_movimiento', 'categoria')
     categoria_total = ingresos + egresos
     categoria_resumen = []
@@ -269,14 +276,14 @@ def finanzas(request):
         categoria_resumen.append(item)
 
     por_periodo = (
-        finanza_base.exclude(mes__isnull=True).exclude(anio__isnull=True)
+        analysis_base.exclude(mes__isnull=True).exclude(anio__isnull=True)
         .values('anio', 'mes', 'tipo_movimiento')
         .annotate(total=Sum('total'))
         .order_by('-anio', '-mes', 'tipo_movimiento')[:24]
     )
     comparativo = []
     periodos = (
-        finanza_base.exclude(mes__isnull=True).exclude(anio__isnull=True)
+        analysis_base.exclude(mes__isnull=True).exclude(anio__isnull=True)
         .values('anio', 'mes')
         .annotate(
             ingresos=Sum('total', filter=Q(tipo_movimiento='Ingreso')),
@@ -298,7 +305,9 @@ def finanzas(request):
         'ingresos_renta': ingresos_renta,
         'ingresos_servicios': ingresos_servicios,
         'egresos_por_categoria': egresos_por_categoria,
+        'ingresos_por_categoria': ingresos_por_categoria,
         'ingresos_por_departamento': ingresos_por_departamento,
+        'movimientos_por_departamento': movimientos_por_departamento,
         'por_categoria': por_categoria,
         'categoria_resumen': categoria_resumen,
         'por_periodo': por_periodo,

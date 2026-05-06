@@ -88,7 +88,7 @@
                     <label for="id_concepto" class="form-label">
                         <i class="fas fa-heading me-1"></i>Concepto <span class="required">*</span>
                     </label>
-                    {% render_field form.concepto class="form-control" placeholder="Ej: Pago de servicios" required="required" %}
+                    {% render_field form.concepto class="form-control" placeholder="Ej: Renta depto 101, pago de agua, luz area comun" required="required" %}
                     {% if form.concepto.errors %}
                     <div class="invalid-feedback">
                         {{ form.concepto.errors.0 }}
@@ -99,7 +99,7 @@
                 <!-- Costo -->
                 <div class="form-group">
                     <label for="id_costo" class="form-label">
-                        <i class="fas fa-money-bill-wave me-1"></i>Renta/Importe <span class="required">*</span>
+                        <i class="fas fa-money-bill-wave me-1"></i>Monto del movimiento <span class="required">*</span>
                     </label>
                     <div class="input-group">
                         <span class="input-group-text">$</span>
@@ -172,39 +172,6 @@
                         {{ form.factura.errors.0 }}
                     </div>
                     {% endif %}
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="id_gas" class="form-label"><i class="fas fa-fire me-1"></i>Gas</label>
-                        {% render_field form.gas class="form-control" placeholder="0.00" step="0.01" %}
-                    </div>
-                    <div class="form-group">
-                        <label for="id_fecha_pago_gas" class="form-label"><i class="fas fa-calendar-check me-1"></i>Pago gas</label>
-                        {% render_field form.fecha_pago_gas class="form-control" %}
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="id_agua" class="form-label"><i class="fas fa-droplet me-1"></i>Agua</label>
-                        {% render_field form.agua class="form-control" placeholder="0.00" step="0.01" %}
-                    </div>
-                    <div class="form-group">
-                        <label for="id_fecha_pago_agua" class="form-label"><i class="fas fa-calendar-check me-1"></i>Pago agua</label>
-                        {% render_field form.fecha_pago_agua class="form-control" %}
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="id_luz" class="form-label"><i class="fas fa-bolt me-1"></i>Luz</label>
-                        {% render_field form.luz class="form-control" placeholder="0.00" step="0.01" %}
-                    </div>
-                    <div class="form-group">
-                        <label for="id_fecha_pago_luz" class="form-label"><i class="fas fa-calendar-check me-1"></i>Pago luz</label>
-                        {% render_field form.fecha_pago_luz class="form-control" %}
-                    </div>
                 </div>
 
                 <!-- Observaciones -->

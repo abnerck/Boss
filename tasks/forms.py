@@ -167,12 +167,6 @@ class FinanzaForm(ModelForm):
             'concepto',
             'costo',
             'fecha_pago',
-            'gas',
-            'fecha_pago_gas',
-            'agua',
-            'fecha_pago_agua',
-            'luz',
-            'fecha_pago_luz',
             'solicita',
             'autoriza',
             'status',
@@ -188,9 +182,6 @@ class FinanzaForm(ModelForm):
         widgets = {
             'anio': forms.NumberInput(attrs={'min': 2000, 'max': 2100}),
             'fecha_pago': forms.DateInput(attrs={'type': 'date'}),
-            'fecha_pago_gas': forms.DateInput(attrs={'type': 'date'}),
-            'fecha_pago_agua': forms.DateInput(attrs={'type': 'date'}),
-            'fecha_pago_luz': forms.DateInput(attrs={'type': 'date'}),
         }
 
     def clean(self):
@@ -198,12 +189,10 @@ class FinanzaForm(ModelForm):
         tipo_movimiento = cleaned_data.get('tipo_movimiento')
         categoria = cleaned_data.get('categoria')
 
-        if categoria in ['Renta', 'Servicios']:
+        if categoria == 'Renta':
             cleaned_data['tipo_movimiento'] = 'Ingreso'
-        elif tipo_movimiento == 'Ingreso' and categoria not in ['Renta', 'Servicios']:
-            raise forms.ValidationError('Los ingresos deben registrarse con categoria Renta o Servicios.')
-        elif tipo_movimiento == 'Egreso' and categoria in ['Renta', 'Servicios']:
-            raise forms.ValidationError('Renta y Servicios se registran como ingresos.')
+        elif tipo_movimiento == 'Egreso' and categoria == 'Renta':
+            raise forms.ValidationError('La renta debe registrarse como ingreso.')
 
         return cleaned_data
 
