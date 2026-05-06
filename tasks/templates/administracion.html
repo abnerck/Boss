@@ -143,10 +143,68 @@
 function makeChart(id, labels, data, colors) {
     const ctx = document.getElementById(id);
     if (!ctx) return;
+    const total = data.reduce((sum, value) => sum + Number(value || 0), 0);
+    const labelsWithPercent = labels.map((label, index) => {
+        const value = Number(data[index] || 0);
+        const percent = total > 0 ? Math.round((value / total) * 100) : 0;
+        return `${label} (${percent}%)`;
+    });
+    const percentLabels = {
+        id: `${id}PercentLabels`,
+        afterDatasetsDraw(chart) {
+            const meta = chart.getDatasetMeta(0);
+            const dataset = chart.data.datasets[0];
+            const chartTotal = dataset.data.reduce((sum, value) => sum + Number(value || 0), 0);
+            const { ctx } = chart;
+
+            ctx.save();
+            ctx.font = '700 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            meta.data.forEach((arc, index) => {
+                const value = Number(dataset.data[index] || 0);
+                if (!value || !chartTotal) return;
+                const percent = Math.round((value / chartTotal) * 100);
+                const position = arc.tooltipPosition();
+                const text = `${percent}%`;
+                const width = ctx.measureText(text).width + 12;
+
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+                ctx.strokeStyle = 'rgba(17, 24, 39, 0.16)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.roundRect(position.x - width / 2, position.y - 11, width, 22, 6);
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = '#111827';
+                ctx.fillText(text, position.x, position.y);
+            });
+            ctx.restore();
+        }
+    };
     new Chart(ctx, {
         type: 'doughnut',
-        data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0 }] },
-        options: { plugins: { legend: { position: 'bottom' } }, cutout: '62%' }
+        data: { labels: labelsWithPercent, datasets: [{ data, backgroundColor: colors, borderWidth: 0 }] },
+        plugins: [percentLabels],
+        options: {
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#1f2937', font: { weight: '600' } }
+                },
+                tooltip: {
+                    callbacks: {
+                        label(context) {
+                            const value = Number(context.raw || 0);
+                            const percent = total > 0 ? Math.round((value / total) * 100) : 0;
+                            return `${context.label}: ${value} (${percent}%)`;
+                        }
+                    }
+                }
+            },
+            cutout: '62%'
+        }
     });
 }
 makeChart(
@@ -166,7 +224,38 @@ makeChart(
 
 {% block extra_css %}
 <style>
-    .admin-dashboard { background: #f5f7fb; min-height: calc(100vh - 56px); }
+    .admin-dashboard {
+        background: #f5f7fb;
+        color: #1f2937;
+        min-height: calc(100vh - 56px);
+    }
+    .admin-dashboard h1,
+    .admin-dashboard h2,
+    .admin-dashboard h3,
+    .admin-dashboard h4,
+    .admin-dashboard h5,
+    .admin-dashboard h6,
+    .admin-dashboard p,
+    .admin-dashboard td,
+    .admin-dashboard th,
+    .admin-dashboard label {
+        color: #1f2937;
+    }
+    .admin-dashboard .text-muted,
+    .admin-dashboard small {
+        color: #64748b !important;
+    }
+    .admin-dashboard .table {
+        color: #1f2937;
+    }
+    .admin-dashboard .table thead th {
+        background: #eef2f7;
+        border-bottom-color: #d8e0ea;
+        color: #334155;
+    }
+    .admin-dashboard .badge {
+        color: #fff;
+    }
     .metric-card, .panel {
         background: #fff;
         border: 1px solid #e3e8ef;
