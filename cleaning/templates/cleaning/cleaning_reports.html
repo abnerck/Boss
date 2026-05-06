@@ -704,6 +704,49 @@
     </a>
 </div>
 
+{% if user.is_staff or user.is_superuser %}
+<div class="cyber-panel" data-aos="fade-up">
+    <h4 style="color: var(--primary-neon); font-family: 'Orbitron', sans-serif;">
+        <i class="fas fa-tags"></i> ETIQUETAS EDITABLES DE LIMPIEZA
+    </h4>
+    <p style="color: var(--text-light);">Ajusta area, actividad y periodicidad cuando cambien los espacios o dias de limpieza.</p>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Area</th>
+                    <th>Actividad</th>
+                    <th>Periodicidad</th>
+                    <th>Estilo</th>
+                    <th>Guardar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for activity in activity_labels %}
+                <tr>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="activity_id" value="{{ activity.id }}">
+                        <td><input class="date-picker" name="area" value="{{ activity.area }}" style="width: 100%; margin-left: 0;"></td>
+                        <td><input class="date-picker" name="task" value="{{ activity.task }}" style="width: 100%; margin-left: 0;"></td>
+                        <td><input class="date-picker" name="frequency" value="{{ activity.frequency }}" style="width: 100%; margin-left: 0;"></td>
+                        <td>
+                            <select class="date-picker" name="css_class" style="width: 100%; margin-left: 0;">
+                                <option value="" {% if not activity.css_class %}selected{% endif %}>Normal</option>
+                                <option value="daily" {% if activity.css_class == 'daily' %}selected{% endif %}>Diario</option>
+                                <option value="biweekly" {% if activity.css_class == 'biweekly' %}selected{% endif %}>Quincenal</option>
+                            </select>
+                        </td>
+                        <td><button class="date-btn" type="submit">Guardar</button></td>
+                    </form>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
 <script>
     // Establecer la fecha máxima como hoy en el selector
     document.addEventListener('DOMContentLoaded', function() {

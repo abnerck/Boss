@@ -1,242 +1,191 @@
 {% extends 'base.html' %}
 
-{% block title %}Panel de Administración{% endblock %}
+{% block title %}Panel de Administracion{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <h1 class="h3 mb-4 text-center text-primary">
-        Panel de Administración
-    </h1>
-    <p class="text-center text-muted">Resumen al {{ hoy|date:"d \\d\\e F \\d\\e Y" }}</p>
-
-    <!-- PRUEBA -->
-    <div style="background: #e7f3ff; padding: 10px; margin: 15px 0; border-left: 5px solid #007bff;">
-        <strong>PRUEBA:</strong> ${{ 1234567.89|floatformat:2 }}
+<div class="container-fluid py-4 admin-dashboard">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-dark">Panorama general del edificio</h1>
+            <p class="text-muted mb-0">Resumen operativo al {{ hoy|date:"d/m/Y" }}</p>
+        </div>
+        <div class="text-end">
+            <span class="badge bg-dark">Semana {{ inicio_semana|date:"d/m" }} - {{ fin_semana|date:"d/m" }}</span>
+        </div>
     </div>
 
-    <!-- TARJETAS -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Gastos (Semana)
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                ${{ total_gastos_semana|floatformat:2 }}
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-dollar-sign fa-2x text-primary"></i>
-                        </div>
-                    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card accent-blue">
+                <span>Areas ocupadas</span>
+                <strong>{{ areas_ocupadas }}/{{ total_areas }}</strong>
+                <small>{{ areas_libres }} libres, {{ areas_mantenimiento }} en mantenimiento</small>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card accent-orange">
+                <span>Mantenimientos abiertos</span>
+                <strong>{{ mant_pendientes }}</strong>
+                <small>{{ mant_detenidos }} detenidos, {{ mant_completados_semana }} cerrados esta semana</small>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card accent-green">
+                <span>Limpieza semanal</span>
+                <strong>{{ cleaning_completion_rate }}%</strong>
+                <small>{{ limpieza_completada_semana }} tareas completadas, {{ limpieza_pendiente }} pendientes</small>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card accent-purple">
+                <span>Balance del mes</span>
+                <strong>${{ balance_mes|floatformat:2 }}</strong>
+                <small>Ingresos ${{ ingresos_mes|floatformat:2 }} / egresos ${{ egresos_mes|floatformat:2 }}</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-xl-4">
+            <div class="panel">
+                <div class="panel-title">Estado de areas</div>
+                <canvas id="areasChart" height="220"></canvas>
+                <div class="mini-list mt-3">
+                    {% for item in areas_por_estado %}
+                    <div><span>{{ item.estado|default:"Sin estado" }}</span><strong>{{ item.count }}</strong></div>
+                    {% empty %}
+                    <p class="text-muted mb-0">Sin areas registradas.</p>
+                    {% endfor %}
                 </div>
             </div>
         </div>
-
-        <div class="col-md-3">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Gastos ({{ nombre_mes }})
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                ${{ total_gastos_mes|floatformat:2 }}
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-calendar-alt fa-2x text-success"></i>
-                        </div>
-                    </div>
+        <div class="col-xl-4">
+            <div class="panel">
+                <div class="panel-title">Mantenimientos por estado</div>
+                <canvas id="mantChart" height="220"></canvas>
+                <div class="mini-list mt-3">
+                    {% for item in mant_por_estado %}
+                    <div><span>{{ item.estado|default:"Sin estado" }}</span><strong>{{ item.count }}</strong></div>
+                    {% empty %}
+                    <p class="text-muted mb-0">Sin mantenimientos registrados.</p>
+                    {% endfor %}
                 </div>
             </div>
         </div>
-
-        <div class="col-md-3">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Mantenimientos Pendientes
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ mant_pendientes }}
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-tools fa-2x text-warning"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Limpiezas Hoy
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ limpieza_hoy.count }}
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-broom fa-2x text-info"></i>
-                        </div>
-                    </div>
+        <div class="col-xl-4">
+            <div class="panel">
+                <div class="panel-title">Temas de mantenimiento</div>
+                <div class="mini-list">
+                    {% for item in mant_por_tema %}
+                    <div><span>{{ item.titulo }}</span><strong>{{ item.count }}</strong></div>
+                    {% empty %}
+                    <p class="text-muted mb-0">Sin datos de temas.</p>
+                    {% endfor %}
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- PROVEEDORES + PRIORIDAD -->
-    <div class="row">
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Top 5 Proveedores</h6>
-                </div>
-                <div class="card-body">
-                    {% if gastos_por_proveedor %}
-                    <table class="table table-sm">
-                        <thead><tr><th>Proveedor</th><th class="text-end">Total</th><th>Reg</th></tr></thead>
+    <div class="row g-4 mt-1">
+        <div class="col-xl-6">
+            <div class="panel">
+                <div class="panel-title">Limpieza hoy</div>
+                {% if limpieza_hoy %}
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead><tr><th>Hora</th><th>Titulo</th><th>Area</th><th>Responsable</th><th>Estado</th></tr></thead>
                         <tbody>
-                            {% for p in gastos_por_proveedor %}
+                            {% for l in limpieza_hoy %}
                             <tr>
-                                <td>{{ p.proveedor|default:"Sin proveedor" }}</td>
-                                <td class="text-end">${{ p.total|floatformat:2 }}</td>
-                                <td class="text-center">{{ p.count }}</td>
+                                <td>{{ l.fecha_programada|time:"H:i" }}</td>
+                                <td>{{ l.titulo }}</td>
+                                <td>{{ l.area }}</td>
+                                <td>{{ l.responsable }}</td>
+                                <td><span class="badge bg-secondary">{{ l.estado }}</span></td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
-                    {% else %}
-                    <p class="text-muted">Sin datos</p>
-                    {% endif %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">Sin tareas programadas para hoy.</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-xl-3">
+            <div class="panel">
+                <div class="panel-title">Limpieza por area esta semana</div>
+                <div class="mini-list">
+                    {% for item in cleaning_by_area %}
+                    <div><span>{{ item.activity__area }}</span><strong>{{ item.count }}</strong></div>
+                    {% empty %}
+                    <p class="text-muted mb-0">Sin registros de limpieza semanal.</p>
+                    {% endfor %}
                 </div>
             </div>
         </div>
-
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Mantenimientos por Prioridad</h6>
+        <div class="col-xl-3">
+            <div class="panel">
+                <div class="panel-title">Finanzas existentes</div>
+                <div class="mini-list">
+                    <div><span>Gastos semana</span><strong>${{ total_gastos_semana|floatformat:2 }}</strong></div>
+                    <div><span>Gastos mes</span><strong>${{ total_gastos_mes|floatformat:2 }}</strong></div>
+                    <div><span>Ingresos semana</span><strong>${{ ingresos_semana|floatformat:2 }}</strong></div>
                 </div>
-                <div class="card-body">
-                    {% if mant_por_prioridad %}
-                    <table class="table table-sm">
-                        <thead><tr><th>Prioridad</th><th class="text-center">Cant.</th></tr></thead>
-                        <tbody>
-                            {% for m in mant_por_prioridad %}
-                            <tr>
-                                <td>
-                                    <span class="badge 
-                                        {% if m.prioridad == 'Alta' %}bg-danger
-                                        {% elif m.prioridad == 'Media' %}bg-warning
-                                        {% else %}bg-secondary{% endif %}">
-                                        {{ m.prioridad|default:"Sin prioridad" }}
-                                    </span>
-                                </td>
-                                <td class="text-center">{{ m.count }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    <p class="text-muted">Sin datos</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- LIMPIEZA HOY -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow">
-                <div class="card-header py-3 d-flex justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        Limpiezas Hoy ({{ hoy|date:"d/m" }})
-                    </h6>
-                    <span class="badge bg-info">{{ limpieza_hoy.count }}</span>
-                </div>
-                <div class="card-body">
-                    {% if limpieza_hoy %}
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead><tr><th>Hora</th><th>Título</th><th>Área</th><th>Resp.</th><th>Estado</th></tr></thead>
-                            <tbody>
-                                {% for l in limpieza_hoy %}
-                                <tr>
-                                    <td>{{ l.fecha_programada|time:"H:i" }}</td>
-                                    <td>{{ l.titulo }}</td>
-                                    <td>{{ l.area }}</td>
-                                    <td>{{ l.responsable }}</td>
-                                    <td>
-                                        <span class="badge 
-                                            {% if l.estado == 'Completado' %}bg-success
-                                            {% elif l.estado == 'En progreso' %}bg-warning
-                                            {% else %}bg-secondary{% endif %}">
-                                            {{ l.estado }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <p class="text-muted text-center">Sin tareas hoy</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ÁREAS -->
-    <div class="row mt-4">
-        <div class="col-md-4">
-            <div class="card text-white bg-success">
-                <div class="card-body">
-                    <h5>{{ areas_libres }}</h5>
-                    <p class="mb-0">Libres</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-white bg-warning">
-                <div class="card-body">
-                    <h5>{{ areas_ocupadas }}</h5>
-                    <p class="mb-0">Ocupadas</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-white bg-primary">
-                <div class="card-body">
-                    <h5>{{ total_areas }}</h5>
-                    <p class="mb-0">Total</p>
-                </div>
+                <small class="text-muted d-block mt-2">Resumen basado en registros actuales; no se agrego modulo nuevo de finanzas.</small>
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+function makeChart(id, labels, data, colors) {
+    const ctx = document.getElementById(id);
+    if (!ctx) return;
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0 }] },
+        options: { plugins: { legend: { position: 'bottom' } }, cutout: '62%' }
+    });
+}
+makeChart(
+    'areasChart',
+    [{% for item in areas_por_estado %}'{{ item.estado|default:"Sin estado" }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+    [{% for item in areas_por_estado %}{{ item.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
+    ['#198754', '#0d6efd', '#ffc107', '#6c757d']
+);
+makeChart(
+    'mantChart',
+    [{% for item in mant_por_estado %}'{{ item.estado|default:"Sin estado" }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+    [{% for item in mant_por_estado %}{{ item.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
+    ['#ffc107', '#0d6efd', '#6c757d', '#198754', '#dc3545']
+);
+</script>
 {% endblock %}
 
 {% block extra_css %}
-<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css" rel="stylesheet">
 <style>
-    .border-left-primary { border-left: .25rem solid #4e73df !important; }
-    .border-left-success { border-left: .25rem solid #1cc88a !important; }
-    .border-left-warning { border-left: .25rem solid #f6c23e !important; }
-    .border-left-info { border-left: .25rem solid #36b9cc !important; }
+    .admin-dashboard { background: #f5f7fb; min-height: calc(100vh - 56px); }
+    .metric-card, .panel {
+        background: #fff;
+        border: 1px solid #e3e8ef;
+        border-radius: 8px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, .06);
+    }
+    .metric-card { padding: 18px; border-left: 5px solid #0d6efd; min-height: 138px; }
+    .metric-card span { display: block; color: #64748b; font-size: .82rem; text-transform: uppercase; font-weight: 700; }
+    .metric-card strong { display: block; color: #111827; font-size: 1.9rem; line-height: 1.2; margin: 8px 0; }
+    .metric-card small { color: #64748b; }
+    .accent-blue { border-left-color: #0d6efd; }
+    .accent-orange { border-left-color: #f59f00; }
+    .accent-green { border-left-color: #198754; }
+    .accent-purple { border-left-color: #7048e8; }
+    .panel { padding: 18px; height: 100%; }
+    .panel-title { font-weight: 800; color: #1f2937; margin-bottom: 14px; }
+    .mini-list div { display: flex; justify-content: space-between; gap: 14px; padding: 9px 0; border-bottom: 1px solid #edf2f7; }
+    .mini-list div:last-child { border-bottom: 0; }
+    .mini-list span { color: #475569; }
+    .mini-list strong { color: #111827; }
 </style>
 {% endblock %}

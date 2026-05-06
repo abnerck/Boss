@@ -19,6 +19,7 @@ class Mantenimientos(models.Model):
     titulo = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_inicio = models.DateField(null=True, blank=True)
     fecha_final = models.DateField(null=True, blank=True)
     fecha_completado = models.DateTimeField(null=True, blank=True)
     responsable = models.CharField(max_length=100)

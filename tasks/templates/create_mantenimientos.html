@@ -28,18 +28,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const tituloSelect = document.getElementById('titulo-select');
-    const tituloOtro = document.getElementById('titulo-otro');
-    if (tituloSelect && tituloOtro) {
-        function toggleOtro() {
-            const isOtro = tituloSelect.value === 'otro';
-            tituloOtro.classList.toggle('d-none', !isOtro);
-            tituloOtro.required = isOtro;
-        }
-        tituloSelect.addEventListener('change', toggleOtro);
-        toggleOtro();
-    }
-
     const descripcion = document.getElementById('descripcion-textarea');
     const charCount = document.getElementById('char-count');
     if (descripcion && charCount) {

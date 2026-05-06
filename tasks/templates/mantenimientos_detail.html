@@ -43,7 +43,7 @@ function confirmDelete() {
     <div class="cyber-detail-panel">
         <div class="detail-grid">
             <div class="detail-card">
-                <div class="detail-label">Titulo</div>
+                <div class="detail-label">Tema</div>
                 <p class="detail-value">{{ mantenimiento.titulo }}</p>
             </div>
             <div class="detail-card">
@@ -64,7 +64,7 @@ function confirmDelete() {
             </div>
             <div class="detail-card">
                 <div class="detail-label">Fecha inicio</div>
-                <p class="detail-value">{{ mantenimiento.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                <p class="detail-value">{{ mantenimiento.fecha_inicio|date:"d/m/Y"|default:"Sin fecha inicio" }}</p>
             </div>
             <div class="detail-card">
                 <div class="detail-label">Fecha final</div>
@@ -114,18 +114,6 @@ function confirmDelete() {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const tituloSelect = document.getElementById('titulo-select');
-    const tituloOtro = document.getElementById('titulo-otro');
-    if (tituloSelect && tituloOtro) {
-        function toggleOtro() {
-            const isOtro = tituloSelect.value === 'otro';
-            tituloOtro.classList.toggle('d-none', !isOtro);
-            tituloOtro.required = isOtro;
-        }
-        tituloSelect.addEventListener('change', toggleOtro);
-        toggleOtro();
-    }
-
     const descripcion = document.getElementById('descripcion-textarea');
     const charCount = document.getElementById('char-count');
     if (descripcion && charCount) {

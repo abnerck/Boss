@@ -36,6 +36,7 @@
                         <option value="">Todos los estados</option>
                         <option value="Pendiente">Pendiente</option>
                         <option value="En progreso">En progreso</option>
+                        <option value="Detenido">Detenido</option>
                         <option value="Completado">Completado</option>
                         <option value="Cancelado">Cancelado</option>
                     </select>
@@ -75,7 +76,7 @@
                 <thead class="table-dark">
                     <tr>
                         <th>#</th>
-                        <th>Titulo</th>
+                        <th>Tema</th>
                         <th>Responsable</th>
                         <th>Ubicacion</th>
                         <th>Estado</th>
@@ -115,6 +116,10 @@
                             <span class="badge bg-primary">
                                 <i class="fas fa-spinner fa-spin me-1"></i> {{ m.estado }}
                             </span>
+                            {% elif m.estado == 'Detenido' %}
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-pause-circle me-1"></i> {{ m.estado }}
+                            </span>
                             {% else %}
                             <span class="badge bg-warning text-dark">
                                 <i class="fas fa-clock me-1"></i> {{ m.estado }}
@@ -142,8 +147,7 @@
                         </td>
                         <td>
                             <small class="text-muted">
-                                {{ m.fecha_creacion|date:"d/m/Y" }}<br>
-                                {{ m.fecha_creacion|date:"H:i" }}
+                                {{ m.fecha_inicio|date:"d/m/Y"|default:"Sin fecha" }}
                             </small>
                         </td>
                         <td>
@@ -454,10 +458,11 @@ $(document).ready(function() {
         
         if (type === 'estado') {
             // Datos para gráfico de estados
-            var estados = ['Pendiente', 'En progreso', 'Completado', 'Cancelado'];
+            var estados = ['Pendiente', 'En progreso', 'Detenido', 'Completado', 'Cancelado'];
             var colors = {
                 'Pendiente': {bg: 'rgba(255, 193, 7, 0.8)', border: 'rgba(255, 193, 7, 1)'},
                 'En progreso': {bg: 'rgba(13, 110, 253, 0.8)', border: 'rgba(13, 110, 253, 1)'},
+                'Detenido': {bg: 'rgba(108, 117, 125, 0.8)', border: 'rgba(108, 117, 125, 1)'},
                 'Completado': {bg: 'rgba(25, 135, 84, 0.8)', border: 'rgba(25, 135, 84, 1)'},
                 'Cancelado': {bg: 'rgba(220, 53, 69, 0.8)', border: 'rgba(220, 53, 69, 1)'}
             };

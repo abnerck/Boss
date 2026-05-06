@@ -1,8 +1,14 @@
 from django import forms
-from django.contrib.auth import get_user_model
 from django.forms import ModelForm
 
 from .models import Area, Finanza, Limpieza, Mantenimientos
+from .catalogs import (
+    AREA_STATUS_CHOICES,
+    DEFAULT_AREA_NAMES,
+    DEFAULT_AREA_SPECS,
+    MAINTENANCE_RESPONSIBLE_CHOICES,
+    MAINTENANCE_TOPIC_CHOICES,
+)
 
 
 AREA_TIPO_CHOICES = [
@@ -16,44 +22,23 @@ AREA_TIPO_CHOICES = [
     ('Pasillo', 'Pasillo'),
     ('Escaleras', 'Escaleras'),
     ('Roof top', 'Roof top'),
-    ('Area Comun', 'Area Comun'),
+    ('Area comun', 'Area comun'),
 ]
 
 AREA_ESTADO_CHOICES = [
     ('', 'Selecciona...'),
-    ('Libre', 'Libre'),
-    ('Ocupado', 'Ocupado'),
-    ('Mantenimiento', 'Mantenimiento'),
+    *AREA_STATUS_CHOICES,
 ]
 
 MANTENIMIENTO_TITULO_CHOICES = [
-    ('', 'Selecciona tipo...'),
-    ('Aguakan', 'Aguakan'),
-    ('alberca', 'Alberca'),
-    ('asador en roof', 'Asador en Roof'),
-    ('camaras', 'Camaras'),
-    ('CFE', 'CFE'),
-    ('cuarto de bombas', 'Cuarto de Bombas'),
-    ('elevador', 'Elevador'),
-    ('espacio holistico', 'Espacio Holistico'),
-    ('estacionamiento', 'Estacionamiento'),
-    ('fumigacion', 'Fumigacion'),
-    ('gas', 'Gas'),
-    ('gym', 'Gym'),
-    ('hidraulico', 'Hidraulico'),
-    ('internet', 'Internet'),
-    ('limpieza', 'Limpieza'),
-    ('lobby', 'Lobby'),
-    ('oficina', 'Oficina'),
-    ('porton automatico', 'Porton Automatico'),
-    ('sala en roof', 'Sala en Roof'),
-    ('Seguimiento mantenimiento', 'Seguimiento mantenimiento'),
-    ('otro', 'Otro...'),
+    ('', 'Selecciona tema...'),
+    *MAINTENANCE_TOPIC_CHOICES,
 ]
 
 MANTENIMIENTO_ESTADO_CHOICES = [
     ('Pendiente', 'Pendiente'),
     ('En progreso', 'En Progreso'),
+    ('Detenido', 'Detenido'),
     ('Completado', 'Completado'),
     ('Cancelado', 'Cancelado'),
 ]
@@ -79,6 +64,7 @@ FINANZA_STATUS_CHOICES = [
 
 
 class AreaForm(forms.ModelForm):
+    nombre = forms.ChoiceField(choices=[], required=True)
     tipo_area = forms.ChoiceField(choices=AREA_TIPO_CHOICES, required=False)
     estado = forms.ChoiceField(choices=AREA_ESTADO_CHOICES, required=False)
 
@@ -86,29 +72,59 @@ class AreaForm(forms.ModelForm):
         model = Area
         fields = ['nombre', 'numero_piso', 'tipo_area', 'estado', 'ubicacion']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        current_name = self.instance.nombre if self.instance and self.instance.pk else None
+        existing_names = set()
+        if not current_name:
+            existing_names = set(Area.objects.filter(nombre__in=DEFAULT_AREA_NAMES).values_list('nombre', flat=True))
+        choices = [(name, name) for name in DEFAULT_AREA_NAMES if name == current_name or name not in existing_names]
+        if current_name and current_name not in DEFAULT_AREA_NAMES:
+            choices.insert(0, (current_name, current_name))
+        self.fields['nombre'].choices = [('', 'Selecciona un area fija...'), *choices]
+        self.fields['numero_piso'].widget.attrs['readonly'] = True
+        self.fields['tipo_area'].widget.attrs['disabled'] = True
+        self.fields['ubicacion'].widget.attrs['readonly'] = True
+
+    def clean_nombre(self):
+        nombre = self.cleaned_data.get('nombre')
+        if nombre not in DEFAULT_AREA_NAMES:
+            raise forms.ValidationError('Selecciona un area del catalogo fijo.')
+        existing = Area.objects.filter(nombre=nombre)
+        if self.instance and self.instance.pk:
+            existing = existing.exclude(pk=self.instance.pk)
+        if existing.exists():
+            raise forms.ValidationError('Esta area fija ya existe. Edita su registro actual.')
+        return nombre
+
+    def clean(self):
+        cleaned_data = super().clean()
+        area_specs = {name: (floor, kind) for name, floor, kind in DEFAULT_AREA_SPECS}
+        nombre = cleaned_data.get('nombre')
+        if nombre in area_specs:
+            floor, kind = area_specs[nombre]
+            cleaned_data['numero_piso'] = floor
+            cleaned_data['tipo_area'] = kind
+            cleaned_data['ubicacion'] = 'BOSS8025'
+        return cleaned_data
+
 
 class MantenimientoForm(ModelForm):
     titulo = forms.ChoiceField(choices=MANTENIMIENTO_TITULO_CHOICES)
-    titulo_otro = forms.CharField(required=False, max_length=100)
-    responsable = forms.ChoiceField(choices=[])
+    responsable = forms.ChoiceField(choices=[('', 'Selecciona...'), *MAINTENANCE_RESPONSIBLE_CHOICES])
     estado = forms.ChoiceField(choices=MANTENIMIENTO_ESTADO_CHOICES, initial='Pendiente')
     prioridad = forms.ChoiceField(choices=PRIORIDAD_CHOICES, initial='Media')
 
     class Meta:
         model = Mantenimientos
-        fields = ['titulo', 'descripcion', 'fecha_final', 'archivo', 'responsable', 'ubicacion', 'estado', 'prioridad']
+        fields = ['titulo', 'descripcion', 'fecha_inicio', 'fecha_final', 'archivo', 'responsable', 'ubicacion', 'estado', 'prioridad']
         widgets = {
+            'fecha_inicio': forms.DateInput(attrs={'type': 'date'}),
             'fecha_final': forms.DateInput(attrs={'type': 'date'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        User = get_user_model()
-        user_choices = [
-            (user.username, user.get_full_name() or user.username)
-            for user in User.objects.order_by('username')
-        ]
-        self.fields['responsable'].choices = [('', 'Selecciona...'), *user_choices]
         self.fields['ubicacion'].label = 'Area'
         self.fields['ubicacion'].empty_label = 'Selecciona un area...'
         self.fields['ubicacion'].queryset = Area.objects.order_by('nombre')
@@ -123,15 +139,6 @@ class MantenimientoForm(ModelForm):
             known_responsables = {value for value, _ in self.fields['responsable'].choices}
             if current_responsable and current_responsable not in known_responsables:
                 self.fields['responsable'].choices = [(current_responsable, current_responsable), *self.fields['responsable'].choices]
-
-    def clean_titulo(self):
-        titulo = self.cleaned_data.get('titulo')
-        titulo_otro = self.cleaned_data.get('titulo_otro', '').strip()
-        if titulo == 'otro':
-            if not titulo_otro:
-                raise forms.ValidationError('Especifica el titulo.')
-            return titulo_otro
-        return titulo
 
 
 class LimpiezaForm(ModelForm):

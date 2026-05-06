@@ -14,7 +14,9 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
+from cleaning.models import Activity, CleaningLog
 from cleaning.views import cleaning_reports, cleaning_schedule
+from .catalogs import DEFAULT_AREA_NAMES, ensure_default_areas
 from .forms import AreaForm, FinanzaForm, LimpiezaForm, MantenimientoForm, RestoreForm
 from .models import Area, Finanza, Limpieza, Mantenimientos
 
@@ -324,6 +326,7 @@ def finanza_detail(request, finanza_id):
 
 @login_required
 def areas(request):
+    ensure_default_areas(request.user)
     area = Area.objects.all().order_by('numero_piso', 'nombre')
     pisos = Area.objects.values('numero_piso').distinct().order_by('numero_piso')
     tipos_area = Area.objects.values('tipo_area').distinct().order_by('tipo_area')
@@ -336,6 +339,7 @@ def areas(request):
 
 @login_required
 def create_area(request):
+    ensure_default_areas(request.user)
     if request.method == 'POST':
         form = AreaForm(request.POST)
         if form.is_valid():
@@ -348,7 +352,11 @@ def create_area(request):
             'error': 'Por favor provee un dato valido',
         })
 
-    return render(request, 'create_area.html', {'form': AreaForm()})
+    form = AreaForm()
+    if len(form.fields['nombre'].choices) <= 1:
+        messages.info(request, 'Todas las areas fijas ya estan activas. Puedes editar su estado desde el detalle.')
+        return redirect('areas')
+    return render(request, 'create_area.html', {'form': form})
 
 
 @login_required
@@ -379,6 +387,9 @@ def delete_area(request, area_id):
         area = get_object_or_404(Area, pk=area_id)
     else:
         area = get_object_or_404(Area, pk=area_id, user=request.user)
+    if area.nombre in DEFAULT_AREA_NAMES:
+        messages.warning(request, 'Esta area pertenece al catalogo fijo y no se puede eliminar.')
+        return redirect('area_detail', area_id=area.id)
     area.delete()
     return redirect('areas')
 
@@ -423,6 +434,7 @@ def calendario_de_limpieza(request):
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def administracion(request):
+    ensure_default_areas(request.user)
     hoy = timezone.now().date()
     inicio_semana = hoy - timedelta(days=hoy.weekday())
     fin_semana = inicio_semana + timedelta(days=6)
@@ -445,11 +457,14 @@ def administracion(request):
     ).exclude(proveedor__isnull=True).exclude(proveedor='').order_by('-total')[:5]
 
     mant_pendientes = Mantenimientos.objects.filter(~Q(estado='Completado')).count()
+    mant_detenidos = Mantenimientos.objects.filter(estado='Detenido').count()
     mant_completados_semana = Mantenimientos.objects.filter(
         estado='Completado',
         fecha_completado__range=[inicio_semana, fin_semana],
     ).count()
     mant_por_prioridad = Mantenimientos.objects.values('prioridad').annotate(count=Count('id')).exclude(prioridad__isnull=True).exclude(prioridad='')
+    mant_por_estado = Mantenimientos.objects.values('estado').annotate(count=Count('id')).exclude(estado__isnull=True).exclude(estado='')
+    mant_por_tema = Mantenimientos.objects.values('titulo').annotate(count=Count('id')).exclude(titulo__isnull=True).exclude(titulo='').order_by('-count')[:8]
 
     limpieza_pendiente = Limpieza.objects.filter(estado='Pendiente').count()
     limpieza_completada_semana = Limpieza.objects.filter(
@@ -460,7 +475,15 @@ def administracion(request):
 
     areas_ocupadas = Area.objects.filter(estado='Ocupado').count()
     areas_libres = Area.objects.filter(estado='Libre').count()
+    areas_mantenimiento = Area.objects.filter(estado='En mantenimiento').count()
     total_areas = Area.objects.count()
+    areas_por_estado = Area.objects.values('estado').annotate(count=Count('id')).exclude(estado__isnull=True).exclude(estado='')
+
+    cleaning_activity_total = Activity.objects.count()
+    cleaning_logs_week = CleaningLog.objects.filter(date__range=[inicio_semana, fin_semana])
+    cleaning_completed_week = cleaning_logs_week.filter(completed=True).count()
+    cleaning_completion_rate = round((cleaning_completed_week / cleaning_logs_week.count() * 100) if cleaning_logs_week.count() else 0)
+    cleaning_by_area = cleaning_logs_week.filter(completed=True).values('activity__area').annotate(count=Count('id')).order_by('-count')[:8]
 
     context = {
         'total_gastos_semana': egresos_semana,
@@ -471,14 +494,22 @@ def administracion(request):
         'balance_mes': ingresos_mes - egresos_mes,
         'gastos_por_proveedor': gastos_por_proveedor,
         'mant_pendientes': mant_pendientes,
+        'mant_detenidos': mant_detenidos,
         'mant_completados_semana': mant_completados_semana,
         'mant_por_prioridad': mant_por_prioridad,
+        'mant_por_estado': mant_por_estado,
+        'mant_por_tema': mant_por_tema,
         'limpieza_pendiente': limpieza_pendiente,
         'limpieza_completada_semana': limpieza_completada_semana,
         'limpieza_hoy': limpieza_hoy,
         'areas_ocupadas': areas_ocupadas,
         'areas_libres': areas_libres,
+        'areas_mantenimiento': areas_mantenimiento,
         'total_areas': total_areas,
+        'areas_por_estado': areas_por_estado,
+        'cleaning_activity_total': cleaning_activity_total,
+        'cleaning_completion_rate': cleaning_completion_rate,
+        'cleaning_by_area': cleaning_by_area,
         'hoy': hoy,
         'inicio_semana': inicio_semana,
         'fin_semana': fin_semana,

@@ -7,6 +7,9 @@ from datetime import datetime, date, timedelta
 from collections import defaultdict
 import json
 import calendar
+from django.contrib import messages
+from django.shortcuts import redirect
+from .forms import ActivityForm
 from .models import Activity, CleaningLog
 
 # Lista COMPLETA de actividades
@@ -235,6 +238,15 @@ def cleaning_reports(request):
     period = request.GET.get('period', 'diario')
     if period not in ['diario', 'semanal', 'quincenal', 'mensual', 'anual']:
         period = 'diario'
+    if request.method == 'POST' and (request.user.is_staff or request.user.is_superuser):
+        activity = get_object_or_404(Activity, id=request.POST.get('activity_id'))
+        form = ActivityForm(request.POST, instance=activity)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Etiqueta de limpieza actualizada.')
+        else:
+            messages.error(request, 'No se pudo actualizar la etiqueta de limpieza.')
+        return redirect(f'{request.path}?date={selected_date_str}&period={period}')
     if period == 'semanal':
         report_start = selected_date - timedelta(days=selected_date.weekday())
         report_end = report_start + timedelta(days=6)
@@ -385,5 +397,6 @@ def cleaning_reports(request):
         },
         'period_by_area': period_by_area,
         'period_by_user': period_by_user,
+        'activity_labels': Activity.objects.order_by('area', 'id'),
     }
     return render(request, 'cleaning/cleaning_reports.html', context)
