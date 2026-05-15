@@ -33,6 +33,22 @@ FINANCE_FIELD_ALIASES = {
     'egresos_totales': ['egresos totales', 'egreso total', 'total egresos', 'egresos'],
 }
 
+MONTH_NAMES = {
+    'enero': 'Enero',
+    'febrero': 'Febrero',
+    'marzo': 'Marzo',
+    'abril': 'Abril',
+    'mayo': 'Mayo',
+    'junio': 'Junio',
+    'julio': 'Julio',
+    'agosto': 'Agosto',
+    'septiembre': 'Septiembre',
+    'setiembre': 'Septiembre',
+    'octubre': 'Octubre',
+    'noviembre': 'Noviembre',
+    'diciembre': 'Diciembre',
+}
+
 
 def _normalize_key(value):
     value = unicodedata.normalize('NFKD', str(value or ''))
@@ -70,6 +86,27 @@ def parse_money(value):
         return Decimal('0.00')
 
 
+def _concept_amount(concept, label):
+    match = re.search(rf'\b{re.escape(label)}\b\s*([$]?\s*[0-9][0-9,.]*)', str(concept or ''), re.IGNORECASE)
+    if not match:
+        return Decimal('0.00')
+    return parse_money(match.group(1))
+
+
+def _concept_month(concept):
+    normalized = _normalize_key(concept)
+    for key, name in MONTH_NAMES.items():
+        if re.search(rf'\b{key}\b', normalized):
+            year_match = re.search(r'\b(20\d{2})\b', normalized)
+            return f'{name} {year_match.group(1)}' if year_match else name
+    return ''
+
+
+def _looks_like_service_charge(concept):
+    normalized = _normalize_key(concept)
+    return any(re.search(rf'\b{name}\b', normalized) for name in ['gas', 'agua', 'luz'])
+
+
 def import_csv(upload):
     raw = upload.file.read()
     text = raw.decode('utf-8-sig', errors='replace')
@@ -101,12 +138,16 @@ def finance_money(row, field):
 
 
 def finance_record(row):
+    concept = row.concept or finance_value(row, 'concepto') or ''
+    row_total = row.total or Decimal('0.00')
+    gas = finance_money(row, 'gas') or _concept_amount(concept, 'gas')
+    water = finance_money(row, 'agua') or _concept_amount(concept, 'agua')
+    electricity = finance_money(row, 'luz') or _concept_amount(concept, 'luz')
     rent = finance_money(row, 'renta')
-    gas = finance_money(row, 'gas')
-    water = finance_money(row, 'agua')
-    electricity = finance_money(row, 'luz')
+    if not rent and row_total and not _looks_like_service_charge(concept):
+        rent = row_total
     income_rent = finance_money(row, 'ingresos_rentas') or rent
-    total_income = finance_money(row, 'ingresos_totales') or (income_rent + gas + water + electricity)
+    total_income = finance_money(row, 'ingresos_totales') or row_total or (income_rent + gas + water + electricity)
     maintenance = finance_money(row, 'mantenimiento')
     administrative = finance_money(row, 'administrativo')
     common_light = finance_money(row, 'luz_area_comun')
@@ -115,7 +156,7 @@ def finance_record(row):
     total_expenses = finance_money(row, 'egresos_totales') or (
         maintenance + administrative + common_light + water_expense + internet
     )
-    month = finance_value(row, 'mes') or f'{row.upload.month:02d}/{row.upload.year}'
+    month = finance_value(row, 'mes') or _concept_month(concept) or f'{row.upload.month:02d}/{row.upload.year}'
 
     return {
         'row': row,
