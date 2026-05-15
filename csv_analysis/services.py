@@ -2,6 +2,7 @@ import csv
 import io
 import json
 import re
+import unicodedata
 import urllib.error
 import urllib.request
 from decimal import Decimal, InvalidOperation
@@ -11,17 +12,56 @@ from django.conf import settings
 from .models import CSVRow
 
 
+FINANCE_FIELD_ALIASES = {
+    'departamento': ['departamento', 'depto', 'unidad', 'area', 'departamento/unidad'],
+    'mes': ['mes', 'periodo', 'month'],
+    'renta': ['renta', 'importe renta', 'monto renta', 'renta mensual'],
+    'fecha_pago': ['fecha de pago', 'fecha pago', 'fecha_de_pago', 'pago renta', 'fecha pago renta'],
+    'gas': ['gas', 'importe gas', 'monto gas'],
+    'fecha_pago_gas': ['fecha de pago gas', 'fecha pago gas', 'fecha_pago_gas'],
+    'agua': ['agua', 'importe agua', 'monto agua'],
+    'fecha_pago_agua': ['fecha de pago agua', 'fecha pago agua', 'fecha_pago_agua'],
+    'luz': ['luz', 'importe luz', 'monto luz'],
+    'fecha_pago_luz': ['fecha de pago luz', 'fecha pago luz', 'fecha_pago_luz'],
+    'ingresos_rentas': ['ingresos por rentas', 'ingreso por rentas', 'ingresos rentas', 'rentas'],
+    'ingresos_totales': ['ingresos totales', 'ingreso total', 'total ingresos', 'ingresos'],
+    'mantenimiento': ['mantenimiento', 'egreso mantenimiento', 'mantenimiento egreso'],
+    'administrativo': ['administrativo', 'administracion', 'administración', 'egreso administrativo'],
+    'luz_area_comun': ['luz area comun', 'luz área común', 'luz area común', 'luz_area_comun'],
+    'agua_egreso': ['agua egreso', 'egreso agua', 'agua comun', 'agua común'],
+    'internet': ['internet', 'egreso internet'],
+    'egresos_totales': ['egresos totales', 'egreso total', 'total egresos', 'egresos'],
+}
+
+
+def _normalize_key(value):
+    value = unicodedata.normalize('NFKD', str(value or ''))
+    value = ''.join(char for char in value if not unicodedata.combining(char))
+    value = re.sub(r'[^a-zA-Z0-9]+', ' ', value).strip().lower()
+    return re.sub(r'\s+', ' ', value)
+
+
 def _first_value(row, names):
-    normalized = {key.strip().lower(): value for key, value in row.items() if key}
+    normalized = {_normalize_key(key): value for key, value in row.items() if key}
     for name in names:
-        value = normalized.get(name.lower())
+        value = normalized.get(_normalize_key(name))
         if value is not None:
             return str(value).strip()
     return ''
 
 
 def parse_money(value):
-    clean = re.sub(r'[^0-9.\-]', '', str(value or ''))
+    text = str(value or '').strip()
+    if ',' in text and '.' in text:
+        comma_index = text.rfind(',')
+        dot_index = text.rfind('.')
+        if comma_index > dot_index:
+            text = text.replace('.', '').replace(',', '.')
+        else:
+            text = text.replace(',', '')
+    elif ',' in text:
+        text = text.replace(',', '.')
+    clean = re.sub(r'[^0-9.\-]', '', text)
     if clean in {'', '.', '-'}:
         return Decimal('0.00')
     try:
@@ -50,6 +90,55 @@ def import_csv(upload):
     CSVRow.objects.bulk_create(rows)
     upload.file.seek(0)
     return len(rows)
+
+
+def finance_value(row, field):
+    return _first_value(row.raw_data or {}, FINANCE_FIELD_ALIASES.get(field, []))
+
+
+def finance_money(row, field):
+    return parse_money(finance_value(row, field))
+
+
+def finance_record(row):
+    rent = finance_money(row, 'renta')
+    gas = finance_money(row, 'gas')
+    water = finance_money(row, 'agua')
+    electricity = finance_money(row, 'luz')
+    income_rent = finance_money(row, 'ingresos_rentas') or rent
+    total_income = finance_money(row, 'ingresos_totales') or (income_rent + gas + water + electricity)
+    maintenance = finance_money(row, 'mantenimiento')
+    administrative = finance_money(row, 'administrativo')
+    common_light = finance_money(row, 'luz_area_comun')
+    water_expense = finance_money(row, 'agua_egreso')
+    internet = finance_money(row, 'internet')
+    total_expenses = finance_money(row, 'egresos_totales') or (
+        maintenance + administrative + common_light + water_expense + internet
+    )
+    month = finance_value(row, 'mes') or f'{row.upload.month:02d}/{row.upload.year}'
+
+    return {
+        'row': row,
+        'departamento': finance_value(row, 'departamento') or row.unit,
+        'mes': month,
+        'renta': rent,
+        'fecha_pago': finance_value(row, 'fecha_pago') or row.date_text,
+        'gas': gas,
+        'fecha_pago_gas': finance_value(row, 'fecha_pago_gas'),
+        'agua': water,
+        'fecha_pago_agua': finance_value(row, 'fecha_pago_agua'),
+        'luz': electricity,
+        'fecha_pago_luz': finance_value(row, 'fecha_pago_luz'),
+        'ingresos_rentas': income_rent,
+        'ingresos_totales': total_income,
+        'mantenimiento': maintenance,
+        'administrativo': administrative,
+        'luz_area_comun': common_light,
+        'agua_egreso': water_expense,
+        'internet': internet,
+        'egresos_totales': total_expenses,
+        'balance': total_income - total_expenses,
+    }
 
 
 def rows_for_ai(queryset, limit=300):

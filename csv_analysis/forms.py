@@ -17,17 +17,33 @@ MONTH_CHOICES = [
 ]
 
 
+class MultipleCSVFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+
+class MultipleCSVFileField(forms.FileField):
+    widget = MultipleCSVFileInput
+
+    def clean(self, data, initial=None):
+        files = data if isinstance(data, (list, tuple)) else [data]
+        cleaned_files = []
+        for file in files:
+            cleaned_files.append(super().clean(file, initial))
+        return cleaned_files
+
+
 class CSVUploadForm(forms.Form):
-    title = forms.CharField(label='Nombre del reporte', max_length=180)
+    title = forms.CharField(label='Nombre del reporte', max_length=180, required=False)
     month = forms.ChoiceField(label='Mes', choices=MONTH_CHOICES)
     year = forms.IntegerField(label='Año', min_value=2020, max_value=2100)
-    file = forms.FileField(label='Archivo CSV')
+    file = MultipleCSVFileField(label='Archivos CSV')
 
     def clean_file(self):
-        file = self.cleaned_data['file']
-        if not file.name.lower().endswith('.csv'):
-            raise forms.ValidationError('Sube un archivo con extension .csv.')
-        return file
+        files = self.cleaned_data['file']
+        for file in files:
+            if not file.name.lower().endswith('.csv'):
+                raise forms.ValidationError('Sube solo archivos con extension .csv.')
+        return files
 
 
 class CSVQuestionForm(forms.Form):

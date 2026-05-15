@@ -113,29 +113,39 @@ def upload_csv(request):
     if request.method != 'POST':
         return redirect('csv_analysis:dashboard')
     form = CSVUploadForm(request.POST, request.FILES)
+    next_url = request.POST.get('next') or request.GET.get('next')
     if not form.is_valid():
         for error in form.errors.values():
             messages.error(request, error)
-        return redirect('csv_analysis:dashboard')
+        return redirect(next_url or 'csv_analysis:dashboard')
 
-    file = form.cleaned_data['file']
-    upload = CSVUpload.objects.create(
-        title=form.cleaned_data['title'],
-        month=int(form.cleaned_data['month']),
-        year=form.cleaned_data['year'],
-        file=file,
-        original_filename=file.name,
-        uploaded_by=request.user,
-    )
-    count = import_csv(upload)
-    messages.success(request, f'CSV importado correctamente: {count} filas.')
-    return redirect('csv_analysis:dashboard')
+    total_rows = 0
+    uploads_count = 0
+    files = form.cleaned_data['file']
+    for index, file in enumerate(files, start=1):
+        title = form.cleaned_data['title'] or file.name.rsplit('.', 1)[0]
+        if len(files) > 1:
+            title = f'{title} - {index}'
+        upload = CSVUpload.objects.create(
+            title=title,
+            month=int(form.cleaned_data['month']),
+            year=form.cleaned_data['year'],
+            file=file,
+            original_filename=file.name,
+            uploaded_by=request.user,
+        )
+        total_rows += import_csv(upload)
+        uploads_count += 1
+
+    messages.success(request, f'CSV importado correctamente: {uploads_count} archivo(s), {total_rows} filas.')
+    return redirect(next_url or 'csv_analysis:dashboard')
 
 
 @login_required
 def delete_upload(request, upload_id):
     upload = get_object_or_404(CSVUpload, id=upload_id)
+    next_url = request.POST.get('next') or request.GET.get('next')
     if request.method == 'POST':
         upload.delete()
         messages.success(request, 'CSV eliminado.')
-    return redirect('csv_analysis:dashboard')
+    return redirect(next_url or 'csv_analysis:dashboard')

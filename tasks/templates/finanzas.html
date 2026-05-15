@@ -18,6 +18,14 @@
         </div>
     </div>
 
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="csv-finance-alert {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <div class="form-grid mb-4">
         <div class="cyber-maintenance-form">
             <h5 class="mb-2"><i class="fas fa-arrow-trend-up me-2"></i>Ingresos</h5>
@@ -69,11 +77,140 @@
                 <label for="anio" class="form-label">Año</label>
                 <input id="anio" name="anio" class="form-control" value="{{ selected_year }}" placeholder="2026">
             </div>
+            <div class="form-group">
+                <label for="csv_upload" class="form-label">CSV importado</label>
+                <select id="csv_upload" name="csv_upload" class="form-select">
+                    <option value="">Todos</option>
+                    {% for upload in csv_uploads %}
+                    <option value="{{ upload.id }}" {% if csv_selected_upload == upload.id|stringformat:"s" %}selected{% endif %}>
+                        {{ upload.title }} - {{ upload.month|stringformat:"02d" }}/{{ upload.year }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
             <div class="form-group d-flex align-items-end">
                 <button class="btn btn-save" type="submit">Filtrar</button>
             </div>
         </div>
     </form>
+
+    <div class="cyber-maintenance-form mb-4">
+        <div class="finance-csv-head">
+            <div>
+                <h5 class="mb-1"><i class="fas fa-file-csv me-2"></i>CSV financiero</h5>
+                <p class="text-muted mb-0">Carga uno o varios CSV y revisa Departamento, mes, renta, servicios, ingresos, egresos y total.</p>
+            </div>
+        </div>
+        <form method="post" action="{% url 'csv_analysis:upload' %}" enctype="multipart/form-data" class="finance-csv-upload">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{% url 'finanzas' %}">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Nombre del reporte</label>
+                    {{ csv_upload_form.title|add_class:"form-control" }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Mes</label>
+                    {{ csv_upload_form.month|add_class:"form-select" }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Anio</label>
+                    {{ csv_upload_form.year|add_class:"form-control" }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Archivos CSV</label>
+                    {{ csv_upload_form.file|add_class:"form-control" }}
+                </div>
+                <div class="form-group d-flex align-items-end">
+                    <button class="btn btn-save w-100" type="submit">
+                        <i class="fas fa-upload me-1"></i>Importar CSV
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <div class="finance-csv-metrics">
+            <div><span>Ingresos por rentas</span><strong class="text-success">${{ csv_total_rentas|floatformat:2 }}</strong></div>
+            <div><span>Ingresos totales</span><strong class="text-success">${{ csv_total_ingresos|floatformat:2 }}</strong></div>
+            <div><span>Egresos</span><strong class="text-danger">${{ csv_total_egresos|floatformat:2 }}</strong></div>
+            <div><span>Total</span><strong class="{% if csv_total_balance >= 0 %}text-success{% else %}text-danger{% endif %}">${{ csv_total_balance|floatformat:2 }}</strong></div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 finance-csv-table">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Departamento</th>
+                        <th>Mes</th>
+                        <th>Renta</th>
+                        <th>Fecha de pago</th>
+                        <th>Gas</th>
+                        <th>Agua</th>
+                        <th>Luz</th>
+                        <th>Ingresos por rentas</th>
+                        <th>Ingresos totales</th>
+                        <th>Mantenimiento</th>
+                        <th>Administrativo</th>
+                        <th>Luz area comun</th>
+                        <th>Agua</th>
+                        <th>Internet</th>
+                        <th>Egresos</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in csv_finance_records %}
+                    <tr>
+                        <td>{{ item.departamento|default:"-" }}</td>
+                        <td>{{ item.mes|default:"-" }}</td>
+                        <td>${{ item.renta|floatformat:2 }}</td>
+                        <td>{{ item.fecha_pago|default:"-" }}</td>
+                        <td>
+                            ${{ item.gas|floatformat:2 }}
+                            {% if item.fecha_pago_gas %}<small>Pago: {{ item.fecha_pago_gas }}</small>{% endif %}
+                        </td>
+                        <td>
+                            ${{ item.agua|floatformat:2 }}
+                            {% if item.fecha_pago_agua %}<small>Pago: {{ item.fecha_pago_agua }}</small>{% endif %}
+                        </td>
+                        <td>
+                            ${{ item.luz|floatformat:2 }}
+                            {% if item.fecha_pago_luz %}<small>Pago: {{ item.fecha_pago_luz }}</small>{% endif %}
+                        </td>
+                        <td class="text-success">${{ item.ingresos_rentas|floatformat:2 }}</td>
+                        <td class="text-success">${{ item.ingresos_totales|floatformat:2 }}</td>
+                        <td>${{ item.mantenimiento|floatformat:2 }}</td>
+                        <td>${{ item.administrativo|floatformat:2 }}</td>
+                        <td>${{ item.luz_area_comun|floatformat:2 }}</td>
+                        <td>${{ item.agua_egreso|floatformat:2 }}</td>
+                        <td>${{ item.internet|floatformat:2 }}</td>
+                        <td class="text-danger">${{ item.egresos_totales|floatformat:2 }}</td>
+                        <td class="{% if item.balance >= 0 %}text-success{% else %}text-danger{% endif %}">${{ item.balance|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="16" class="text-muted">Aun no hay CSV importados para los filtros actuales.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if csv_uploads %}
+        <div class="finance-csv-files">
+            {% for upload in csv_uploads %}
+            <div>
+                <span>{{ upload.title }} - {{ upload.original_filename }} - {{ upload.rows.count }} filas</span>
+                <form method="post" action="{% url 'csv_analysis:delete' upload.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{% url 'finanzas' %}">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Eliminar</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
 
     <div class="form-grid mb-4">
         <div class="cyber-maintenance-form h-100">
@@ -1175,11 +1312,88 @@ $(document).ready(function() {
         min-height: 250px;
     }
 
+    .csv-finance-alert {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        background: rgba(0, 188, 196, 0.12);
+        border: 1px solid var(--border-glow);
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .finance-csv-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .finance-csv-upload {
+        margin-bottom: 1rem;
+    }
+
+    .finance-csv-metrics {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.75rem;
+        margin: 1rem 0;
+    }
+
+    .finance-csv-metrics div {
+        background: rgba(6, 16, 26, 0.58);
+        border: 1px solid var(--border-glow);
+        border-radius: 8px;
+        padding: 0.85rem;
+    }
+
+    .finance-csv-metrics span {
+        display: block;
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+    }
+
+    .finance-csv-metrics strong {
+        display: block;
+        font-size: 1.25rem;
+        line-height: 1.2;
+    }
+
+    .finance-csv-table {
+        min-width: 1500px;
+    }
+
+    .finance-csv-table small {
+        display: block;
+        color: var(--text-secondary);
+        font-size: 0.76rem;
+        margin-top: 0.15rem;
+        white-space: nowrap;
+    }
+
+    .finance-csv-files {
+        display: grid;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .finance-csv-files > div {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        padding-top: 0.6rem;
+    }
+
     /* Responsive */
     @media (max-width: 992px) {
         .form-grid {
             grid-template-columns: 1fr;
             gap: 0.8rem;
+        }
+
+        .finance-csv-metrics {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
         .cyber-maintenance-header {
@@ -1225,6 +1439,15 @@ $(document).ready(function() {
         .form-control {
             padding: 0.55rem 0.7rem;
             font-size: 0.85rem;
+        }
+
+        .finance-csv-metrics {
+            grid-template-columns: 1fr;
+        }
+
+        .finance-csv-files > div {
+            align-items: flex-start;
+            flex-direction: column;
         }
     }
 

@@ -17,6 +17,9 @@ from django.utils import timezone
 
 from cleaning.models import Activity, CleaningLog
 from cleaning.views import cleaning_reports, cleaning_schedule
+from csv_analysis.forms import CSVUploadForm
+from csv_analysis.models import CSVRow, CSVUpload
+from csv_analysis.services import finance_record
 from .catalogs import DEFAULT_AREA_NAMES, ensure_default_areas
 from .forms import AreaForm, FinanzaForm, LimpiezaForm, MantenimientoForm, RestoreForm
 from .models import Area, Finanza, Limpieza, Mantenimientos
@@ -297,6 +300,30 @@ def finanzas(request):
         periodo['balance'] = periodo['ingresos'] - periodo['egresos']
         comparativo.append(periodo)
 
+    csv_uploads = CSVUpload.objects.prefetch_related('rows').all()
+    csv_selected_upload = request.GET.get('csv_upload')
+    csv_upload_queryset = csv_uploads
+    if csv_selected_upload:
+        csv_upload_queryset = csv_upload_queryset.filter(id=csv_selected_upload)
+    if selected_year:
+        csv_upload_queryset = csv_upload_queryset.filter(year=selected_year)
+    if selected_month:
+        csv_upload_queryset = csv_upload_queryset.filter(month=selected_month)
+
+    csv_rows = CSVRow.objects.filter(upload__in=csv_upload_queryset).select_related('upload')
+    csv_finance_records = [finance_record(row) for row in csv_rows.order_by('-upload__year', '-upload__month', 'row_number')[:300]]
+    if selected_property:
+        selected_property_normalized = selected_property.strip().lower()
+        csv_finance_records = [
+            item for item in csv_finance_records
+            if selected_property_normalized in (item['departamento'] or '').strip().lower()
+        ]
+
+    csv_total_rentas = sum((item['ingresos_rentas'] for item in csv_finance_records), Decimal('0'))
+    csv_total_ingresos = sum((item['ingresos_totales'] for item in csv_finance_records), Decimal('0'))
+    csv_total_egresos = sum((item['egresos_totales'] for item in csv_finance_records), Decimal('0'))
+    csv_total_balance = csv_total_ingresos - csv_total_egresos
+
     return render(request, 'finanzas.html', {
         'finanza': finanza,
         'ingresos': ingresos,
@@ -317,6 +344,14 @@ def finanzas(request):
         'selected_property': selected_property or '',
         'months': Finanza.MES_CHOICES,
         'property_choices': Finanza.objects.values_list('clave_inmueble', flat=True).distinct().order_by('clave_inmueble'),
+        'csv_upload_form': CSVUploadForm(),
+        'csv_uploads': csv_uploads,
+        'csv_selected_upload': csv_selected_upload or '',
+        'csv_finance_records': csv_finance_records,
+        'csv_total_rentas': csv_total_rentas,
+        'csv_total_ingresos': csv_total_ingresos,
+        'csv_total_egresos': csv_total_egresos,
+        'csv_total_balance': csv_total_balance,
     })
 
 
