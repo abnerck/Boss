@@ -226,6 +226,10 @@ def finance_record(row):
 
     return {
         'row': row,
+        'archivo': row.upload.title,
+        'forma_pago': row.payment_method,
+        'concepto': concept,
+        'comentarios': row.comments,
         'categorias': categories,
         'categoria': ', '.join(category_labels.get(category, category.title()) for category in categories),
         'departamento': finance_value(row, 'departamento') or row.unit,

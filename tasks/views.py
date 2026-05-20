@@ -303,6 +303,7 @@ def finanzas(request):
     csv_uploads = CSVUpload.objects.prefetch_related('rows').all()
     csv_selected_upload = request.GET.get('csv_upload')
     csv_selected_category = request.GET.get('csv_categoria')
+    csv_concept_search = request.GET.get('csv_concepto', '').strip()
     csv_upload_queryset = csv_uploads
     if csv_selected_upload:
         csv_upload_queryset = csv_upload_queryset.filter(id=csv_selected_upload)
@@ -312,7 +313,14 @@ def finanzas(request):
         csv_upload_queryset = csv_upload_queryset.filter(month=selected_month)
 
     csv_rows = CSVRow.objects.filter(upload__in=csv_upload_queryset).select_related('upload')
-    csv_finance_records = [finance_record(row) for row in csv_rows.order_by('-upload__year', '-upload__month', 'row_number')[:300]]
+    if csv_concept_search:
+        csv_rows = csv_rows.filter(
+            Q(concept__icontains=csv_concept_search)
+            | Q(comments__icontains=csv_concept_search)
+            | Q(unit__icontains=csv_concept_search)
+            | Q(payment_method__icontains=csv_concept_search)
+        )
+    csv_finance_records = [finance_record(row) for row in csv_rows.order_by('-upload__year', '-upload__month', 'row_number')[:1000]]
     if selected_property:
         selected_property_normalized = selected_property.strip().lower()
         csv_finance_records = [
@@ -354,6 +362,7 @@ def finanzas(request):
         'csv_uploads': csv_uploads,
         'csv_selected_upload': csv_selected_upload or '',
         'csv_selected_category': csv_selected_category or '',
+        'csv_concept_search': csv_concept_search,
         'csv_category_filters': FINANCE_CONCEPT_FILTERS,
         'csv_finance_records': csv_finance_records,
         'csv_total_rentas': csv_total_rentas,
