@@ -33,6 +33,15 @@ FINANCE_FIELD_ALIASES = {
     'egresos_totales': ['egresos totales', 'egreso total', 'total egresos', 'egresos'],
 }
 
+FINANCE_CONCEPT_FILTERS = [
+    ('renta', 'Renta'),
+    ('gas', 'Pago de gas'),
+    ('agua', 'Pago de agua'),
+    ('estacionamiento', 'Estacionamiento'),
+    ('multas', 'Multas'),
+    ('otros', 'Otros'),
+]
+
 MONTH_NAMES = {
     'enero': 'Enero',
     'febrero': 'Febrero',
@@ -107,6 +116,31 @@ def _looks_like_service_charge(concept):
     return any(re.search(rf'\b{name}\b', normalized) for name in ['gas', 'agua', 'luz'])
 
 
+def _concept_categories(row, concept, rent, gas, water):
+    normalized = _normalize_key(concept)
+    categories = []
+    if rent or re.search(r'\b(renta|mensualidad)\b', normalized):
+        categories.append('renta')
+    if gas or re.search(r'\b(gas|pago de gas)\b', normalized):
+        categories.append('gas')
+    if water or re.search(r'\b(agua|pago de agua)\b', normalized):
+        categories.append('agua')
+    if re.search(r'\b(estacionamiento|parking|cajon|cochera)\b', normalized):
+        categories.append('estacionamiento')
+    if re.search(r'\b(multa|multas|penalizacion|penalizacion|sancion|sanciones)\b', normalized):
+        categories.append('multas')
+
+    if not categories:
+        raw_values = ' '.join(str(value or '') for value in (row.raw_data or {}).values())
+        raw_normalized = _normalize_key(raw_values)
+        if re.search(r'\b(estacionamiento|parking|cajon|cochera)\b', raw_normalized):
+            categories.append('estacionamiento')
+        if re.search(r'\b(multa|multas|penalizacion|penalizacion|sancion|sanciones)\b', raw_normalized):
+            categories.append('multas')
+
+    return categories or ['otros']
+
+
 def import_csv(upload):
     raw = upload.file.read()
     text = raw.decode('utf-8-sig', errors='replace')
@@ -157,9 +191,13 @@ def finance_record(row):
         maintenance + administrative + common_light + water_expense + internet
     )
     month = finance_value(row, 'mes') or _concept_month(concept) or f'{row.upload.month:02d}/{row.upload.year}'
+    categories = _concept_categories(row, concept, rent, gas, water)
+    category_labels = dict(FINANCE_CONCEPT_FILTERS)
 
     return {
         'row': row,
+        'categorias': categories,
+        'categoria': ', '.join(category_labels.get(category, category.title()) for category in categories),
         'departamento': finance_value(row, 'departamento') or row.unit,
         'mes': month,
         'renta': rent,

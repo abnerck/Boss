@@ -19,7 +19,7 @@ from cleaning.models import Activity, CleaningLog
 from cleaning.views import cleaning_reports, cleaning_schedule
 from csv_analysis.forms import CSVUploadForm
 from csv_analysis.models import CSVRow, CSVUpload
-from csv_analysis.services import finance_record
+from csv_analysis.services import FINANCE_CONCEPT_FILTERS, finance_record
 from .catalogs import DEFAULT_AREA_NAMES, ensure_default_areas
 from .forms import AreaForm, FinanzaForm, LimpiezaForm, MantenimientoForm, RestoreForm
 from .models import Area, Finanza, Limpieza, Mantenimientos
@@ -302,6 +302,7 @@ def finanzas(request):
 
     csv_uploads = CSVUpload.objects.prefetch_related('rows').all()
     csv_selected_upload = request.GET.get('csv_upload')
+    csv_selected_category = request.GET.get('csv_categoria')
     csv_upload_queryset = csv_uploads
     if csv_selected_upload:
         csv_upload_queryset = csv_upload_queryset.filter(id=csv_selected_upload)
@@ -317,6 +318,11 @@ def finanzas(request):
         csv_finance_records = [
             item for item in csv_finance_records
             if selected_property_normalized in (item['departamento'] or '').strip().lower()
+        ]
+    if csv_selected_category:
+        csv_finance_records = [
+            item for item in csv_finance_records
+            if csv_selected_category in item.get('categorias', [])
         ]
 
     csv_total_rentas = sum((item['ingresos_rentas'] for item in csv_finance_records), Decimal('0'))
@@ -347,6 +353,8 @@ def finanzas(request):
         'csv_upload_form': CSVUploadForm(),
         'csv_uploads': csv_uploads,
         'csv_selected_upload': csv_selected_upload or '',
+        'csv_selected_category': csv_selected_category or '',
+        'csv_category_filters': FINANCE_CONCEPT_FILTERS,
         'csv_finance_records': csv_finance_records,
         'csv_total_rentas': csv_total_rentas,
         'csv_total_ingresos': csv_total_ingresos,
