@@ -96,7 +96,11 @@ def parse_money(value):
 
 
 def _concept_amount(concept, label):
-    match = re.search(rf'\b{re.escape(label)}\b\s*([$]?\s*[0-9][0-9,.]*)', str(concept or ''), re.IGNORECASE)
+    match = re.search(
+        rf'\b{re.escape(label)}\b(?:\s+{re.escape(label)}\b)?\s*([$]?\s*[0-9][0-9,.]*)',
+        str(concept or ''),
+        re.IGNORECASE,
+    )
     if not match:
         return Decimal('0.00')
     return parse_money(match.group(1))
@@ -116,26 +120,52 @@ def _looks_like_service_charge(concept):
     return any(re.search(rf'\b{name}\b', normalized) for name in ['gas', 'agua', 'luz'])
 
 
-def _concept_categories(row, concept, rent, gas, water):
+def _looks_like_rent_charge(concept):
+    normalized = _normalize_key(concept)
+    if re.search(r'\b(renta|mensualidad)\b', normalized):
+        return True
+    return bool(
+        re.search(r'\bmantenimiento\b', normalized)
+        and not _looks_like_service_charge(concept)
+    )
+
+
+def _concept_categories(row, concept, gas, water):
     normalized = _normalize_key(concept)
     categories = []
-    if rent or re.search(r'\b(renta|mensualidad)\b', normalized):
+
+    is_gas = bool(gas) or re.search(r'\b(gas|pago de gas)\b', normalized)
+    is_water = bool(water) or re.search(r'\b(agua|pago de agua)\b', normalized)
+    is_parking = re.search(r'\b(estacionamiento|parking|cajon|cajones|cochera)\b', normalized)
+    is_fine = re.search(r'\b(multa|multas|sancion|sanciones|penalizacion|penalizaciones|recargo|recargos)\b', normalized)
+    is_common_area = re.search(r'\b(area comun|areas comunes|area comunes|amenidades|lobby|salon|mesa rota)\b', normalized)
+    is_rent = re.search(r'\b(renta|mensualidad)\b', normalized)
+    is_monthly_maintenance = (
+        re.search(r'\bmantenimiento\b', normalized)
+        and not is_gas
+        and not is_water
+        and not re.search(r'\bluz\b', normalized)
+    )
+
+    if is_rent or is_monthly_maintenance:
         categories.append('renta')
-    if gas or re.search(r'\b(gas|pago de gas)\b', normalized):
+    if is_gas:
         categories.append('gas')
-    if water or re.search(r'\b(agua|pago de agua)\b', normalized):
+    if is_water:
         categories.append('agua')
-    if re.search(r'\b(estacionamiento|parking|cajon|cochera)\b', normalized):
+    if is_parking:
         categories.append('estacionamiento')
-    if re.search(r'\b(multa|multas|penalizacion|penalizacion|sancion|sanciones)\b', normalized):
+    if is_fine:
         categories.append('multas')
+    if is_common_area and 'otros' not in categories:
+        categories.append('otros')
 
     if not categories:
         raw_values = ' '.join(str(value or '') for value in (row.raw_data or {}).values())
         raw_normalized = _normalize_key(raw_values)
-        if re.search(r'\b(estacionamiento|parking|cajon|cochera)\b', raw_normalized):
+        if re.search(r'\b(estacionamiento|parking|cajon|cajones|cochera)\b', raw_normalized):
             categories.append('estacionamiento')
-        if re.search(r'\b(multa|multas|penalizacion|penalizacion|sancion|sanciones)\b', raw_normalized):
+        if re.search(r'\b(multa|multas|sancion|sanciones|penalizacion|penalizaciones|recargo|recargos)\b', raw_normalized):
             categories.append('multas')
 
     return categories or ['otros']
@@ -178,7 +208,7 @@ def finance_record(row):
     water = finance_money(row, 'agua') or _concept_amount(concept, 'agua')
     electricity = finance_money(row, 'luz') or _concept_amount(concept, 'luz')
     rent = finance_money(row, 'renta')
-    if not rent and row_total and not _looks_like_service_charge(concept):
+    if not rent and row_total and _looks_like_rent_charge(concept):
         rent = row_total
     income_rent = finance_money(row, 'ingresos_rentas') or rent
     total_income = finance_money(row, 'ingresos_totales') or row_total or (income_rent + gas + water + electricity)
@@ -191,7 +221,7 @@ def finance_record(row):
         maintenance + administrative + common_light + water_expense + internet
     )
     month = finance_value(row, 'mes') or _concept_month(concept) or f'{row.upload.month:02d}/{row.upload.year}'
-    categories = _concept_categories(row, concept, rent, gas, water)
+    categories = _concept_categories(row, concept, gas, water)
     category_labels = dict(FINANCE_CONCEPT_FILTERS)
 
     return {
