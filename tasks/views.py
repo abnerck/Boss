@@ -1,5 +1,6 @@
 import calendar
 import os
+from collections import defaultdict
 from decimal import Decimal
 from datetime import timedelta
 
@@ -91,8 +92,13 @@ def signin(request):
 
 @login_required
 def mantenimientos(request):
-    mantenimiento = Mantenimientos.objects.select_related('ubicacion', 'user').all().order_by('-fecha_creacion')
-    return render(request, 'mantenimientos.html', {'mantenimiento': mantenimiento})
+    mantenimiento_base = Mantenimientos.objects.select_related('ubicacion', 'user').all()
+    mantenimiento = mantenimiento_base.exclude(estado='Completado').order_by('-fecha_creacion')
+    mantenimiento_historial = mantenimiento_base.filter(estado='Completado').order_by('-fecha_completado', '-fecha_final', '-fecha_creacion')
+    return render(request, 'mantenimientos.html', {
+        'mantenimiento': mantenimiento,
+        'mantenimiento_historial': mantenimiento_historial,
+    })
 
 
 @login_required
@@ -304,6 +310,8 @@ def finanzas(request):
     csv_selected_upload = request.GET.get('csv_upload')
     csv_selected_category = request.GET.get('csv_categoria')
     csv_concept_search = request.GET.get('csv_concepto', '').strip()
+    csv_department_search = request.GET.get('csv_departamento', '').strip()
+    csv_payment_search = request.GET.get('csv_forma_pago', '').strip()
     csv_upload_queryset = csv_uploads
     if csv_selected_upload:
         csv_upload_queryset = csv_upload_queryset.filter(id=csv_selected_upload)
@@ -320,13 +328,11 @@ def finanzas(request):
             | Q(unit__icontains=csv_concept_search)
             | Q(payment_method__icontains=csv_concept_search)
         )
+    if csv_department_search:
+        csv_rows = csv_rows.filter(unit__icontains=csv_department_search)
+    if csv_payment_search:
+        csv_rows = csv_rows.filter(payment_method__icontains=csv_payment_search)
     csv_finance_records = [finance_record(row) for row in csv_rows.order_by('-upload__year', '-upload__month', 'row_number')[:1000]]
-    if selected_property:
-        selected_property_normalized = selected_property.strip().lower()
-        csv_finance_records = [
-            item for item in csv_finance_records
-            if selected_property_normalized in (item['departamento'] or '').strip().lower()
-        ]
     if csv_selected_category:
         csv_finance_records = [
             item for item in csv_finance_records
@@ -337,22 +343,81 @@ def finanzas(request):
     csv_total_ingresos = sum((item['ingresos_totales'] for item in csv_finance_records), Decimal('0'))
     csv_total_egresos = sum((item['egresos_totales'] for item in csv_finance_records), Decimal('0'))
     csv_total_balance = csv_total_ingresos - csv_total_egresos
+    csv_total_servicios = sum((item['gas'] + item['agua'] + item['luz'] for item in csv_finance_records), Decimal('0'))
+
+    csv_ingresos_por_categoria = defaultdict(Decimal)
+    csv_egresos_por_categoria = defaultdict(Decimal)
+    csv_ingresos_por_departamento = defaultdict(Decimal)
+    csv_movimientos_por_departamento = defaultdict(lambda: {'ingresos': Decimal('0'), 'egresos': Decimal('0')})
+    for item in csv_finance_records:
+        if item['ingresos_rentas']:
+            csv_ingresos_por_categoria['Renta'] += item['ingresos_rentas']
+        servicios = item['gas'] + item['agua'] + item['luz']
+        if servicios:
+            csv_ingresos_por_categoria['Servicios cobrados'] += servicios
+        otros_ingresos = item['ingresos_totales'] - item['ingresos_rentas'] - servicios
+        if otros_ingresos:
+            csv_ingresos_por_categoria['Otros ingresos'] += otros_ingresos
+
+        egreso_fields = [
+            ('Mantenimiento', item['mantenimiento']),
+            ('Administrativo', item['administrativo']),
+            ('Luz area comun', item['luz_area_comun']),
+            ('Agua egreso', item['agua_egreso']),
+            ('Internet', item['internet']),
+        ]
+        egresos_detallados = Decimal('0')
+        for label, amount in egreso_fields:
+            if amount:
+                csv_egresos_por_categoria[label] += amount
+                egresos_detallados += amount
+        otros_egresos = item['egresos_totales'] - egresos_detallados
+        if otros_egresos:
+            csv_egresos_por_categoria['Otros egresos'] += otros_egresos
+
+        departamento = item['departamento'] or 'Sin departamento'
+        if item['ingresos_totales']:
+            csv_ingresos_por_departamento[departamento] += item['ingresos_totales']
+        csv_movimientos_por_departamento[departamento]['ingresos'] += item['ingresos_totales']
+        csv_movimientos_por_departamento[departamento]['egresos'] += item['egresos_totales']
+
+    csv_ingresos_por_categoria = [
+        {'categoria': categoria, 'total': total}
+        for categoria, total in sorted(csv_ingresos_por_categoria.items(), key=lambda item: item[1], reverse=True)
+    ]
+    csv_egresos_por_categoria = [
+        {'categoria': categoria, 'total': total}
+        for categoria, total in sorted(csv_egresos_por_categoria.items(), key=lambda item: item[1], reverse=True)
+    ]
+    csv_ingresos_por_departamento = [
+        {'departamento': departamento, 'total': total}
+        for departamento, total in sorted(csv_ingresos_por_departamento.items(), key=lambda item: item[1], reverse=True)[:12]
+    ]
+    csv_movimientos_por_departamento = [
+        {
+            'departamento': departamento,
+            'ingresos': values['ingresos'],
+            'egresos': values['egresos'],
+            'balance': values['ingresos'] - values['egresos'],
+        }
+        for departamento, values in sorted(csv_movimientos_por_departamento.items())
+    ]
 
     return render(request, 'finanzas.html', {
         'finanza': finanza,
-        'ingresos': ingresos,
-        'egresos': egresos,
-        'balance': balance,
-        'ingresos_renta': ingresos_renta,
-        'ingresos_servicios': ingresos_servicios,
-        'egresos_por_categoria': egresos_por_categoria,
-        'ingresos_por_categoria': ingresos_por_categoria,
-        'ingresos_por_departamento': ingresos_por_departamento,
-        'movimientos_por_departamento': movimientos_por_departamento,
+        'ingresos': csv_total_ingresos,
+        'egresos': csv_total_egresos,
+        'balance': csv_total_balance,
+        'ingresos_renta': csv_total_rentas,
+        'ingresos_servicios': csv_total_servicios,
+        'egresos_por_categoria': csv_egresos_por_categoria,
+        'ingresos_por_categoria': csv_ingresos_por_categoria,
+        'ingresos_por_departamento': csv_ingresos_por_departamento,
+        'movimientos_por_departamento': csv_movimientos_por_departamento,
         'por_categoria': por_categoria,
         'categoria_resumen': categoria_resumen,
-        'por_periodo': por_periodo,
-        'comparativo': comparativo,
+        'por_periodo': [],
+        'comparativo': [],
         'selected_year': selected_year or '',
         'selected_month': selected_month or '',
         'selected_property': selected_property or '',
@@ -363,12 +428,15 @@ def finanzas(request):
         'csv_selected_upload': csv_selected_upload or '',
         'csv_selected_category': csv_selected_category or '',
         'csv_concept_search': csv_concept_search,
+        'csv_department_search': csv_department_search,
+        'csv_payment_search': csv_payment_search,
         'csv_category_filters': FINANCE_CONCEPT_FILTERS,
         'csv_finance_records': csv_finance_records,
         'csv_total_rentas': csv_total_rentas,
         'csv_total_ingresos': csv_total_ingresos,
         'csv_total_egresos': csv_total_egresos,
         'csv_total_balance': csv_total_balance,
+        'show_manual_finance': False,
     })
 
 
@@ -548,20 +616,29 @@ def administracion(request):
     egresos_mes = finanzas_mes.filter(tipo_movimiento='Egreso').aggregate(total=Sum('total'))['total'] or 0
     ingresos_semana = finanzas_semana.filter(tipo_movimiento='Ingreso').aggregate(total=Sum('total'))['total'] or 0
     egresos_semana = finanzas_semana.filter(tipo_movimiento='Egreso').aggregate(total=Sum('total'))['total'] or 0
+    csv_mes_records = [
+        finance_record(row)
+        for row in CSVRow.objects.filter(upload__month=hoy.month, upload__year=hoy.year).select_related('upload').order_by('row_number')[:1000]
+    ]
+    csv_ingresos_mes = sum((item['ingresos_totales'] for item in csv_mes_records), Decimal('0'))
+    csv_egresos_mes = sum((item['egresos_totales'] for item in csv_mes_records), Decimal('0'))
+    csv_rentas_mes = sum((item['ingresos_rentas'] for item in csv_mes_records), Decimal('0'))
+    csv_servicios_mes = sum((item['gas'] + item['agua'] + item['luz'] for item in csv_mes_records), Decimal('0'))
 
     gastos_por_proveedor = finanzas_mes.filter(tipo_movimiento='Egreso').values('proveedor').annotate(
         total=Sum('total'), count=Count('id')
     ).exclude(proveedor__isnull=True).exclude(proveedor='').order_by('-total')[:5]
 
-    mant_pendientes = Mantenimientos.objects.filter(~Q(estado='Completado')).count()
+    mantenimientos_actuales = Mantenimientos.objects.filter(~Q(estado='Completado'))
+    mant_pendientes = mantenimientos_actuales.count()
     mant_detenidos = Mantenimientos.objects.filter(estado='Detenido').count()
     mant_completados_semana = Mantenimientos.objects.filter(
         estado='Completado',
         fecha_completado__range=[inicio_semana, fin_semana],
     ).count()
-    mant_por_prioridad = Mantenimientos.objects.values('prioridad').annotate(count=Count('id')).exclude(prioridad__isnull=True).exclude(prioridad='')
-    mant_por_estado = Mantenimientos.objects.values('estado').annotate(count=Count('id')).exclude(estado__isnull=True).exclude(estado='')
-    mant_por_tema = Mantenimientos.objects.values('titulo').annotate(count=Count('id')).exclude(titulo__isnull=True).exclude(titulo='').order_by('-count')[:8]
+    mant_por_prioridad = mantenimientos_actuales.values('prioridad').annotate(count=Count('id')).exclude(prioridad__isnull=True).exclude(prioridad='')
+    mant_por_estado = mantenimientos_actuales.values('estado').annotate(count=Count('id')).exclude(estado__isnull=True).exclude(estado='')
+    mant_por_tema = mantenimientos_actuales.values('titulo').annotate(count=Count('id')).exclude(titulo__isnull=True).exclude(titulo='').order_by('-count')[:8]
 
     limpieza_pendiente = Limpieza.objects.filter(estado='Pendiente').count()
     limpieza_completada_semana = Limpieza.objects.filter(
@@ -575,6 +652,13 @@ def administracion(request):
     areas_mantenimiento = Area.objects.filter(estado='En mantenimiento').count()
     total_areas = Area.objects.count()
     areas_por_estado = Area.objects.values('estado').annotate(count=Count('id')).exclude(estado__isnull=True).exclude(estado='')
+    departamentos = Area.objects.filter(tipo_area='Departamento')
+    total_departamentos = departamentos.count()
+    departamentos_ocupados = departamentos.filter(estado='Ocupado').count()
+    departamentos_libres = departamentos.filter(estado='Libre').count()
+    departamentos_mantenimiento = departamentos.filter(estado='En mantenimiento').count()
+    ocupacion_departamentos_pct = round((departamentos_ocupados / total_departamentos * 100) if total_departamentos else 0)
+    areas_por_tipo = Area.objects.values('tipo_area').annotate(count=Count('id')).exclude(tipo_area__isnull=True).exclude(tipo_area='').order_by('tipo_area')
 
     cleaning_activity_total = Activity.objects.count()
     cleaning_logs_week = CleaningLog.objects.filter(date__range=[inicio_semana, fin_semana])
@@ -586,9 +670,12 @@ def administracion(request):
         'total_gastos_semana': egresos_semana,
         'total_gastos_mes': egresos_mes,
         'ingresos_semana': ingresos_semana,
-        'ingresos_mes': ingresos_mes,
-        'egresos_mes': egresos_mes,
-        'balance_mes': ingresos_mes - egresos_mes,
+        'ingresos_mes': csv_ingresos_mes,
+        'egresos_mes': csv_egresos_mes,
+        'balance_mes': csv_ingresos_mes - csv_egresos_mes,
+        'csv_rentas_mes': csv_rentas_mes,
+        'csv_servicios_mes': csv_servicios_mes,
+        'csv_movimientos_mes': len(csv_mes_records),
         'gastos_por_proveedor': gastos_por_proveedor,
         'mant_pendientes': mant_pendientes,
         'mant_detenidos': mant_detenidos,
@@ -604,6 +691,12 @@ def administracion(request):
         'areas_mantenimiento': areas_mantenimiento,
         'total_areas': total_areas,
         'areas_por_estado': areas_por_estado,
+        'total_departamentos': total_departamentos,
+        'departamentos_ocupados': departamentos_ocupados,
+        'departamentos_libres': departamentos_libres,
+        'departamentos_mantenimiento': departamentos_mantenimiento,
+        'ocupacion_departamentos_pct': ocupacion_departamentos_pct,
+        'areas_por_tipo': areas_por_tipo,
         'cleaning_activity_total': cleaning_activity_total,
         'cleaning_completion_rate': cleaning_completion_rate,
         'cleaning_by_area': cleaning_by_area,

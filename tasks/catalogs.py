@@ -73,6 +73,7 @@ MAINTENANCE_RESPONSIBLE_CHOICES = [
 MAINTENANCE_TOPIC_CHOICES = [
     ("Hidraulico", "Hidraulico"),
     ("Electrico", "Electrico"),
+    ("Elevador", "Elevador"),
     ("Gas", "Gas"),
     ("Limpieza", "Limpieza"),
     ("Mantenimiento", "Mantenimiento"),

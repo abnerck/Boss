@@ -12,8 +12,8 @@
             <p class="cyber-subtitle">Registro eficiente de transacciones - Vegas Corporativo</p>
         </div>
         <div class="header-actions">
-            <a href="{% url 'create_finanza' %}" class="btn btn-outline-light btn-sm">
-                <i class="fas fa-plus-circle me-1"></i>Nuevo Registro
+            <a href="#csv-financiero" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-file-csv me-1"></i>Importar CSV
             </a>
         </div>
     </div>
@@ -52,19 +52,6 @@
     <form method="get" class="cyber-maintenance-form mb-4">
         <div class="form-grid">
             <div class="form-group">
-                <label for="clave_inmueble" class="form-label">Inmueble</label>
-                <select id="clave_inmueble" name="clave_inmueble" class="form-select">
-                    <option value="">Todos</option>
-                    <option value="boss8025" {% if selected_property == 'boss8025' %}selected{% endif %}>boss8025</option>
-                    <option value="C1438" {% if selected_property == 'C1438' %}selected{% endif %}>C1438</option>
-                    {% for property in property_choices %}
-                        {% if property != 'boss8025' and property != 'C1438' %}
-                        <option value="{{ property }}" {% if selected_property == property %}selected{% endif %}>{{ property }}</option>
-                        {% endif %}
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
                 <label for="mes" class="form-label">Mes</label>
                 <select id="mes" name="mes" class="form-select">
                     <option value="">Todos</option>
@@ -101,13 +88,21 @@
                 <label for="csv_concepto" class="form-label">Concepto CSV</label>
                 <input id="csv_concepto" name="csv_concepto" class="form-control" value="{{ csv_concept_search }}" placeholder="renta, agua, sancion, cajon...">
             </div>
+            <div class="form-group">
+                <label for="csv_departamento" class="form-label">Departamento CSV</label>
+                <input id="csv_departamento" name="csv_departamento" class="form-control" value="{{ csv_department_search }}" placeholder="101, 202, Lobby...">
+            </div>
+            <div class="form-group">
+                <label for="csv_forma_pago" class="form-label">Forma de pago CSV</label>
+                <input id="csv_forma_pago" name="csv_forma_pago" class="form-control" value="{{ csv_payment_search }}" placeholder="transferencia, efectivo...">
+            </div>
             <div class="form-group d-flex align-items-end">
                 <button class="btn btn-save" type="submit">Filtrar</button>
             </div>
         </div>
     </form>
 
-    <div class="cyber-maintenance-form mb-4">
+    <div id="csv-financiero" class="cyber-maintenance-form mb-4">
         <div class="finance-csv-head">
             <div>
                 <h5 class="mb-1"><i class="fas fa-file-csv me-2"></i>CSV financiero</h5>
@@ -338,6 +333,7 @@
     </div>
     {% endif %}
 
+    {% if show_manual_finance %}
     {% if finanza %}
     <!-- Filtros avanzados -->
     <div class="cyber-maintenance-form mb-4">
@@ -541,6 +537,7 @@
         </a>
     </div>
     {% endif %}
+    {% endif %}
 </div>
 
 <!-- Incluir DataTables CSS -->
@@ -678,6 +675,7 @@ $(document).ready(function() {
         });
     });
 
+    if ($('#tablaFinanzas').length) {
     // Inicializar DataTable sin paginación
     var table = $('#tablaFinanzas').DataTable({
         paging: false,
@@ -1008,6 +1006,7 @@ $(document).ready(function() {
 
     // Actualizar gráficos al cargar la página
     updateCharts();
+    }
 });
 </script>
 

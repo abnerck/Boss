@@ -102,6 +102,37 @@
         </div>
     </div>
 
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card accent-green">
+                <span>Ocupacion departamentos</span>
+                <strong>{{ ocupacion_departamentos_pct }}%</strong>
+                <small>{{ departamentos_ocupados }} ocupados de {{ total_departamentos }} departamentos</small>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card accent-blue">
+                <span>Departamentos libres</span>
+                <strong>{{ departamentos_libres }}</strong>
+                <small>{{ departamentos_mantenimiento }} departamentos en mantenimiento</small>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card accent-orange">
+                <span>Areas totales</span>
+                <strong>{{ total_areas }}</strong>
+                <small>Departamentos, areas comunes, bodegas y servicios</small>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card accent-purple">
+                <span>Mantenimientos cerrados</span>
+                <strong>{{ mant_completados_semana }}</strong>
+                <small>Completados durante esta semana</small>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4">
         <div class="col-xl-4">
             <div class="panel">
@@ -138,6 +169,32 @@
                     {% empty %}
                     <p class="text-muted mb-0">Sin datos de temas.</p>
                     {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+        <div class="col-xl-6">
+            <div class="panel">
+                <div class="panel-title">Resumen por tipo de area</div>
+                <div class="mini-list">
+                    {% for item in areas_por_tipo %}
+                    <div><span>{{ item.tipo_area|default:"Sin tipo" }}</span><strong>{{ item.count }}</strong></div>
+                    {% empty %}
+                    <p class="text-muted mb-0">Sin tipos de area registrados.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="panel">
+                <div class="panel-title">Resumen de departamentos</div>
+                <div class="mini-list">
+                    <div><span>Ocupados</span><strong>{{ departamentos_ocupados }}</strong></div>
+                    <div><span>Libres</span><strong>{{ departamentos_libres }}</strong></div>
+                    <div><span>En mantenimiento</span><strong>{{ departamentos_mantenimiento }}</strong></div>
+                    <div><span>Total departamentos</span><strong>{{ total_departamentos }}</strong></div>
                 </div>
             </div>
         </div>
@@ -183,13 +240,14 @@
         </div>
         <div class="col-xl-3">
             <div class="panel">
-                <div class="panel-title">Finanzas existentes</div>
+                <div class="panel-title">Finanzas CSV del mes</div>
                 <div class="mini-list">
-                    <div><span>Gastos semana</span><strong>${{ total_gastos_semana|floatformat:2 }}</strong></div>
-                    <div><span>Gastos mes</span><strong>${{ total_gastos_mes|floatformat:2 }}</strong></div>
-                    <div><span>Ingresos semana</span><strong>${{ ingresos_semana|floatformat:2 }}</strong></div>
+                    <div><span>Ingresos CSV</span><strong>${{ ingresos_mes|floatformat:2 }}</strong></div>
+                    <div><span>Rentas CSV</span><strong>${{ csv_rentas_mes|floatformat:2 }}</strong></div>
+                    <div><span>Servicios CSV</span><strong>${{ csv_servicios_mes|floatformat:2 }}</strong></div>
+                    <div><span>Filas CSV</span><strong>{{ csv_movimientos_mes }}</strong></div>
                 </div>
-                <small class="text-muted d-block mt-2">Resumen basado en registros actuales; no se agrego modulo nuevo de finanzas.</small>
+                <small class="text-muted d-block mt-2">Resumen basado en CSV importados del mes actual.</small>
             </div>
         </div>
     </div>

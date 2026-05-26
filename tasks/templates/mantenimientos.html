@@ -11,26 +11,34 @@
         </a>
     </div>
 
-    {% if mantenimiento %}
+    {% if mantenimiento or mantenimiento_historial %}
     <!-- Filtros avanzados -->
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <div class="row g-3 d-flex align-items-center">
-                <div class="col-md-3 text-start">
+                <div class="col-md-2 text-start">
                     <label for="filtroTitulo" class="form-label">Buscar por titulo:</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-search"></i></span>
                         <input type="text" class="form-control" id="filtroTitulo" placeholder="Título del mantenimiento">
                     </div>
                 </div>
-                <div class="col-md-3 mx-auto">
+                <div class="col-md-2 mx-auto">
                     <label for="filtroResponsable" class="form-label">Buscar por responsable:</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-user"></i></span>
                         <input type="text" class="form-control" id="filtroResponsable" placeholder="Nombre del responsable">
                     </div>
                 </div>
-                <div class="col-md-3 text-end">
+                <div class="col-md-2">
+                    <label for="filtroTema" class="form-label">Filtrar por tema:</label>
+                    <input type="text" class="form-control" id="filtroTema" placeholder="Tema">
+                </div>
+                <div class="col-md-2">
+                    <label for="filtroArea" class="form-label">Filtrar por area:</label>
+                    <input type="text" class="form-control" id="filtroArea" placeholder="Area">
+                </div>
+                <div class="col-md-2 text-end">
                     <label for="filtroEstado" class="form-label">Filtrar por estado:</label>
                     <select class="form-select" id="filtroEstado">
                         <option value="">Todos los estados</option>
@@ -41,7 +49,7 @@
                         <option value="Cancelado">Cancelado</option>
                     </select>
                 </div>
-                <div class="col-md-3 text-end">
+                <div class="col-md-2 text-end">
                     <label for="filtroPrioridad" class="form-label">Filtrar por prioridad:</label>
                     <select class="form-select" id="filtroPrioridad">
                         <option value="">Todas las prioridades</option>
@@ -55,11 +63,12 @@
         </div>
     </div>
 
-    <!-- Tabla de mantenimientos -->
+    {% if mantenimiento %}
+    <!-- Tabla de mantenimientos actuales -->
     <div class="card shadow-sm">
         <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0">
-                <i class="fas fa-clipboard-list me-2"></i> Listado de Mantenimientos
+                <i class="fas fa-clipboard-list me-2"></i> Mantenimientos actuales
             </h5>
             <div>
                 <button id="btnExportExcel" class="btn btn-success btn-sm me-2">
@@ -75,34 +84,26 @@
             <table id="tablaMantenimientos" class="table table-hover table-striped mb-0">
                 <thead class="table-dark">
                     <tr>
-                        <th>#</th>
-                        <th>Tema</th>
-                        <th>Responsable</th>
                         <th>Ubicacion</th>
+                        <th>Tema</th>
                         <th>Estado</th>
                         <th>Prioridad</th>
                         <th>Fecha Inicio</th>
                         <th>Fecha Final</th>
-                        <th>Creador</th>
+                        <th>Responsable</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for m in mantenimiento %}
                     <tr>
-                        <td>{{ forloop.counter }}</td>
+                        <td>{{ m.ubicacion|default:"N/A" }}</td>
                         <td>
                             <a href="{% url 'mantenimientos_detail' m.id %}" class="text-decoration-none fw-bold text-dark">
                                 {{ m.titulo|truncatechars:30 }}
                             </a>
                             <small class="text-muted d-block">{{ m.descripcion|truncatechars:40|default:"Sin descripcion" }}</small>
                         </td>
-                        <td>
-                            <span class="badge bg-primary bg-opacity-10 text-primary">
-                                {{ m.responsable|default:"Sin asignar" }}
-                            </span>
-                        </td>
-                        <td>{{ m.ubicacion|default:"N/A" }}</td>
                         <td>
                             {% if m.estado == 'Completado' %}
                             <span class="badge bg-success">
@@ -156,12 +157,9 @@
                             </small>
                         </td>
                         <td>
-                            <div class="d-flex gap-2">
-                                <a  class="btn btn-sm btn-outline-primary" title="Ver detalles">
-                                    {{ m.user }}
-                                </a>
-                            </div>
-
+                            <span class="badge bg-primary bg-opacity-10 text-primary">
+                                {{ m.responsable|default:"Sin asignar" }}
+                            </span>
                         </td>
                         <td>
                             <div class="d-flex gap-2">
@@ -209,12 +207,57 @@
     {% else %}
     <div class="alert alert-info text-center py-5">
         <i class="fas fa-clipboard-list fa-4x text-info mb-4"></i>
-        <h4 class="alert-heading fw-bold">No hay mantenimientos registrados</h4>
-        <p>Parece que no has anadido ningun mantenimiento todavia.</p>
+        <h4 class="alert-heading fw-bold">No hay mantenimientos actuales</h4>
+        <p>Los mantenimientos completados se muestran en el historial.</p>
         <hr>
         <a href="{% url 'create_mantenimientos' %}" class="btn btn-info mt-3">
-            <i class="fas fa-plus-circle me-2"></i> Crear Primer Mantenimiento
+            <i class="fas fa-plus-circle me-2"></i> Crear mantenimiento
         </a>
+    </div>
+    {% endif %}
+
+    {% if mantenimiento_historial %}
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0"><i class="fas fa-history me-2"></i>Historial de mantenimientos completados</h5>
+        </div>
+        <div class="table-responsive">
+            <table id="tablaHistorialMantenimientos" class="table table-hover table-striped mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Ubicacion</th>
+                        <th>Tema</th>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Final</th>
+                        <th>Completado</th>
+                        <th>Responsable</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in mantenimiento_historial %}
+                    <tr>
+                        <td>{{ m.ubicacion|default:"N/A" }}</td>
+                        <td>
+                            <a href="{% url 'mantenimientos_detail' m.id %}" class="text-decoration-none fw-bold text-dark">
+                                {{ m.titulo|truncatechars:30 }}
+                            </a>
+                            <small class="text-muted d-block">{{ m.descripcion|truncatechars:40|default:"Sin descripcion" }}</small>
+                        </td>
+                        <td>{{ m.fecha_inicio|date:"d/m/Y"|default:"Sin fecha" }}</td>
+                        <td>{{ m.fecha_final|date:"d/m/Y"|default:"Sin fecha" }}</td>
+                        <td>{{ m.fecha_completado|date:"d/m/Y H:i"|default:"-" }}</td>
+                        <td>{{ m.responsable|default:"Sin asignar" }}</td>
+                        <td>
+                            <a href="{% url 'mantenimientos_detail' m.id %}" class="btn btn-sm btn-outline-primary" title="Ver detalles">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
     {% endif %}
 </div>
@@ -238,6 +281,9 @@
 $(document).ready(function() {
     // Logotipo en Base64 (marcador de posición, reemplaza con tu propio logotipo)
     var logoBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAMAAABHPGVmAAAAA1BMVEX///+nxBvIAAAAIElEQVRoge3BAQ0AAADCoPdPbQ8HFAAAAAAAAAAAAPgT1y0AAd9zLeQAAAAASUVORK5CYII=";
+    if (!$('#tablaMantenimientos').length) {
+        return;
+    }
 
     // Inicializar DataTable sin paginación
     var table = $('#tablaMantenimientos').DataTable({
@@ -251,11 +297,11 @@ $(document).ready(function() {
                 className: 'btn-success btn-sm',
                 title: 'Reporte de Mantenimientos',
                 exportOptions: {
-                    columns: [0, 1, 2, 3, 4, 5, 6, 7],
+                    columns: [0, 1, 2, 3, 4, 5, 6],
                     format: {
                         body: function (data, row, column, node) {
                             // Limpiar el contenido de las celdas para exportación
-                            if (column === 4 || column === 5) { // Columnas de estado y prioridad
+                            if (column === 2 || column === 3) { // Columnas de estado y prioridad
                                 return $(data).text() || data;
                             }
                             return data;
@@ -269,11 +315,11 @@ $(document).ready(function() {
                 className: 'btn-danger btn-sm',
                 title: 'Reporte de Mantenimientos',
                 exportOptions: {
-                    columns: [0, 1, 2, 3, 4, 5, 6, 7],
+                    columns: [0, 1, 2, 3, 4, 5, 6],
                     format: {
                         body: function (data, row, column, node) {
                             // Limpiar el contenido de las celdas para exportación
-                            if (column === 4 || column === 5) { // Columnas de estado y prioridad
+                            if (column === 2 || column === 3) { // Columnas de estado y prioridad
                                 return $(data).text() || data;
                             }
                             return data;
@@ -470,7 +516,7 @@ $(document).ready(function() {
             estados.forEach(function(estado) {
                 var count = 0;
                 filteredData.each(function(row) {
-                    if (row[4].includes(estado)) count++;
+                    if (row[2].includes(estado)) count++;
                 });
                 if (count > 0) {
                     labels.push(estado);
@@ -492,7 +538,7 @@ $(document).ready(function() {
             prioridades.forEach(function(prioridad) {
                 var count = 0;
                 filteredData.each(function(row) {
-                    if (row[5].includes(prioridad)) count++;
+                    if (row[3].includes(prioridad)) count++;
                 });
                 if (count > 0) {
                     labels.push(prioridad);
@@ -527,19 +573,29 @@ $(document).ready(function() {
         table.column(1).search(this.value).draw();
         updateCharts();
     });
+
+    $('#filtroTema').on('keyup', function() {
+        table.column(1).search(this.value).draw();
+        updateCharts();
+    });
+
+    $('#filtroArea').on('keyup', function() {
+        table.column(0).search(this.value).draw();
+        updateCharts();
+    });
     
     $('#filtroResponsable').on('keyup', function() {
-        table.column(2).search(this.value).draw();
+        table.column(6).search(this.value).draw();
         updateCharts();
     });
     
     $('#filtroEstado').on('change', function() {
-        table.column(4).search(this.value).draw();
+        table.column(2).search(this.value).draw();
         updateCharts();
     });
     
     $('#filtroPrioridad').on('change', function() {
-        table.column(5).search(this.value).draw();
+        table.column(3).search(this.value).draw();
         updateCharts();
     });
     
