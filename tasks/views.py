@@ -94,10 +94,11 @@ def signin(request):
 def mantenimientos(request):
     mantenimiento_base = Mantenimientos.objects.select_related('ubicacion', 'user').all()
     mantenimiento = mantenimiento_base.exclude(estado='Completado').order_by('-fecha_creacion')
-    mantenimiento_historial = mantenimiento_base.filter(estado='Completado').order_by('-fecha_completado', '-fecha_final', '-fecha_creacion')
+    mantenimiento_historial = mantenimiento_base.filter(estado='Completado').order_by('-fecha_creacion')
     return render(request, 'mantenimientos.html', {
         'mantenimiento': mantenimiento,
         'mantenimiento_historial': mantenimiento_historial,
+        'has_mantenimientos': mantenimiento.exists() or mantenimiento_historial.exists(),
     })
 
 
