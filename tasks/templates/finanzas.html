@@ -86,15 +86,30 @@
             </div>
             <div class="form-group">
                 <label for="csv_concepto" class="form-label">Concepto CSV</label>
-                <input id="csv_concepto" name="csv_concepto" class="form-control" value="{{ csv_concept_search }}" placeholder="renta, agua, sancion, cajon...">
+                <select id="csv_concepto" name="csv_concepto" class="form-select">
+                    <option value="">Todos</option>
+                    {% for value,label in csv_concept_choices %}
+                    <option value="{{ value }}" {% if csv_concept_search == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="form-group">
                 <label for="csv_departamento" class="form-label">Departamento CSV</label>
-                <input id="csv_departamento" name="csv_departamento" class="form-control" value="{{ csv_department_search }}" placeholder="101, 202, Lobby...">
+                <select id="csv_departamento" name="csv_departamento" class="form-select">
+                    <option value="">Todos</option>
+                    {% for department in csv_department_choices %}
+                    <option value="{{ department }}" {% if csv_department_search == department %}selected{% endif %}>{{ department }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="form-group">
                 <label for="csv_forma_pago" class="form-label">Forma de pago CSV</label>
-                <input id="csv_forma_pago" name="csv_forma_pago" class="form-control" value="{{ csv_payment_search }}" placeholder="transferencia, efectivo...">
+                <select id="csv_forma_pago" name="csv_forma_pago" class="form-select">
+                    <option value="">Todas</option>
+                    {% for payment_method in csv_payment_choices %}
+                    <option value="{{ payment_method }}" {% if csv_payment_search == payment_method %}selected{% endif %}>{{ payment_method }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="form-group d-flex align-items-end">
                 <button class="btn btn-save" type="submit">Filtrar</button>

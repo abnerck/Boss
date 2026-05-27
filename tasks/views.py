@@ -307,6 +307,17 @@ def finanzas(request):
     csv_concept_search = request.GET.get('csv_concepto', '').strip()
     csv_department_search = request.GET.get('csv_departamento', '').strip()
     csv_payment_search = request.GET.get('csv_forma_pago', '').strip()
+    csv_concept_choices = [
+        ('renta', 'Renta'),
+        ('mantenimiento', 'Mantenimiento'),
+        ('agua', 'Agua'),
+        ('gas', 'Gas'),
+        ('luz', 'Luz'),
+        ('estacionamiento', 'Estacionamiento'),
+        ('sancion', 'Sancion / multa'),
+        ('areas comunes', 'Areas comunes'),
+        ('cajon', 'Cajon'),
+    ]
     csv_upload_queryset = csv_uploads
     if csv_selected_upload:
         csv_upload_queryset = csv_upload_queryset.filter(id=csv_selected_upload)
@@ -316,6 +327,14 @@ def finanzas(request):
         csv_upload_queryset = csv_upload_queryset.filter(month=selected_month)
 
     csv_rows = CSVRow.objects.filter(upload__in=csv_upload_queryset).select_related('upload')
+    csv_department_choices = (
+        csv_rows.exclude(unit__isnull=True).exclude(unit='')
+        .values_list('unit', flat=True).distinct().order_by('unit')
+    )
+    csv_payment_choices = (
+        csv_rows.exclude(payment_method__isnull=True).exclude(payment_method='')
+        .values_list('payment_method', flat=True).distinct().order_by('payment_method')
+    )
     if csv_concept_search:
         csv_rows = csv_rows.filter(
             Q(concept__icontains=csv_concept_search)
@@ -324,9 +343,9 @@ def finanzas(request):
             | Q(payment_method__icontains=csv_concept_search)
         )
     if csv_department_search:
-        csv_rows = csv_rows.filter(unit__icontains=csv_department_search)
+        csv_rows = csv_rows.filter(unit=csv_department_search)
     if csv_payment_search:
-        csv_rows = csv_rows.filter(payment_method__icontains=csv_payment_search)
+        csv_rows = csv_rows.filter(payment_method=csv_payment_search)
     csv_finance_records = [finance_record(row) for row in csv_rows.order_by('-upload__year', '-upload__month', 'row_number')[:1000]]
     if csv_selected_category:
         csv_finance_records = [
@@ -425,6 +444,9 @@ def finanzas(request):
         'csv_concept_search': csv_concept_search,
         'csv_department_search': csv_department_search,
         'csv_payment_search': csv_payment_search,
+        'csv_concept_choices': csv_concept_choices,
+        'csv_department_choices': csv_department_choices,
+        'csv_payment_choices': csv_payment_choices,
         'csv_category_filters': FINANCE_CONCEPT_FILTERS,
         'csv_finance_records': csv_finance_records,
         'csv_total_rentas': csv_total_rentas,
