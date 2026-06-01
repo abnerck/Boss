@@ -22,7 +22,7 @@ DEFAULT_AREA_SPECS = [
     ("Lobby", 0, "Area comun"),
     ("Elevador", 0, "Area comun"),
     ("Estacionamiento", 0, "Area comun"),
-    ("Porton electrico", 0, "Area comun"),
+    ("Porton Électrico", 0, "Area comun"),
     ("Cisterna", 0, "Cuarto de maquinas"),
     ("Bombas de subida", 0, "Cuarto de maquinas"),
     ("Bodega de limpieza", 0, "Bodega"),

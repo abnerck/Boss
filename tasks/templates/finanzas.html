@@ -11,11 +11,6 @@
             </h2>
             <p class="cyber-subtitle">Registro eficiente de transacciones - Vegas Corporativo</p>
         </div>
-        <div class="header-actions">
-            <a href="#csv-financiero" class="btn btn-outline-light btn-sm">
-                <i class="fas fa-file-csv me-1"></i>Importar CSV
-            </a>
-        </div>
     </div>
 
     {% if messages %}
@@ -65,18 +60,7 @@
                 <input id="anio" name="anio" class="form-control" value="{{ selected_year }}" placeholder="2026">
             </div>
             <div class="form-group">
-                <label for="csv_upload" class="form-label">CSV importado</label>
-                <select id="csv_upload" name="csv_upload" class="form-select">
-                    <option value="">Todos</option>
-                    {% for upload in csv_uploads %}
-                    <option value="{{ upload.id }}" {% if csv_selected_upload == upload.id|stringformat:"s" %}selected{% endif %}>
-                        {{ upload.title }} - {{ upload.month|stringformat:"02d" }}/{{ upload.year }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="csv_categoria" class="form-label">Tipo de pago CSV</label>
+                <label for="csv_categoria" class="form-label">Tipo</label>
                 <select id="csv_categoria" name="csv_categoria" class="form-select">
                     <option value="">Todos</option>
                     {% for value,label in csv_category_filters %}
@@ -85,16 +69,11 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="csv_concepto" class="form-label">Concepto CSV</label>
-                <select id="csv_concepto" name="csv_concepto" class="form-select">
-                    <option value="">Todos</option>
-                    {% for value,label in csv_concept_choices %}
-                    <option value="{{ value }}" {% if csv_concept_search == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
+                <label for="csv_concepto" class="form-label">Buscar concepto</label>
+                <input id="csv_concepto" name="csv_concepto" class="form-control" value="{{ csv_concept_search }}" placeholder="Renta, gas, agua, multa...">
             </div>
             <div class="form-group">
-                <label for="csv_departamento" class="form-label">Departamento CSV</label>
+                <label for="csv_departamento" class="form-label">Departamento</label>
                 <select id="csv_departamento" name="csv_departamento" class="form-select">
                     <option value="">Todos</option>
                     {% for department in csv_department_choices %}
@@ -103,7 +82,7 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="csv_forma_pago" class="form-label">Forma de pago CSV</label>
+                <label for="csv_forma_pago" class="form-label">Forma de pago</label>
                 <select id="csv_forma_pago" name="csv_forma_pago" class="form-select">
                     <option value="">Todas</option>
                     {% for payment_method in csv_payment_choices %}
@@ -120,37 +99,10 @@
     <div id="csv-financiero" class="cyber-maintenance-form mb-4">
         <div class="finance-csv-head">
             <div>
-                <h5 class="mb-1"><i class="fas fa-file-csv me-2"></i>CSV financiero</h5>
-                <p class="text-muted mb-0">Carga uno o varios CSV y revisa Departamento, mes, renta, servicios, ingresos, egresos y total.</p>
+                <h5 class="mb-1"><i class="fas fa-chart-line me-2"></i>Movimientos importados</h5>
+                <p class="text-muted mb-0">Analisis de datos cargados desde Analisis de CSV. El filtro Tipo detecta renta, gas, agua, multas y otros conceptos aunque vengan juntos en la misma celda.</p>
             </div>
         </div>
-        <form method="post" action="{% url 'csv_analysis:upload' %}" enctype="multipart/form-data" class="finance-csv-upload">
-            {% csrf_token %}
-            <input type="hidden" name="next" value="{% url 'finanzas' %}">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label class="form-label">Nombre del reporte</label>
-                    {{ csv_upload_form.title|add_class:"form-control" }}
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Mes</label>
-                    {{ csv_upload_form.month|add_class:"form-select" }}
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Anio</label>
-                    {{ csv_upload_form.year|add_class:"form-control" }}
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Archivos CSV</label>
-                    {{ csv_upload_form.file|add_class:"form-control" }}
-                </div>
-                <div class="form-group d-flex align-items-end">
-                    <button class="btn btn-save w-100" type="submit">
-                        <i class="fas fa-upload me-1"></i>Importar CSV
-                    </button>
-                </div>
-            </div>
-        </form>
 
         <div class="finance-csv-metrics">
             <div><span>Ingresos por rentas</span><strong class="text-success">${{ csv_total_rentas|floatformat:2 }}</strong></div>
@@ -160,7 +112,7 @@
         </div>
 
         <div class="finance-csv-column-tools">
-            <span>Columnas CSV</span>
+            <span>Vista</span>
             <button type="button" class="btn btn-outline-light btn-sm active" data-csv-view="all">Todo</button>
             <button type="button" class="btn btn-outline-light btn-sm" data-csv-view="concepts">Conceptos</button>
             <button type="button" class="btn btn-outline-light btn-sm" data-csv-view="income">Ingresos</button>
@@ -171,11 +123,11 @@
             <table id="financeCsvTable" class="table table-hover mb-0 finance-csv-table">
                 <thead class="table-dark">
                     <tr>
-                        <th>Archivo</th>
+                        <th>Reporte</th>
                         <th>Departamento</th>
-                        <th>Mes</th>
+                        <th>Periodo</th>
                         <th>Tipo</th>
-                        <th>Concepto CSV</th>
+                        <th>Concepto</th>
                         <th>Forma de pago</th>
                         <th>Renta</th>
                         <th>Fecha de pago</th>
@@ -230,27 +182,12 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="21" class="text-muted">Aun no hay CSV importados para los filtros actuales.</td>
+                        <td colspan="21" class="text-muted">No hay movimientos importados para los filtros actuales.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-
-        {% if csv_uploads %}
-        <div class="finance-csv-files">
-            {% for upload in csv_uploads %}
-            <div>
-                <span>{{ upload.title }} - {{ upload.original_filename }} - {{ upload.rows.count }} filas</span>
-                <form method="post" action="{% url 'csv_analysis:delete' upload.id %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="next" value="{% url 'finanzas' %}">
-                    <button type="submit" class="btn btn-outline-danger btn-sm">Eliminar</button>
-                </form>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
     </div>
 
     <div class="form-grid mb-4">

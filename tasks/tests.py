@@ -5,17 +5,19 @@ from django.test import TestCase
 from django.urls import reverse
 
 from csv_analysis.models import CSVRow, CSVUpload
+from csv_analysis.services import finance_record
 from .catalogs import DEFAULT_AREA_NAMES, MAINTENANCE_TOPIC_CHOICES
 from .forms import MantenimientoForm
 from .models import Area, Finanza, Mantenimientos
 
 
 class MaintenanceClientRequestTests(TestCase):
-    def test_catalog_has_elevador_and_single_porton_electrico_area(self):
+    def test_catalog_has_elevador_and_single_accented_porton_electrico_area(self):
         topics = [value for value, _label in MAINTENANCE_TOPIC_CHOICES]
 
         self.assertIn('Elevador', topics)
-        self.assertEqual(DEFAULT_AREA_NAMES.count('Porton electrico'), 1)
+        self.assertNotIn('Porton electrico', DEFAULT_AREA_NAMES)
+        self.assertEqual(DEFAULT_AREA_NAMES.count('Porton Électrico'), 1)
 
     def test_maintenance_form_uses_mobile_date_inputs(self):
         form = MantenimientoForm()
@@ -115,6 +117,41 @@ class FinanceFilterTests(TestCase):
         self.assertEqual(len(records), 1)
         self.assertEqual(records[0]['departamento'], '101')
         self.assertEqual(response.context['csv_total_ingresos'], Decimal('1200.00'))
+
+    def test_finance_type_filter_matches_mixed_concept_cells(self):
+        upload = CSVUpload.objects.create(
+            uploaded_by=self.user,
+            title='Mayo',
+            original_filename='mayo.csv',
+            month=5,
+            year=2026,
+        )
+        mixed_row = CSVRow.objects.create(
+            upload=upload,
+            row_number=1,
+            unit='101',
+            concept='Renta pago de agua pago de gas',
+            payment_method='Transferencia',
+            total=Decimal('1200.00'),
+            raw_data={'Mes': 'Mayo 2026'},
+        )
+
+        parsed = finance_record(mixed_row)
+        self.assertEqual(parsed['mes'], '05/2026')
+        self.assertIn('renta', parsed['categorias'])
+        self.assertIn('agua', parsed['categorias'])
+        self.assertIn('gas', parsed['categorias'])
+
+        response = self.client.get(reverse('finanzas'), {
+            'mes': '5',
+            'anio': '2026',
+            'csv_categoria': 'gas',
+        })
+
+        self.assertEqual(response.status_code, 200)
+        records = response.context['csv_finance_records']
+        self.assertEqual(len(records), 1)
+        self.assertIn('gas', records[0]['categorias'])
 
     def test_manual_finance_filter_preserves_existing_summary_context(self):
         Finanza.objects.create(

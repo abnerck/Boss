@@ -18,7 +18,6 @@ from django.utils import timezone
 
 from cleaning.models import Activity, CleaningLog
 from cleaning.views import cleaning_reports, cleaning_schedule
-from csv_analysis.forms import CSVUploadForm
 from csv_analysis.models import CSVRow, CSVUpload
 from csv_analysis.services import FINANCE_CONCEPT_FILTERS, finance_record
 from .catalogs import DEFAULT_AREA_NAMES, ensure_default_areas
@@ -302,25 +301,11 @@ def finanzas(request):
         comparativo.append(periodo)
 
     csv_uploads = CSVUpload.objects.prefetch_related('rows').all()
-    csv_selected_upload = request.GET.get('csv_upload')
     csv_selected_category = request.GET.get('csv_categoria')
     csv_concept_search = request.GET.get('csv_concepto', '').strip()
     csv_department_search = request.GET.get('csv_departamento', '').strip()
     csv_payment_search = request.GET.get('csv_forma_pago', '').strip()
-    csv_concept_choices = [
-        ('renta', 'Renta'),
-        ('mantenimiento', 'Mantenimiento'),
-        ('agua', 'Agua'),
-        ('gas', 'Gas'),
-        ('luz', 'Luz'),
-        ('estacionamiento', 'Estacionamiento'),
-        ('sancion', 'Sancion / multa'),
-        ('areas comunes', 'Areas comunes'),
-        ('cajon', 'Cajon'),
-    ]
     csv_upload_queryset = csv_uploads
-    if csv_selected_upload:
-        csv_upload_queryset = csv_upload_queryset.filter(id=csv_selected_upload)
     if selected_year:
         csv_upload_queryset = csv_upload_queryset.filter(year=selected_year)
     if selected_month:
@@ -437,14 +422,11 @@ def finanzas(request):
         'selected_property': selected_property or '',
         'months': Finanza.MES_CHOICES,
         'property_choices': Finanza.objects.values_list('clave_inmueble', flat=True).distinct().order_by('clave_inmueble'),
-        'csv_upload_form': CSVUploadForm(),
         'csv_uploads': csv_uploads,
-        'csv_selected_upload': csv_selected_upload or '',
         'csv_selected_category': csv_selected_category or '',
         'csv_concept_search': csv_concept_search,
         'csv_department_search': csv_department_search,
         'csv_payment_search': csv_payment_search,
-        'csv_concept_choices': csv_concept_choices,
         'csv_department_choices': csv_department_choices,
         'csv_payment_choices': csv_payment_choices,
         'csv_category_filters': FINANCE_CONCEPT_FILTERS,

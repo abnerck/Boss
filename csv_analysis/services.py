@@ -35,8 +35,9 @@ FINANCE_FIELD_ALIASES = {
 
 FINANCE_CONCEPT_FILTERS = [
     ('renta', 'Renta'),
-    ('gas', 'Pago de gas'),
-    ('agua', 'Pago de agua'),
+    ('gas', 'Gas'),
+    ('agua', 'Agua'),
+    ('luz', 'Luz'),
     ('estacionamiento', 'Estacionamiento'),
     ('multas', 'Multas'),
     ('otros', 'Otros'),
@@ -130,12 +131,13 @@ def _looks_like_rent_charge(concept):
     )
 
 
-def _concept_categories(row, concept, gas, water):
+def _concept_categories(row, concept, gas, water, electricity=Decimal('0.00')):
     normalized = _normalize_key(concept)
     categories = []
 
     is_gas = bool(gas) or re.search(r'\b(gas|pago de gas)\b', normalized)
     is_water = bool(water) or re.search(r'\b(agua|pago de agua)\b', normalized)
+    is_electricity = bool(electricity) or re.search(r'\b(luz|pago de luz|electricidad)\b', normalized)
     is_parking = re.search(r'\b(estacionamiento|parking|cajon|cajones|cochera)\b', normalized)
     is_fine = re.search(r'\b(multa|multas|sancion|sanciones|penalizacion|penalizaciones|recargo|recargos)\b', normalized)
     is_common_area = re.search(r'\b(area comun|areas comunes|area comunes|amenidades|lobby|salon|mesa rota)\b', normalized)
@@ -153,6 +155,8 @@ def _concept_categories(row, concept, gas, water):
         categories.append('gas')
     if is_water:
         categories.append('agua')
+    if is_electricity:
+        categories.append('luz')
     if is_parking:
         categories.append('estacionamiento')
     if is_fine:
@@ -167,6 +171,8 @@ def _concept_categories(row, concept, gas, water):
             categories.append('estacionamiento')
         if re.search(r'\b(multa|multas|sancion|sanciones|penalizacion|penalizaciones|recargo|recargos)\b', raw_normalized):
             categories.append('multas')
+        if re.search(r'\b(luz|pago de luz|electricidad)\b', raw_normalized):
+            categories.append('luz')
 
     return categories or ['otros']
 
@@ -220,8 +226,8 @@ def finance_record(row):
     total_expenses = finance_money(row, 'egresos_totales') or (
         maintenance + administrative + common_light + water_expense + internet
     )
-    month = finance_value(row, 'mes') or _concept_month(concept) or f'{row.upload.month:02d}/{row.upload.year}'
-    categories = _concept_categories(row, concept, gas, water)
+    month = f'{row.upload.month:02d}/{row.upload.year}'
+    categories = _concept_categories(row, concept, gas, water, electricity)
     category_labels = dict(FINANCE_CONCEPT_FILTERS)
 
     return {
