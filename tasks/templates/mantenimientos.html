@@ -31,6 +31,18 @@
                     </div>
                 </div>
                 <div class="col-md-3 text-end">
+                    <label for="filtroTema" class="form-label">Filtrar por tema:</label>
+                    <select class="form-select" id="filtroTema">
+                        <option value="">Todos los temas</option>
+                    </select>
+                </div>
+                <div class="col-md-3 text-end">
+                    <label for="filtroArea" class="form-label">Filtrar por area:</label>
+                    <select class="form-select" id="filtroArea">
+                        <option value="">Todas las areas</option>
+                    </select>
+                </div>
+                <div class="col-md-3 text-end">
                     <label for="filtroEstado" class="form-label">Filtrar por estado:</label>
                     <select class="form-select" id="filtroEstado">
                         <option value="">Todos los estados</option>
@@ -76,14 +88,13 @@
                 <thead class="table-dark">
                     <tr>
                         <th>#</th>
-                        <th>Tema</th>
-                        <th>Responsable</th>
                         <th>Ubicacion</th>
+                        <th>Tema</th>
                         <th>Estado</th>
                         <th>Prioridad</th>
                         <th>Fecha Inicio</th>
                         <th>Fecha Final</th>
-                        <th>Creador</th>
+                        <th>Responsable</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -91,18 +102,13 @@
                     {% for m in mantenimiento %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
+                        <td>{{ m.ubicacion|default:"N/A" }}</td>
                         <td>
                             <a href="{% url 'mantenimientos_detail' m.id %}" class="text-decoration-none fw-bold text-dark">
                                 {{ m.titulo|truncatechars:30 }}
                             </a>
                             <small class="text-muted d-block">{{ m.descripcion|truncatechars:40|default:"Sin descripcion" }}</small>
                         </td>
-                        <td>
-                            <span class="badge bg-primary bg-opacity-10 text-primary">
-                                {{ m.responsable|default:"Sin asignar" }}
-                            </span>
-                        </td>
-                        <td>{{ m.ubicacion|default:"N/A" }}</td>
                         <td>
                             {% if m.estado == 'Completado' %}
                             <span class="badge bg-success">
@@ -156,12 +162,9 @@
                             </small>
                         </td>
                         <td>
-                            <div class="d-flex gap-2">
-                                <a  class="btn btn-sm btn-outline-primary" title="Ver detalles">
-                                    {{ m.user }}
-                                </a>
-                            </div>
-
+                            <span class="badge bg-primary bg-opacity-10 text-primary">
+                                {{ m.responsable|default:"Sin asignar" }}
+                            </span>
                         </td>
                         <td>
                             <div class="d-flex gap-2">
@@ -255,7 +258,7 @@ $(document).ready(function() {
                     format: {
                         body: function (data, row, column, node) {
                             // Limpiar el contenido de las celdas para exportación
-                            if (column === 4 || column === 5) { // Columnas de estado y prioridad
+                            if (column === 3 || column === 4 || column === 7) { // Columnas con badges
                                 return $(data).text() || data;
                             }
                             return data;
@@ -273,7 +276,7 @@ $(document).ready(function() {
                     format: {
                         body: function (data, row, column, node) {
                             // Limpiar el contenido de las celdas para exportación
-                            if (column === 4 || column === 5) { // Columnas de estado y prioridad
+                            if (column === 3 || column === 4 || column === 7) { // Columnas con badges
                                 return $(data).text() || data;
                             }
                             return data;
@@ -358,7 +361,7 @@ $(document).ready(function() {
                     };
                     
                     // Personalizar tabla
-                    doc.content[1].table.widths = ['5%', '20%', '15%', '15%', '15%', '15%', '15%'];
+                    doc.content[1].table.widths = ['5%', '15%', '18%', '12%', '12%', '12%', '12%', '14%'];
                     doc.content[1].table.body.forEach(function(row, index) {
                         row.forEach(function(cell, colIndex) {
                             cell.alignment = 'left';
@@ -458,19 +461,18 @@ $(document).ready(function() {
         
         if (type === 'estado') {
             // Datos para gráfico de estados
-            var estados = ['Pendiente', 'En progreso', 'Detenido', 'Completado', 'Cancelado'];
+            var estados = ['Pendiente', 'En progreso', 'Detenido', 'Cancelado'];
             var colors = {
                 'Pendiente': {bg: 'rgba(255, 193, 7, 0.8)', border: 'rgba(255, 193, 7, 1)'},
                 'En progreso': {bg: 'rgba(13, 110, 253, 0.8)', border: 'rgba(13, 110, 253, 1)'},
                 'Detenido': {bg: 'rgba(108, 117, 125, 0.8)', border: 'rgba(108, 117, 125, 1)'},
-                'Completado': {bg: 'rgba(25, 135, 84, 0.8)', border: 'rgba(25, 135, 84, 1)'},
                 'Cancelado': {bg: 'rgba(220, 53, 69, 0.8)', border: 'rgba(220, 53, 69, 1)'}
             };
             
             estados.forEach(function(estado) {
                 var count = 0;
                 filteredData.each(function(row) {
-                    if (row[4].includes(estado)) count++;
+                    if (row[3].includes(estado)) count++;
                 });
                 if (count > 0) {
                     labels.push(estado);
@@ -492,7 +494,7 @@ $(document).ready(function() {
             prioridades.forEach(function(prioridad) {
                 var count = 0;
                 filteredData.each(function(row) {
-                    if (row[5].includes(prioridad)) count++;
+                    if (!row[3].includes('Completado') && row[4].includes(prioridad)) count++;
                 });
                 if (count > 0) {
                     labels.push(prioridad);
@@ -523,23 +525,55 @@ $(document).ready(function() {
     }
     
     // Aplicar filtros y actualizar gráficos
+    function exactRegex(value) {
+        return value ? '^' + $.fn.dataTable.util.escapeRegex(value) + '$' : '';
+    }
+
+    function cleanCellText(value) {
+        return $('<div>').html(value).text().replace(/\s+/g, ' ').trim();
+    }
+
+    function fillColumnSelect(columnIndex, selector) {
+        var seen = {};
+        table.column(columnIndex).data().each(function(value) {
+            var text = cleanCellText(value);
+            if (text && !seen[text]) {
+                seen[text] = true;
+                $(selector).append($('<option>', { value: text, text: text }));
+            }
+        });
+    }
+
+    fillColumnSelect(1, '#filtroArea');
+    fillColumnSelect(2, '#filtroTema');
+
     $('#filtroTitulo').on('keyup', function() {
-        table.column(1).search(this.value).draw();
-        updateCharts();
-    });
-    
-    $('#filtroResponsable').on('keyup', function() {
         table.column(2).search(this.value).draw();
         updateCharts();
     });
     
+    $('#filtroResponsable').on('keyup', function() {
+        table.column(7).search(this.value).draw();
+        updateCharts();
+    });
+
+    $('#filtroTema').on('change', function() {
+        table.column(2).search(exactRegex(this.value), true, false).draw();
+        updateCharts();
+    });
+
+    $('#filtroArea').on('change', function() {
+        table.column(1).search(exactRegex(this.value), true, false).draw();
+        updateCharts();
+    });
+    
     $('#filtroEstado').on('change', function() {
-        table.column(4).search(this.value).draw();
+        table.column(3).search(exactRegex(this.value), true, false).draw();
         updateCharts();
     });
     
     $('#filtroPrioridad').on('change', function() {
-        table.column(5).search(this.value).draw();
+        table.column(4).search(exactRegex(this.value), true, false).draw();
         updateCharts();
     });
     
